@@ -18,7 +18,7 @@ ninja.data = [{
           },
         },{id: "nav-projects",
           title: "projects",
-          description: "A growing collection of your cool projects.",
+          description: "Some projects I have worked on I have split the according if they are MCU, FPGA or SBC based.",
           section: "Navigation",
           handler: () => {
             window.location.href = "/projects/";
@@ -450,6 +450,11 @@ ninja.data = [{
           description: "another project with an image 🎉",
           section: "Projects",handler: () => {
               window.location.href = "/projects/9_project/";
+            },},{id: "projects-ble-proximity-detector",
+          title: 'BLE Proximity Detector',
+          description: "Bluetooth Low Energy Proximity Detector",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/BLE_Prox_Dect/";
             },},{
         id: 'social-cv',
         title: 'CV',
