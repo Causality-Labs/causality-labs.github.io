@@ -2,10 +2,10 @@
 layout: page
 title: projects
 permalink: /projects/
-description: A growing collection of your cool projects.
+description: Some projects I have worked on I have split the according if they are MCU, FPGA or SBC based.
 nav: true
 nav_order: 2
-display_categories: [work, fun]
+display_categories: [work, fun, MCU, SBC, FPGA]
 horizontal: false
 ---
 
