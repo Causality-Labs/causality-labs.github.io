@@ -14,6 +14,7 @@ The BLE proximity detector was developed in Dr. Edmond Lou's Intelligent IoT and
 
 # Design
 
+![Block Diagram](/assets/img/Prox_Block_Diagram.png)
 On the left is a block diagram of the entire system and it works as follows:
 The Power Detection Board receives utilizes an LC resonant circuit to wirelessly pickup a signal coming from the power supply.  That signal is then is passed through  analog circuit that converts that analog signal into a digital signal  that is sampled  by the BlueNRG2-M2SA RF module which has RF Ceramic Antenna  to wirelessly transmit that data to the PC-Based User Interface.
 
