@@ -2,7 +2,7 @@
 layout: page
 title: BLE Proximity Detector
 description: Bluetooth Low Energy Proximity Detector
-img: assets/img/Both_Prox_Board.jpg
+img: assets/img/Both_Prox_Boards.jpg
 importance: 1
 category: MCU
 related_publications: true
