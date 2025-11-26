@@ -1,6 +1,6 @@
 ---
 layout: page
-title: BLE Proximity Detector (May 2023 - December 2023)
+title: BLE Proximity Detector
 description: Bluetooth Low Energy Proximity Detector
 img: assets/img/Both_Prox_Boards.jpg
 importance: 1
