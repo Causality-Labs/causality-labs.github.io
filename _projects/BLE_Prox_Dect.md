@@ -67,7 +67,7 @@ category: MCU
 
 <div class="row">
     <div class="col-md-12">
-        {% include figure.liquid path="assets/img/PC_Interface.png" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/PC_Interface.png" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
 <div class="row mt-3">
