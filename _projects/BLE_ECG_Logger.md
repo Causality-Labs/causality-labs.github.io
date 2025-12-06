@@ -35,11 +35,12 @@ category: MCU
     </div>
 </div>
 
+
 <style>
     .even-height-img {
         height: 300px;
         width: 100%;
-        object-fit: cover;
+        object-fit: contain;
     }
 </style>
 

@@ -27,7 +27,9 @@ category: MCU
 </div>
 <div class="row mt-3">
     <div class="col-md-12">
-        <p>The BLE proximity detector was developed in Dr. Edmond Lou's Intelligent IoT and Ultrasound lab at the University of Alberta to predict the distance of electromagnetic sensor and a probe. The system consist of two PCBs that are each equipped with an Ultra Low Power Bluetooth Low Energy (BLE) SoC called  the BlueNRG2 , and a PC based User Interface that wirelessly communicates with both of the PCBs simultaneously. The system was designed to allow for the user to track the distance of a probe to an electromagnetic sensor in real-time it also serves as means to alert the user if the probe is too close to the sensor through the use of visual and audio feedback.</p>
+        <p>The BLE proximity detector was developed in Dr. Edmond Lou's Intelligent IoT and Ultrasound lab at the University of Alberta to predict the distance of electromagnetic sensor and a probe. The system consist of two PCBs that are each equipped with an Ultra Low Power Bluetooth Low Energy (BLE) SoC called  the BlueNRG2 , and a PC based User Interface that wirelessly communicates with both of the PCBs simultaneously.</p>
+
+        <p>The system was designed to allow for the user to track the distance of a probe to an electromagnetic sensor in real-time it also serves as means to alert the user if the probe is too close to the sensor through the use of visual and audio feedback.</p>
     </div>
 </div>
 
