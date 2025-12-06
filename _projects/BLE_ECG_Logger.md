@@ -1,7 +1,7 @@
 ---
 layout: page
-title: BLE Proximity Detector
-description: Bluetooth Low Energy Proximity Detector
+title: BLE ECG Logger (January 2024)
+description: Award-winning Bluetooth Low Energy ECG monitoring system that captures and wirelessly transmits heart activity data - 1st Place Winner at HackED 2024 Hackathon
 img: assets/img/Both_Prox_Boards.jpg
 importance: 1
 category: MCU
@@ -11,12 +11,12 @@ category: MCU
 
 <div class="row">
     <div class="col-md-6">
-        {% include figure.liquid path="assets/img/Both_Prox_Boards.jpg" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Both_Prox_Boards.jpg" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
 <div class="row mt-3">
     <div class="col-md-12">
-        <p>The BLE proximity detector was developed in Dr. Edmond Lou's Intelligent IoT and Ultrasound lab at the University of Alberta to predict the distance of electromagnetic sensor and a probe. The system consist of two PCBs that are each equipped with an Ultra Low Power Bluetooth Low Energy (BLE) SoC called  the BlueNRG2 , and a PC based User Interface that wirelessly communicates with both of the PCBs simultaneously. The system was designed to allow for the user to track the distance of a probe to an electromagnetic sensor in real-time it also serves as means to alert the user if the probe is too close to the sensor through the use of visual and audio feedback.</p>
+        <p>The BLE ECG logger was developed for HackED 2024, which is the biggest student led hackathon in Alberta  hosted by the Computer Engineering Department  of the University of Alberta.  The BLE ECG logger is a biophysical instrumentation device that reads the electrical signal of a user's heart  and provides the user with an electrodiagram  on a PC based User Interface. The system consists of an analog circuit (Instrumentation amplifier) that reads the patients electrical signal. A MCU with BLE (BlueNRG 2) to sample the signal from the analog circuit and transmit the sampled signal wirelessly while also making use of a buzzer that beeps every time the user's heart beats. And a PC based User Interface to the receive the signal wirelessly and for real time ECG plotting.</p>
     </div>
 </div>
 
@@ -24,16 +24,14 @@ category: MCU
 
 <div class="row">
     <div class="col-md-12">
-        {% include figure.liquid path="assets/img/Prox_Block_Diagram.png" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Prox_Block_Diagram.png" class="img-fluid rounded z-depth-1" %}
     </div>
     <div class="col-md-6">
-        <p>The diagram shows how the entire system works:</p>
+        <p>As you can see from the block diagram the BLE ECG data logger is comprised of three subsystems the Instrumentation Amplifier Circuit, BlueNRG-2 MCU and a PC-Based user Interface. </p>
         
-        <p>The Power Detection Board wirelessly picks up signals from the power supply using a special antenna circuit. It converts these signals into digital data and sends it via Bluetooth to the computer interface.</p>
+        <p> The Instrumentation Amplifier is comprised of three op amps that are connected to three electrode pads that are placed on the user's body. This circuit is able to read the electric signals that the heart generates across the users body.</p>
         
-        <p>The Electromagnetic Sensor Detection Board works similarly, but connects directly to the sensor with a wire. It also converts the sensor's signals to digital data and transmits it wirelessly to the computer.</p>
-        
-        <p>The PC-Based User Interface receives data from both boards and calculates how far the probe is from the sensor in real-time. It provides visual and audio alerts when the probe gets too close to the sensor.</p>
+        <p>The BlueNRG-2 is an ultra low power SoC that has Bluetooth Low Energy(BLE) capabilities, this SoC was used to sample the analog signal from the Instrumentation Amplifier making use of its 10 bit Analog to Digital Converter (ADC). The BlueNRG-2 SoC was also responsible for processing the signal and supplying a voltage to a buzzer to simulate the user's heart beat whilst also transmitting the sampled data wirelessly via BLE to the PC Based User Interface. The PC based User Interface wirelessly receives data from the BlueNRG-2 and plots a real time ECG.</p>
     </div>
 </div>
 
@@ -42,7 +40,7 @@ category: MCU
 <div class="row">
     <div class="col-md-6">
         <div style="transform: rotate(90deg); transform-origin: center;">
-            {% include figure.liquid path="assets/img/Power_Board.jpg" class="img-fluid rounded z-depth-1" %}
+            {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Power_Board.jpg" class="img-fluid rounded z-depth-1" %}
         </div>
     </div>
     <div class="col-md-6">
@@ -57,7 +55,7 @@ category: MCU
 <div class="row">
     <div class="col-md-6">
         <div style="transform: rotate(90deg); transform-origin: center;">
-            {% include figure.liquid path="assets/img/Sensor_Board.jpg" class="img-fluid rounded z-depth-1" %}
+            {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Sensor_Board.jpg" class="img-fluid rounded z-depth-1" %}
         </div>
     </div>
     <div class="col-md-6">
@@ -71,7 +69,7 @@ category: MCU
 
 <div class="row">
     <div class="col-md-12">
-        {% include figure.liquid path="assets/img/PC_Interface.png" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/PC_Interface.png" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
 <div class="row mt-3">

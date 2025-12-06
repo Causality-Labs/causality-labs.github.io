@@ -1,8 +1,8 @@
 ---
 layout: page
 title: BLE Proximity Detector (May 2023 - December 2023)
-description: Bluetooth Low Energy Proximity Detector
-img: assets/img/Both_Prox_Boards.jpg
+description: A Bluetooth Low Energy system for real-time proximity detection between electromagnetic sensors and probes, featuring dual PCB modules and a custom PC interface with visual and audio feedback
+img: assets/img/BLE_Prox_Dect_img/Both_Prox_Boards.jpg
 importance: 1
 category: MCU
 ---
@@ -11,7 +11,7 @@ category: MCU
 
 <div class="row">
     <div class="col-md-6">
-        {% include figure.liquid path="assets/img/Both_Prox_Boards.jpg" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Both_Prox_Boards.jpg" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
 <div class="row mt-3">
@@ -23,8 +23,8 @@ category: MCU
 <h1 style="text-align: center;">Design</h1>
 
 <div class="row">
-    <div class="col-md-12">
-        {% include figure.liquid path="assets/img/Prox_Block_Diagram.png" class="img-fluid rounded z-depth-1" %}
+    <div class="col-md-6">
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/block_diagram.png" class="img-fluid rounded z-depth-1" %}
     </div>
     <div class="col-md-6">
         <p>The diagram shows how the entire system works:</p>
@@ -41,9 +41,7 @@ category: MCU
 
 <div class="row">
     <div class="col-md-6">
-        <div style="transform: rotate(90deg); transform-origin: center;">
-            {% include figure.liquid path="assets/img/Power_Board.jpg" class="img-fluid rounded z-depth-1" %}
-        </div>
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Power_Board.jpg" class="img-fluid rounded z-depth-1" %}
     </div>
     <div class="col-md-6">
         <p>This circuit board wirelessly detects signals from the power supply using an antenna coil. The board is tuned to the power supply's frequency to capture the strongest signal possible.</p>
@@ -56,9 +54,7 @@ category: MCU
 
 <div class="row">
     <div class="col-md-6">
-        <div style="transform: rotate(90deg); transform-origin: center;">
-            {% include figure.liquid path="assets/img/Sensor_Board.jpg" class="img-fluid rounded z-depth-1" %}
-        </div>
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Sensor_Board.jpg" class="img-fluid rounded z-depth-1" %}
     </div>
     <div class="col-md-6">
         <p>This board connects directly to the electromagnetic sensor with a wire. It receives signals from the sensor and processes them in a similar way to the Power Detection Board.</p>
