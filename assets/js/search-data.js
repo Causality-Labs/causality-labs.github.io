@@ -415,6 +415,11 @@ ninja.data = [{
           description: "A Bluetooth Low Energy system for real-time proximity detection between electromagnetic sensors and probes, featuring dual PCB modules and a custom PC interface with visual and audio feedback",
           section: "Projects",handler: () => {
               window.location.href = "/projects/BLE_Prox_Dect/";
+            },},{id: "projects-causality-soc-june-2025-august-2025",
+          title: 'Causality SoC (June 2025 - August 2025)',
+          description: "Custom FPGA SoC on Basys 3 using Verilog and C, featuring a flexible HAL and Snake game demo",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/Causality_SoC/";
             },},{
         id: 'social-cv',
         title: 'CV',
