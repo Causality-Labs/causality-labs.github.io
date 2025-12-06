@@ -35,12 +35,20 @@ category: MCU
     </div>
 </div>
 
+<style>
+    .even-height-img {
+        height: 300px;
+        width: 100%;
+        object-fit: cover;
+    }
+</style>
+
 <div class="row">
     <div class="col-sm mt-3 mt-md-0">
-        {% include figure.liquid loading="eager" path="assets/img/BLE_ECG_Logger/Hardware.jpg" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid loading="eager" path="assets/img/BLE_ECG_Logger/Hardware.jpg" class="img-fluid rounded z-depth-1 even-height-img" %}
     </div>
     <div class="col-sm mt-3 mt-md-0">
-        {% include figure.liquid loading="eager" path="assets/img/BLE_ECG_Logger/PC_Interface.png" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid loading="eager" path="assets/img/BLE_ECG_Logger/PC_Interface.png" class="img-fluid rounded z-depth-1 even-height-img" %}
     </div>
 </div>
 <div class="caption">
