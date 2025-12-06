@@ -13,6 +13,9 @@ category: MCU
     <div class="col-md-6">
         {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Both_Prox_Boards.jpg" class="img-fluid rounded z-depth-1" %}
     </div>
+    <div class="col-md-6">
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/PC_Interface.png" class="img-fluid rounded z-depth-1" %}
+    </div>
 </div>
 <div class="row mt-3">
     <div class="col-md-12">
