@@ -9,12 +9,20 @@ category: MCU
 
 <h1 style="text-align: center;">Overview</h1>
 
+<style>
+    .even-height-img {
+        height: 300px; /* Forces both images to same height */
+        width: 100%;
+        object-fit: cover; /* Ensures image fills the area without distortion */
+    }
+</style>
+
 <div class="row">
-    <div class="col-md-6">
-        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Both_Prox_Boards.jpg" class="img-fluid rounded z-depth-1" %}
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/Both_Prox_Boards.jpg" class="img-fluid rounded z-depth-1 even-height-img" %}
     </div>
-    <div class="col-md-6">
-        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/PC_Interface.png" class="img-fluid rounded z-depth-1" %}
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.liquid path="assets/img/BLE_Prox_Dect_img/PC_Interface.png" class="img-fluid rounded z-depth-1 even-height-img" %}
     </div>
 </div>
 <div class="row mt-3">
