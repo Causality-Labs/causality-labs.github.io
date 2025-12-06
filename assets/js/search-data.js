@@ -59,11 +59,11 @@ ninja.data = [{
             window.location.href = "/blog/2024/photo-gallery/";
           
         },
-      },{id: "post-https-blog-google-technology-ai-google-gemini-update-flash-ai-assistant-io-2024",
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
         
-          title: 'https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/ <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
         
-        description: "",
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
         section: "Posts",
         handler: () => {
           
@@ -405,14 +405,14 @@ ninja.data = [{
             },},{id: "news-a-simple-inline-announcement-with-markdown-emoji-sparkles-smile",
           title: 'A simple inline announcement with Markdown emoji! :sparkles: :smile:',
           description: "",
-          section: "News",},{id: "projects-ble-proximity-detector",
-          title: 'BLE Proximity Detector',
-          description: "Bluetooth Low Energy Proximity Detector",
+          section: "News",},{id: "projects-ble-ecg-logger-january-2024",
+          title: 'BLE ECG Logger (January 2024)',
+          description: "Award-winning Bluetooth Low Energy ECG monitoring system that captures and wirelessly transmits heart activity data - 1st Place Winner at HackED 2024 Hackathon",
           section: "Projects",handler: () => {
               window.location.href = "/projects/BLE_ECG_Logger/";
             },},{id: "projects-ble-proximity-detector-may-2023-december-2023",
           title: 'BLE Proximity Detector (May 2023 - December 2023)',
-          description: "Bluetooth Low Energy Proximity Detector",
+          description: "A Bluetooth Low Energy system for real-time proximity detection between electromagnetic sensors and probes, featuring dual PCB modules and a custom PC interface with visual and audio feedback",
           section: "Projects",handler: () => {
               window.location.href = "/projects/BLE_Prox_Dect/";
             },},{
