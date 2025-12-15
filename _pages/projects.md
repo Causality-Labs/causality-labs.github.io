@@ -5,7 +5,7 @@ permalink: /projects/
 description: Some projects I have worked on I have split the according if they are MCU, FPGA or SBC based.
 nav: true
 nav_order: 2
-display_categories: [MCU, SBC, FPGA]
+display_categories: [MCU, Embedded Linux, FPGA]
 horizontal: false
 ---
 
