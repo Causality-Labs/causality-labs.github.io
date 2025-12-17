@@ -21,14 +21,15 @@ To showcase Zephyr, I decided to demo it being used in an Environmental Sensor A
 
 ## Steps
 
-I did this on a Windows machine
+I did this on a Windows machine.
 
 ### 1. Environment Setup
 - Install nRF Connect SDK in VS Code
 
 ### 2. Project Initialization
 - Configure `prj.conf` with required modules (sensors, Bluetooth, etc.)
-```properties
+
+```
 # Core
 CONFIG_SENSOR=y
 CONFIG_I2C=y
@@ -106,8 +107,9 @@ I created clean HAL interfaces for each sensor:
 - bme280_hal.c/h - BME280 temperature/humidity/pressure
 - sgp40_hal.c/h - SGP40 VOC index calculation
 - scd40_hal.c/h - SCD40 CO2 measurements
+
 Threading Architecture
-``` c
+```c
 K_THREAD_DEFINE(bme_id, STACK_SIZE, bme_thread, NULL, NULL, NULL, BME_THREAD_PRIORITY, 0, 0);
 K_THREAD_DEFINE(sgp_id, STACK_SIZE, sgp_thread, NULL, NULL, NULL, SGP_THREAD_PRIORITY, 0, 0);
 K_THREAD_DEFINE(scd_id, STACK_SIZE, scd_thread, NULL, NULL, NULL, SCD_THREAD_PRIORITY, 0, 0);
@@ -124,7 +126,7 @@ K_MSGQ_DEFINE(scd40_msgq, sizeof(double), 5, 1);
 
 
 
-### 5. Key Features I Explored
+## Key Features I Explored
 
 The Zephyr features that stood out to me:
 
@@ -143,4 +145,4 @@ Each sensor thread runs independently with configurable priorities, ensuring tim
 ## Next Steps
 
 ### Bluetooth LE Integration
-Add BLE GATT services to expose sensor readings wirelessly, leveraging Nordic's SoftDevice integration in nRF Connect SDK. This would enable an  **Environmental Service** which will act as custom GATT service with characteristics for temperature, humidity, pressure, CO2, and VOC readings
+Add BLE GATT services to expose sensor readings wirelessly, leveraging Nordic's SoftDevice integration in nRF Connect SDK. This would enable an **Environmental Service**: a custom GATT service with characteristics for temperature, humidity, pressure, CO2, and VOC readings.
