@@ -137,19 +137,19 @@ K_MSGQ_DEFINE(scd40_msgq, sizeof(double), 5, 1);
 
 The Zephyr features that stood out to me:
 
-### Unified Sensor API
+#### Unified Sensor API
 Zephyr's sensor subsystem provides a consistent interface across different sensor types. The `sensor_sample_fetch()` and `sensor_channel_get()` pattern works seamlessly with BME280, SCD40, and SGP40 sensors.
 
-### Device Tree Integration
+#### Device Tree Integration
 The device tree system makes hardware configuration declarative and maintainable. Adding new sensors is as simple as updating the overlay file without touching application code.
 
-### Threading and Synchronization
+#### Threading and Synchronization
 Zephyr's threading primitives (`K_THREAD_DEFINE`, `K_MSGQ_DEFINE`) make concurrent programming straightforward. The message queue system provides type-safe inter-thread communication.
 
-### Real-time Capabilities
+#### Real-time Capabilities
 Each sensor thread runs independently with configurable priorities, ensuring time-critical measurements aren't blocked by slower operations.
 
 ## Next Steps
 
-### Bluetooth LE Integration
+#### Bluetooth LE Integration
 Add BLE GATT services to expose sensor readings wirelessly, leveraging Nordic's SoftDevice integration in nRF Connect SDK. This would enable an **Environmental Service**: a custom GATT service with characteristics for temperature, humidity, pressure, CO2, and VOC readings.
