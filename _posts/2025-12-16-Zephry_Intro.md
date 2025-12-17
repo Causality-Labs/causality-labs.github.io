@@ -29,7 +29,7 @@ I did this on a Windows machine.
 ### 2. Project Initialization
 - Configure `prj.conf` with required modules (sensors, Bluetooth, etc.)
 
-```
+```ini
 # Core
 CONFIG_SENSOR=y
 CONFIG_I2C=y
@@ -48,6 +48,7 @@ CONFIG_PRINTK=y
 
 ### 3. Device Tree Configuration
 - Define sensor nodes in device tree overlay in a file called `nrf52840dk_nrf52840.overlay`
+
 ```
 &i2c0 {
     status = "okay";
@@ -92,6 +93,7 @@ CONFIG_PRINTK=y
 	};
 };
 ```
+
 This configuration:
 
 - Enables I2C0 bus with fast mode (400kHz)
