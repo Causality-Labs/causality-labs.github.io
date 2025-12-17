@@ -19,6 +19,8 @@ To showcase Zephyr, I decided to demo it being used in an Environmental Sensor A
 - **SGP40** - VOC (Volatile Organic Compounds) gas sensor for air quality monitoring
 - **SCD40** - CO2 and temperature sensor for indoor air quality assessment
 
+The source code for this ongoing project can be found here [Zephyr Env Sensor](https://github.com/Causality-Labs/Env_Sensor)
+
 ## Steps
 
 I did this on a Windows machine.
@@ -29,7 +31,7 @@ I did this on a Windows machine.
 ### 2. Project Initialization
 - Configure `prj.conf` with required modules (sensors, Bluetooth, etc.)
 
-```ini
+{% highlight ini linenos %}
 # Core
 CONFIG_SENSOR=y
 CONFIG_I2C=y
@@ -44,24 +46,24 @@ CONFIG_CBPRINTF_FP_SUPPORT=y
 # SCD40 driver
 CONFIG_SCD4X=y
 CONFIG_PRINTK=y
-```
+{% endhighlight %}
 
 ### 3. Device Tree Configuration
 - Define sensor nodes in device tree overlay in a file called `nrf52840dk_nrf52840.overlay`
 
-```
+{% highlight c linenos %}
 &i2c0 {
-    status = "okay";
+	status = "okay";
 	clock-frequency = <I2C_BITRATE_FAST>;
-    pinctrl-0 = <&i2c0_default>;
+	pinctrl-0 = <&i2c0_default>;
 	pinctrl-1 = <&i2c0_sleep>;
-    pinctrl-names = "default", "sleep";
+	pinctrl-names = "default", "sleep";
 
-    bme280_0: bme280@76 {
-        compatible = "bosch,bme280";
-        status = "okay";
-        reg = <0x76>;
-    };
+	bme280_0: bme280@76 {
+		compatible = "bosch,bme280";
+		status = "okay";
+		reg = <0x76>;
+	};
 
 	sgp40_0: sgp40@59 {
 		compatible = "sensirion,sgp40";
@@ -92,7 +94,7 @@ CONFIG_PRINTK=y
 		};
 	};
 };
-```
+{% endhighlight %}
 
 This configuration:
 
@@ -111,20 +113,23 @@ I created clean HAL interfaces for each sensor:
 - scd40_hal.c/h - SCD40 CO2 measurements
 
 Threading Architecture
-```c
+
+{% highlight c linenos %}
 K_THREAD_DEFINE(bme_id, STACK_SIZE, bme_thread, NULL, NULL, NULL, BME_THREAD_PRIORITY, 0, 0);
 K_THREAD_DEFINE(sgp_id, STACK_SIZE, sgp_thread, NULL, NULL, NULL, SGP_THREAD_PRIORITY, 0, 0);
 K_THREAD_DEFINE(scd_id, STACK_SIZE, scd_thread, NULL, NULL, NULL, SCD_THREAD_PRIORITY, 0, 0);
 K_THREAD_DEFINE(disp_id, STACK_SIZE, display_thread, NULL, NULL, NULL, DISPLAY_THREAD_PRIORITY, 0, 0);
-```
+{% endhighlight %}
+
 
 Inter-Thread Communication
 I used Zephyr's message queues for safe data passing between threads:
-```c
+
+{% highlight c linenos %}
 K_MSGQ_DEFINE(bme280_msgq, sizeof(struct bme280_sample), 5, 1);
 K_MSGQ_DEFINE(sgp40_msgq, sizeof(int32_t), 5, 1);
 K_MSGQ_DEFINE(scd40_msgq, sizeof(double), 5, 1);
-```
+{% endhighlight %}
 
 
 
