@@ -41,7 +41,7 @@ ninja.data = [{
         
           title: "Getting started with Zephyr",
         
-        description: "A post about my expirience getting started with Zephyr",
+        description: "A post about my experience getting started with Zephyr",
         section: "Posts",
         handler: () => {
           
