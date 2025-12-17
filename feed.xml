@@ -1,25 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2025-12-17T13:09:30+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">Getting started with Zephyr</title><link href="https://causality-lab.github.io/blog/2025/Zephry_Intro/" rel="alternate" type="text/html" title="Getting started with Zephyr"/><published>2025-12-16T16:40:16+00:00</published><updated>2025-12-16T16:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2025/Zephry_Intro</id><content type="html" xml:base="https://causality-lab.github.io/blog/2025/Zephry_Intro/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>I decided to try Zephyr RTOS because of its increased user base in the world of embedded systems. As an open-source RTOS backed by the Linux Foundation, it’s gaining traction for IoT and embedded projects. The extensive hardware support and security focus made it an appealing choice to explore.</p> <p>I used the nRF Connect SDK in VS Code since it comes bundled with Zephyr, making it easy to get started.</p> <p>To showcase Zephyr, I decided to demo it being used in an Environmental Sensor Application. The components used are the following:</p> <ul> <li><strong>nRF52840 Discovery Kit</strong> - The main development board featuring Bluetooth LE and plenty of GPIO</li> <li><strong>BME280</strong> - Temperature, humidity, and atmospheric pressure sensor</li> <li><strong>SGP40</strong> - VOC (Volatile Organic Compounds) gas sensor for air quality monitoring</li> <li><strong>SCD40</strong> - CO2 and temperature sensor for indoor air quality assessment</li> </ul> <h2 id="steps">Steps</h2> <p>I did this on a Windows machine.</p> <h3 id="1-environment-setup">1. Environment Setup</h3> <ul> <li>Install nRF Connect SDK in VS Code</li> </ul> <h3 id="2-project-initialization">2. Project Initialization</h3> <ul> <li>Configure <code class="language-plaintext highlighter-rouge">prj.conf</code> with required modules (sensors, Bluetooth, etc.)</li> </ul> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Core
-CONFIG_SENSOR=y
-CONFIG_I2C=y
-CONFIG_PM_DEVICE=y
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2025-12-17T13:42:14+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">Getting started with Zephyr</title><link href="https://causality-lab.github.io/blog/2025/Zephry_Intro/" rel="alternate" type="text/html" title="Getting started with Zephyr"/><published>2025-12-16T16:40:16+00:00</published><updated>2025-12-16T16:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2025/Zephry_Intro</id><content type="html" xml:base="https://causality-lab.github.io/blog/2025/Zephry_Intro/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>I decided to try Zephyr RTOS because of its increased user base in the world of embedded systems. As an open-source RTOS backed by the Linux Foundation, it’s gaining traction for IoT and embedded projects. The extensive hardware support and security focus made it an appealing choice to explore.</p> <p>I used the nRF Connect SDK in VS Code since it comes bundled with Zephyr, making it easy to get started.</p> <p>To showcase Zephyr, I decided to demo it being used in an Environmental Sensor Application. The components used are the following:</p> <ul> <li><strong>nRF52840 Discovery Kit</strong> - The main development board featuring Bluetooth LE and plenty of GPIO</li> <li><strong>BME280</strong> - Temperature, humidity, and atmospheric pressure sensor</li> <li><strong>SGP40</strong> - VOC (Volatile Organic Compounds) gas sensor for air quality monitoring</li> <li><strong>SCD40</strong> - CO2 and temperature sensor for indoor air quality assessment</li> </ul> <h2 id="steps">Steps</h2> <p>I did this on a Windows machine.</p> <h3 id="1-environment-setup">1. Environment Setup</h3> <ul> <li>Install nRF Connect SDK in VS Code</li> </ul> <h3 id="2-project-initialization">2. Project Initialization</h3> <ul> <li>Configure <code class="language-plaintext highlighter-rouge">prj.conf</code> with required modules (sensors, Bluetooth, etc.)</li> </ul> <div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Core
+</span><span class="py">CONFIG_SENSOR</span><span class="p">=</span><span class="s">y</span>
+<span class="py">CONFIG_I2C</span><span class="p">=</span><span class="s">y</span>
+<span class="py">CONFIG_PM_DEVICE</span><span class="p">=</span><span class="s">y</span>
 
-# BME280 driver
-CONFIG_PM_DEVICE=y
+<span class="c"># BME280 driver
+</span><span class="py">CONFIG_PM_DEVICE</span><span class="p">=</span><span class="s">y</span>
 
-# C++ support
-CONFIG_CBPRINTF_FP_SUPPORT=y
+<span class="c"># C++ support
+</span><span class="py">CONFIG_CBPRINTF_FP_SUPPORT</span><span class="p">=</span><span class="s">y</span>
 
-# SCD40 driver
-CONFIG_SCD4X=y
-CONFIG_PRINTK=y
-</code></pre></div></div> <h3 id="3-device-tree-configuration">3. Device Tree Configuration</h3> <ul> <li> <p>Define sensor nodes in device tree overlay in a file called <code class="language-plaintext highlighter-rouge">nrf52840dk_nrf52840.overlay</code> ``` &amp;i2c0 { status = “okay”; clock-frequency = <I2C_BITRATE_FAST>; pinctrl-0 = &lt;&amp;i2c0_default&gt;; pinctrl-1 = &lt;&amp;i2c0_sleep&gt;; pinctrl-names = "default", "sleep";</I2C_BITRATE_FAST></p> <p>bme280_0: bme280@76 { compatible = “bosch,bme280”; status = “okay”; reg = &lt;0x76&gt;; };</p> <p>sgp40_0: sgp40@59 { compatible = “sensirion,sgp40”; status = “okay”; reg = &lt;0x59&gt;; };</p> <p>scd40_0: scd40@62 { compatible = “sensirion,scd40”; status = “okay”; reg = &lt;0x62&gt;; }; };</p> </li> </ul> <p>&amp;pinctrl { /omit-if-no-ref/ i2c0_default: i2c0_default { group1 { psels = &lt;NRF_PSEL(TWIM_SCL, 1, 14)&gt;, &lt;NRF_PSEL(TWIM_SDA, 1, 15)&gt;; }; };</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/omit-if-no-ref/ i2c0_sleep: i2c0_sleep {
-	group1  {
-		psels = &lt;NRF_PSEL(TWIM_SCL, 1, 14)&gt;,
-				&lt;NRF_PSEL(TWIM_SDA, 1, 15)&gt;;
-		low-power-enable;
+<span class="c"># SCD40 driver
+</span><span class="py">CONFIG_SCD4X</span><span class="p">=</span><span class="s">y</span>
+<span class="py">CONFIG_PRINTK</span><span class="p">=</span><span class="s">y</span>
+</code></pre></div></div> <h3 id="3-device-tree-configuration">3. Device Tree Configuration</h3> <ul> <li>Define sensor nodes in device tree overlay in a file called <code class="language-plaintext highlighter-rouge">nrf52840dk_nrf52840.overlay</code></li> </ul> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&amp;i2c0 {
+    status = "okay";
+	clock-frequency = &lt;I2C_BITRATE_FAST&gt;;
+    pinctrl-0 = &lt;&amp;i2c0_default&gt;;
+	pinctrl-1 = &lt;&amp;i2c0_sleep&gt;;
+    pinctrl-names = "default", "sleep";
+
+    bme280_0: bme280@76 {
+        compatible = "bosch,bme280";
+        status = "okay";
+        reg = &lt;0x76&gt;;
+    };
+
+	sgp40_0: sgp40@59 {
+		compatible = "sensirion,sgp40";
+		status = "okay";
+		reg = &lt;0x59&gt;;
 	};
-}; }; ``` This configuration:
-</code></pre></div></div> <ul> <li>Enables I2C0 bus with fast mode (400kHz)</li> <li>Maps each sensor to its I2C address</li> <li>Configures pin control for power management</li> </ul> <h3 id="4-application-development">4. Application Development</h3> <p>I implemented a multi-threaded application with separate threads for each sensor and a display thread. The architecture includes:</p> <p>Hardware Abstraction Layer (HAL) I created clean HAL interfaces for each sensor:</p> <ul> <li>bme280_hal.c/h - BME280 temperature/humidity/pressure</li> <li>sgp40_hal.c/h - SGP40 VOC index calculation</li> <li>scd40_hal.c/h - SCD40 CO2 measurements</li> </ul> <p>Threading Architecture</p> <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">K_THREAD_DEFINE</span><span class="p">(</span><span class="n">bme_id</span><span class="p">,</span> <span class="n">STACK_SIZE</span><span class="p">,</span> <span class="n">bme_thread</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">BME_THREAD_PRIORITY</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+	scd40_0: scd40@62 {
+		compatible = "sensirion,scd40";
+		status = "okay";
+		reg = &lt;0x62&gt;;
+	};
+};
+
+&amp;pinctrl {
+	/omit-if-no-ref/ i2c0_default: i2c0_default {
+		group1  {
+			psels = &lt;NRF_PSEL(TWIM_SCL, 1, 14)&gt;,
+					&lt;NRF_PSEL(TWIM_SDA, 1, 15)&gt;;
+		};
+	};
+
+	/omit-if-no-ref/ i2c0_sleep: i2c0_sleep {
+		group1  {
+			psels = &lt;NRF_PSEL(TWIM_SCL, 1, 14)&gt;,
+					&lt;NRF_PSEL(TWIM_SDA, 1, 15)&gt;;
+			low-power-enable;
+		};
+	};
+};
+</code></pre></div></div> <p>This configuration:</p> <ul> <li>Enables I2C0 bus with fast mode (400kHz)</li> <li>Maps each sensor to its I2C address</li> <li>Configures pin control for power management</li> </ul> <h3 id="4-application-development">4. Application Development</h3> <p>I implemented a multi-threaded application with separate threads for each sensor and a display thread. The architecture includes:</p> <p>Hardware Abstraction Layer (HAL) I created clean HAL interfaces for each sensor:</p> <ul> <li>bme280_hal.c/h - BME280 temperature/humidity/pressure</li> <li>sgp40_hal.c/h - SGP40 VOC index calculation</li> <li>scd40_hal.c/h - SCD40 CO2 measurements</li> </ul> <p>Threading Architecture</p> <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">K_THREAD_DEFINE</span><span class="p">(</span><span class="n">bme_id</span><span class="p">,</span> <span class="n">STACK_SIZE</span><span class="p">,</span> <span class="n">bme_thread</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">BME_THREAD_PRIORITY</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 <span class="n">K_THREAD_DEFINE</span><span class="p">(</span><span class="n">sgp_id</span><span class="p">,</span> <span class="n">STACK_SIZE</span><span class="p">,</span> <span class="n">sgp_thread</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">SGP_THREAD_PRIORITY</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 <span class="n">K_THREAD_DEFINE</span><span class="p">(</span><span class="n">scd_id</span><span class="p">,</span> <span class="n">STACK_SIZE</span><span class="p">,</span> <span class="n">scd_thread</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">SCD_THREAD_PRIORITY</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 <span class="n">K_THREAD_DEFINE</span><span class="p">(</span><span class="n">disp_id</span><span class="p">,</span> <span class="n">STACK_SIZE</span><span class="p">,</span> <span class="n">display_thread</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">DISPLAY_THREAD_PRIORITY</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
