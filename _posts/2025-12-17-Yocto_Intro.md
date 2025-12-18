@@ -1,3 +1,4 @@
+---
 layout: post
 title: Getting started with Yocto
 date: 2025-12-17 16:40:16
