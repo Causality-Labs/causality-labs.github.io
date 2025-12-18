@@ -20,12 +20,12 @@ skilled and having a deep understanding of Yocto will make me a strong embedded 
 Feel free to follow me along on this journey and we can both learn a thing or two, the board of choice for this jouney will be the Beagle Bone Black as it is a well documented and well supported board. This serieas was also heavily inspired by Bootlin's Yocto training program which you can find here : 
 
 Ensure you have the following program on your machine as they are needed when working with Yocto:
-```bash
-sudo apt install gawk wget git diffstat unzip texinfo gcc build-essential \
+{% highlight bash linenos %}
+$ sudo apt install gawk wget git diffstat unzip texinfo gcc build-essential \
 chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils \
 iputils-ping python3-git python3-jinja2 python3-subunit zstd liblz4-tool file \
 locales libacl1
-```
+{% endhighlight %}
 #### Poky
 
 Poky is the reference distro provided by the Yocto Project, bundling BitBake, OpenEmbedded metadata, and example configurations so you can build a working Linux image before layering on your own board- or product-specific customizations. 
@@ -36,11 +36,11 @@ To build images for a BeagleBone Black, we need:
 
 To get Poky on your machine, run the following commands:
 
-```bash
-git clone https://git.yoctoproject.org/git/poky
-cd $HOME/yocto-labs/poky
-git checkout -b scarthgap-5.0.4
-```
+{% highlight bash linenos %}
+$ git clone https://git.yoctoproject.org/git/poky
+$ cd $HOME/yocto-labs/poky
+$ git checkout -b scarthgap-5.0.4
+{% endhighlight %}
 
 At this time, Scarthgap is the LTS release, and we will focus on it. Some directories of note in the Poky repo:
 - **bitbake/**: Holds all scripts used by the BitBake command. Usually matches the stable release of the BitBake project.
@@ -54,28 +54,28 @@ At this time, Scarthgap is the LTS release, and we will focus on it. Some direct
 
 In the same directory where Poky is located, add the following layers for our build:
 
-```bash
+{% highlight bash linenos %}
 # Pull the meta-arm repo as we will be using the meta-arm-toolchain
 # for our build.
-git clone https://git.yoctoproject.org/git/meta-arm
-cd meta-arm
-git checkout -b yocto-5.0.1 
+$ git clone https://git.yoctoproject.org/git/meta-arm
+$ cd meta-arm
+$ git checkout -b yocto-5.0.1 
 
-git clone https://git.yoctoproject.org/git/meta-ti
-cd meta-ti
-git checkout -b scarthgap-labs 10.01.03
+$ git clone https://git.yoctoproject.org/git/meta-ti
+$ cd meta-ti
+$ git checkout -b scarthgap-labs 10.01.03
 
 # Bootlin adds these patches to the meta-ti layer. I'm not yet sure if the build is successful without these patches.
 # git am $HOME/yocto-labs/bootlin-lab-data/0001-Don-t-use-a-custom-deployment-directory.patch \
 # $HOME/yocto-labs/bootlin-lab-data/0002-Modify-linux-bb.org-defconfig.patch
-```
+{% endhighlight %}
 
 #### Setting up your build environment
 
 Before you get started, enable BitBake by entering the Poky directory and running:
-```bash
-source oe-init-build-env
-```
+{% highlight bash linenos %}
+$ source oe-init-build-env
+{% endhighlight %}
 
 Once you run this command, a build directory will be created with two important files:
 - build/conf/bblayers.conf
@@ -96,21 +96,21 @@ INHERIT += "rm_work"
 ```
 
 Then build a minimal image:
-```bash
-bitbake core-image-minimal
-```
+{% highlight bash linenos %}
+$ bitbake core-image-minimal
+{% endhighlight %}
 
 The build will take a while. Once it finishes, navigate to this directory:
-```bash
-cd $PROJ_DIR/poky/build/tmp/deploy/images/beaglebone-yocto
-```
+{% highlight bash linenos %}
+$ cd $PROJ_DIR/poky/build/tmp/deploy/images/beaglebone-yocto
+{% endhighlight %}
 
 There should be a file that ends with `.wic`; this is your image.
 Connect an SD card to your build machine, then either use balenaEtcher or run the following command:
-```bash
-sudo dd if=core-image-minimal-beaglebone-yocto.rootfs-20251218040257.wic \
+{% highlight bash linenos %}
+$ sudo dd if=core-image-minimal-beaglebone-yocto.rootfs-20251218040257.wic \
 of=/dev/sdd bs=4M status=progress conv=fdatasync
-```
+{% endhighlight %}
 
 Insert the SD card into the BeagleBone Black, connect a serial debugger, and power it up. You should see the device boot. When prompted to log in, sign in as `root`.
 
