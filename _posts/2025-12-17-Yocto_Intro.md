@@ -113,4 +113,4 @@ of=/dev/sdd bs=4M status=progress conv=fdatasync
 
 Insert the SD card into the BeagleBone Black, connect a serial debugger, and power it up. You should see the device boot. When prompted to log in, sign in as `root`.
 
-You have successfully built an image using Yocto!
+You have successfully built an image using Yocto!!
