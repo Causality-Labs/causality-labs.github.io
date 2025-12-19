@@ -30,15 +30,15 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-getting-started-with-yocto",
+        },{id: "post-",
         
-          title: "Getting started with Yocto",
+          title: "",
         
-        description: "Documenting using yocto in my Personal Life",
+        description: "",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/blog/2025/Yocto_Intro/";
+            window.location.href = "/blog/2025/2025-12-17-Yocto_Intro/";
           
         },
       },{id: "post-getting-started-with-zephyr",
