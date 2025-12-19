@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Chapter 1: Getting started with Yocto (Poky and Firs Image)
+title: Getting started with Yocto (Poky and First Image)
 date: 2025-12-17 16:40:16
 description: Documenting using yocto in my Personal Life
-tags: "Embedded Linux"
+tags: "Embedded-Linux"
 ---
 
 ## Introduction
