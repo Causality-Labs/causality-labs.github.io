@@ -3,7 +3,8 @@ layout: post
 title: Getting started with Yocto (Poky and First Image)
 date: 2025-12-17 16:40:16
 description: Documenting using yocto in my Personal Life
-tags: "Embedded-Linux"
+tags: Embedded-Linux
+categories: Yocto
 ---
 
 ## Introduction
