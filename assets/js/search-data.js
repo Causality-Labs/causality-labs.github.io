@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-getting-started-with-yocto-poky-and-first-image",
+        },{id: "post-a-quick-guide-on-docker-basics",
+        
+          title: "A quick guide on Docker basics",
+        
+        description: "A post about my experience getting started with Docker",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Docker_Basics/";
+          
+        },
+      },{id: "post-getting-started-with-yocto-poky-and-first-image",
         
           title: "Getting started with Yocto (Poky and First Image)",
         
