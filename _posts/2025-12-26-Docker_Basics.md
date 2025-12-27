@@ -18,21 +18,20 @@ I thought it would be helpful for me and others who are just starting their soft
 ### What is Docker and Why is it so Popular
 Docker is a tool that packages an application and all its dependencies into a lightweight, portable container, ensuring it runs consistently across any environment. By doing this, your application can run the same way whether it is deployed on a laptop, a powerful server, or an embedded platform.
 
-Docker is popular in industry because of the following reasons:
+Docker is popular in the industry for the following reasons:
 
 1. **Consistency ("It works on my machine"):** Docker eliminates the common problem where code works in development but fails in production due to different library versions or OS configurations.
 2. **Efficiency:** Unlike Virtual Machines (VMs), containers share the host system's kernel. This makes them much smaller, faster to start, and less resource-intensive.
 3. **Isolation:** Each container runs in its own isolated environment. You can run multiple applications with conflicting dependencies on the same host without them interfering with each other.
 4. **Scalability and Ecosystem:** With Docker Hub, there is a massive library of pre-built images (like databases, web servers, and compilers) that you can pull and use instantly, significantly speeding up development and deployment.
 
-If you would like to learn more about about the details of Docker you can find it in th official Docker [Documentation](https://docs.docker.com/get-started/docker-overview/)
+If you would like to learn more about Docker, you can find details in the official Docker [documentation](https://docs.docker.com/get-started/docker-overview/).
 
 
 ## Getting Started with Docker
-We will be demonstraiting how we can use Docker based on a simple TCP/IP Client Server application
-written in C++. The source code for this demo and can be found here [Docker Demo](https://github.com/Causality-Labs/Docker_Lesson)
+We will be demonstrating how we can use Docker based on a simple TCP/IP client-server application written in C++. The source code for this demo can be found here: [Docker Demo](https://github.com/Causality-Labs/Docker_Lesson)
 
-The layout out for the source code for our application is as follows:
+The layout for the source code for our application is as follows:
 
 {% highlight bash linenos %}
 $ tree .
@@ -50,11 +49,11 @@ $ tree .
 └── test_server.sh
 {% endhighlight %}
 
-- **src/** & inc/: The C++ code for our application.
-- Makefile: Instructions for building the code.
-- client.py & test_server.sh: Scripts to test that the server works.
+- **`src/` & `inc/`**: The C++ code for our application.
+- `Makefile`: Instructions for building the code.
+- `client.py` & `test_server.sh`: Scripts to test that the server works.
 
-The first step for Containerixatrion to work we ne a Dockerfile. As stated above a Dockerfile gives us instructions for building a Docker container. This what our Dockerfile shoudl look like:
+The first step for containerization is that we need a `Dockerfile`. As stated above, a `Dockerfile` gives us instructions for building a Docker container. This is what our `Dockerfile` should look like:
 
 {% highlight Dockerfile linenos %}
 FROM ubuntu:24.04
@@ -87,13 +86,13 @@ CMD ["./bin/server"]
 {% endhighlight %}
 
 
-- FROM ubuntu:24.04: Starts with a clean Ubuntu Linux operating system as the base.
-- RUN apt-get...: Installs the necessary tools (Python, Make, and a C++ compiler) inside that Ubuntu system.
-- WORKDIR /app: Creates a folder called /app inside the container and moves into it (like cd /app).
-- COPY ...: Pulls your source code, Makefile, and scripts from your computer into the container's /app folder.
-- RUN chmod +x ...: Gives the scripts permission to run as programs.
-- RUN make...: Compiles your C++ code into a finished executable program.
-- CMD ["./bin/server"]: Tells Docker that as soon as the container starts, it should automatically run your server program.
+- `FROM ubuntu:24.04`: Starts with a clean Ubuntu Linux operating system as the base.
+- `RUN apt-get...`: Installs the necessary tools (Python, Make, and a C++ compiler) inside that Ubuntu system.
+- `WORKDIR /app`: Creates a folder called `/app` inside the container and moves into it (like `cd /app`).
+- `COPY ...`: Copies your source code, Makefile, and scripts from your computer into the container’s `/app` folder.
+- `RUN chmod +x ...`: Gives the scripts permission to run.
+- `RUN make...`: Compiles your C++ code into a finished executable program.
+- `CMD ["./bin/server"]`: Tells Docker to run your server program when the container starts.
 
 Your Dockerfile now gives you the ability to create a Docker Image. A Docker Image is a read-only template that contains your application code, libraries, and all the dependencies required for it to run. You can think of the **Dockerfile** as the "recipe" and the **Image** as the "finished dish" that is ready to be served.
 
@@ -103,20 +102,20 @@ To build your image, you use the `docker build` command:
 $ docker build -t my-server .
 {% endhighlight %}
 
-This command uses the Dockerfile in the current directory to build your image and tags it as my-server.
+This command uses the `Dockerfile` in the current directory to build your image and tags it as `my-server`.
 
 Next up you can run the Docker Container from the image with the following command:
 
 {% highlight bash linenos %}
 # Pattern:
 # docker run -d -p <host>:<container>  --name <container-name> <image-name>
-$ docker run -d -p 3500:3500 --name my-server-image my-server-container
+$ docker run -d -p 3500:3500 --name my-server my-server
 {% endhighlight %}
 
 - Detached: Runs in the background (`-d`).
 - Ports: Maps host port `3500` to container port `3500` (`-p 3500:3500`).
-- Name: Sets the container name to `my-server-image` (`--name`).
-- Image: Starts a container from the image `my-server-container`.
+- Name: Sets the container name to `my-server` (`--name`).
+- Image: Starts a container from the image `my-server`.
 - Access: Reach the app at `http://localhost:3500` if it listens on port `3500` inside the container.
 
 
@@ -127,7 +126,7 @@ CONTAINER ID   IMAGE       COMMAND          CREATED         STATUS         PORTS
 0d4bfd75ba8e   my-server   "./bin/server"   3 seconds ago   Up 3 seconds   0.0.0.0:3500->3500/tcp, [::]:3500->3500/tcp   my-server
 {% endhighlight %}
 
-The server is running inside the container, and port `3500` is exposed from the container to port `3500` on the host. This lets a client on the host communicate with the server in the docker container.
+The server is running inside the container, and port `3500` is exposed from the container to port `3500` on the host. This lets a client on the host communicate with the server inside the Docker container.
 {% highlight bash linenos %}
 $ ./bin/client
 [HW_Client] [INFO] Connecting to server...
@@ -137,18 +136,18 @@ $ ./bin/client
 [HW_Client] [INFO] Disconnected from server
 {% endhighlight %}
 
-You can see the logs that our server is also making in the container by running this command:
+You can see the server logs in the container by running this command:
 {% highlight bash linenos %}
-$ docker logs -f my-server-container
+$ docker logs -f my-server
 [HW_Server] [INFO] Server listening on port 3500...
 [HW_Server] [INFO] Client connected
 [HW_Server] [INFO] Received: Hello from C++ client!
 [HW_Server] [INFO] Response sent to client
 {% endhighlight %}
 
-This command stops the container
+This command stops the container:
 {% highlight bash linenos %}
-$ docker stop my-server-container
+$ docker stop my-server
 {% endhighlight %}
 
 You can also enter the container via interactive mode and run the test script manually:
@@ -172,7 +171,7 @@ This gives you a bash shell inside the running container. You can then run comma
 ./test_server.sh
 {% endhighlight %}
 
-Exit the container shell with exit.
+Exit the container shell with `exit`.
 
 To remove a container, use the command:
 {% highlight bash linenos %}
