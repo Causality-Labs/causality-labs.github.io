@@ -1,7 +1,7 @@
 github_users:
   - Causality-Labs
 
-repo_description_lines_max: 3
+repo_description_lines_max: 1
 
 github_repos:
   - Causality-Labs/Causality_SoC
