@@ -9,8 +9,8 @@ last_name: Asamudo
 contact_note:
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
   A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
-footer_text: >
-  © 2025 Ime Asamudo. Built with <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> and <a href="https://github.com/alshedivat/al-folio">al-folio</a>.
+footer_text: # >
+# © 2025 Ime Asamudo. Built with <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> and <a href="https://github.com/alshedivat/al-folio">al-folio</a>.
 keywords: jekyll, jekyll-theme, academic-website, portfolio-website # add your own keywords or leave empty
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
@@ -247,7 +247,7 @@ jekyll-archives:
   books:
     enabled: [year, tags, categories] # enables year, tag and category archives (remove if you need to disable one of them).
 
-display_tags: ["Embedded-Linux", "FPGAs", "MCU", RTOS] # these tags will be displayed on the front page of your blog
+display_tags: ["Embedded-Linux", "FPGAs", "MCU", RTOS, Misc] # these tags will be displayed on the front page of your blog
 display_categories: ["Zephyr-Env-Sensor", "Yocto"] # these categories will be displayed on the front page of your blog
 
 # -----------------------------------------------------------------------------
