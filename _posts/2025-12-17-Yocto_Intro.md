@@ -5,6 +5,7 @@ date: 2025-12-17 16:40:16
 description: Documenting using yocto in my Personal Life
 tags: Embedded-Linux
 categories: Yocto
+thumbnail: assets/img/blogs/yocto-project-logo.webp
 ---
 
 ## Introduction

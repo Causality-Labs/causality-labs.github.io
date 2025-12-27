@@ -5,6 +5,7 @@ date: 2025-12-26 16:40:16
 description: A post about my experience getting started with Docker
 tags: Misc
 categories:
+thumbnail: assets/img/blogs/Docker-logo.webp
 ---
 
 ## Introduction

@@ -5,6 +5,7 @@ date: 2025-12-16 16:40:16
 description: A post about my experience getting started with Zephyr
 tags: MCU RTOS
 categories: Zephyr-Env-Sensor
+thumbnail: assets/img/blogs/Zephyr-Logo.webp
 ---
 
 ## Introduction
