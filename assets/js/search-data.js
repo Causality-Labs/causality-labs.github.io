@@ -94,6 +94,11 @@ ninja.data = [{
           description: "Custom FPGA SoC on Basys 3 using Verilog and C, featuring a flexible HAL and Snake game demo",
           section: "Projects",handler: () => {
               window.location.href = "/projects/Causality_SoC/";
+            },},{id: "projects-environmental-sensor-daemon-december-2025-january-2026",
+          title: 'Environmental Sensor Daemon (December 2025 - January 2026)',
+          description: "Environmental sensor daemon that exposes BME280 temperature, pressure, and humidity data over TCP/IP with C++ and Python client implementations for remote monitoring.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/Env_Sensor_Daemon/";
             },},{
         id: 'social-cv',
         title: 'CV',
