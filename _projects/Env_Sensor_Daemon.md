@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Environmental Sensor Daemon (December 2025 - January 2026)
+title: EnvSensord (December 2025 - January 2026)
 description: Environmental sensor daemon that exposes BME280 temperature, pressure, and humidity data over TCP/IP with C++ and Python client implementations for remote monitoring.
 img: assets/img/EnvSensord/BeagleBone.jpeg
 importance: 1
@@ -67,12 +67,12 @@ category: Embedded-Linux
          </ul>
 
          <p>Examples:</p>
-         {% highlight text %}
+         ```
          TEMP;
          TEMP,PRESS;
          TEMP,PRESS,HUMID;
          HUMID,TEMP;
-         {% endhighlight %}
+         ```
         
         <p><strong>Response format:</strong> Replies are <code>HEADER;timestamp,values</code> where HEADER matches the request and values include units (TEMP: C, PRESS: hPa, HUMID: %). Example: <code>TEMP,PRESS;1738454400,23.50C,1013.25hPa</code>.</p>
     </div>
@@ -83,15 +83,15 @@ category: Embedded-Linux
 <div class="row">
 <div class="col-md-12">
     <p>Run the server in background:</p>
-    {% highlight bash %}
+    ```bash
     $ ./EnvSensord &
-    {% endhighlight %}
+    ```
 
     <p>Use the provided clients to query the daemon — the C++ client (`EnvClient-cli`) and the Python script (`envSensorClient.py`) both support requesting TEMP, PRESS, and HUMID. Example:</p>
-    {% highlight bash %}
+    ```bash
     $ ./EnvClient-cli -t            # request temperature
     $ python3 envSensorClient.py -a  # request all values
-    {% endhighlight %}
+    ```
 
     <p>For full CLI options, stress-testing and implementation details see the project repository (source and scripts are included there).</p>
 
@@ -102,13 +102,13 @@ category: Embedded-Linux
 <div class="col-md-12">
     <h4>Stress testing</h4>
     <p>Run the included <code>test_server.sh</code> to simulate concurrent clients and collect performance stats.</p>
-    {% highlight bash %}
+    ```bash
     $ ./test_server.sh                    # default: 5 clients of each type
     $ ./test_server.sh 20                 # 20 clients of each type
     $ ./test_server.sh 50 cpp             # 50 C++ clients only
     $ ./test_server.sh 100 python         # 100 Python clients only
     $ ./test_server.sh 200 both           # 200 of each type
-    {% endhighlight %}
+    ```
 
     <p><strong>Output:</strong> the script reports totals, success/failure counts, duration, requests/sec, and saves logs to <code>logs/test_TIMESTAMP/</code>. Failed client outputs are shown for debugging.</p>
 
