@@ -93,12 +93,12 @@ category: Embedded-Linux
 <h4>Server</h4>
 
 <p>Execute the program as a background process:</p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ ./EnvSensord &
 {% endhighlight %}
 
 <p>The server supports the following options:</p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ ./EnvSensord [OPTIONS]
 {% endhighlight %}
 
@@ -113,7 +113,7 @@ $ ./EnvSensord [OPTIONS]
 </ul>
 
 <p><strong>Examples:</strong></p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ ./EnvSensord --port 8080 --threads 8
 $ ./EnvSensord -p 3500 -i 500
 {% endhighlight %}
@@ -127,7 +127,7 @@ $ ./EnvSensord -p 3500 -i 500
 <p>The compiled client is built from <a href="https://github.com/Causality-Labs/envsensord/blob/main/src/client.cpp" target="_blank" rel="noopener">src/client.cpp</a> and provides a native interface to query the sensor server.</p>
 
 <p><strong>Usage:</strong></p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ ./EnvClient-cli [OPTIONS]
 {% endhighlight %}
 
@@ -144,7 +144,7 @@ $ ./EnvClient-cli [OPTIONS]
 </ul>
 
 <p><strong>Examples:</strong></p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ ./EnvClient-cli                          # Request all values from localhost:3500
 $ ./EnvClient-cli -t                       # Request only temperature
 $ ./EnvClient-cli -t -u                    # Request temperature and humidity
@@ -163,12 +163,12 @@ $ ./EnvClient-cli -H 192.168.1.100 -t      # Request temp from remote host
 </ul>
 
 <p><strong>Usage:</strong></p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ python3 envSensorClient.py [OPTIONS]
 {% endhighlight %}
 
 <p>Or make it executable and run directly:</p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ chmod +x envSensorClient.py
 $ ./envSensorClient.py [OPTIONS]
 {% endhighlight %}
@@ -184,7 +184,7 @@ $ ./envSensorClient.py [OPTIONS]
 </ul>
 
 <p><strong>Examples:</strong></p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ python3 envSensorClient.py                          # Request all values
 $ python3 envSensorClient.py -t                       # Request only temperature
 $ python3 envSensorClient.py -H 192.168.1.100 -t -u   # Request temp and humidity from remote host
@@ -196,7 +196,7 @@ $ python3 envSensorClient.py --host server.local --port 8080 --all
 <p>The <a href="https://github.com/Causality-Labs/envsensord/blob/main/test_server.sh" target="_blank" rel="noopener">test_server.sh</a> script allows you to stress test the server by running multiple concurrent client connections.</p>
 
 <p><strong>Usage:</strong></p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ ./test_server.sh [NUM_CLIENTS] [CLIENT_TYPE]
 {% endhighlight %}
 
@@ -222,7 +222,7 @@ $ ./test_server.sh [NUM_CLIENTS] [CLIENT_TYPE]
 </ul>
 
 <p><strong>Examples:</strong></p>
-{% highlight bash %}
+{% highlight bash linenos %}
 $ ./test_server.sh                    # Test with 5 clients of each type
 $ ./test_server.sh 20                 # Test with 20 clients of each type
 $ ./test_server.sh 50 cpp             # Test with 50 C++ clients only
