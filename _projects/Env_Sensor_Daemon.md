@@ -16,7 +16,7 @@ category: Embedded-Linux
     </div>
 </div>
 
-<div class="row mt-3">
+<div class="row">
     <div class="col-md-12">
         <p>The Environmental Sensor Daemon is a multi-threaded server application that provides network-accessible environmental data from a BME280 sensor. It demonstrates common Embedded Linux design patterns including network socket programming, boss-worker threading models, and client-server architecture. The daemon runs as a background service, allowing multiple concurrent clients to query real-time temperature, humidity, and pressure readings over TCP/IP.</p>
 
@@ -89,27 +89,158 @@ category: Embedded-Linux
 
 <div class="row">
 <div class="col-md-12">
-    <p>Run the server in background:</p>
-    {% highlight bash linenos %}
-    $ ./EnvSensord &{% endhighlight %}
 
-    <p>Use the provided clients to query the daemon — the C++ client (<code>EnvClient-cli</code>) and the Python script (<code>envSensorClient.py</code>) both support requesting TEMP, PRESS, and HUMID. Example:</p>
+<h4>Server</h4>
 
-    {% highlight bash linenos%}
-    $ ./EnvClient-cli -t            # request temperature
-    $ python3 envSensorClient.py -a  # request all values{% endhighlight %}
+<p>Execute the program as a background process:</p>
+{% highlight bash %}
+$ ./EnvSensord &
+{% endhighlight %}
 
-    <p>For full CLI options, stress-testing and implementation details see the project repository (source and scripts are included there).</p>
+<p>The server supports the following options:</p>
+{% highlight bash %}
+$ ./EnvSensord [OPTIONS]
+{% endhighlight %}
 
-    <p>A script called test_server.sh was also included to simulate concurrent clients and collect performance stats. Before running it however make user envsensord is running in the background.</p>
-    {% highlight bash linenos %}
-    $ ./test_server.sh                    # default: 5 clients of each type
-    $ ./test_server.sh 20                 # 20 clients of each type
-    $ ./test_server.sh 50 cpp             # 50 C++ clients only
-    $ ./test_server.sh 100 python         # 100 Python clients only
-    $ ./test_server.sh 200 both           # 200 of each type{% endhighlight %}
+<p><strong>Options:</strong></p>
+<ul>
+    <li><code>-p, --port PORT</code> - Server port (default: 3500)</li>
+    <li><code>-t, --threads NUM</code> - Number of worker threads (default: 4)</li>
+    <li><code>-i, --interval MS</code> - Sensor update interval in milliseconds (default: 1000)</li>
+    <li><code>-d, --device NAME</code> - Device name for logging (optional)</li>
+    <li><code>-h, --help</code> - Show help message</li>
+    <li><code>-v, --version</code> - Show version information</li>
+</ul>
 
-    <p><strong>Output:</strong> The script reports totals, success/failure counts, duration, requests/sec.</p>
+<p><strong>Examples:</strong></p>
+{% highlight bash %}
+$ ./EnvSensord --port 8080 --threads 8
+$ ./EnvSensord -p 3500 -i 500
+{% endhighlight %}
+
+<h4>Client</h4>
+
+<p>There are two client implementations available: a compiled C++ client and a Python script.</p>
+
+<h5>Compiled C++ Client</h5>
+
+<p>The compiled client is built from <a href="https://github.com/Causality-Labs/envsensord/blob/main/src/client.cpp" target="_blank" rel="noopener">src/client.cpp</a> and provides a native interface to query the sensor server.</p>
+
+<p><strong>Usage:</strong></p>
+{% highlight bash %}
+$ ./EnvClient-cli [OPTIONS]
+{% endhighlight %}
+
+<p><strong>Options:</strong></p>
+<ul>
+    <li><code>-H, --host HOSTNAME</code> - Server hostname or IP address (default: localhost)</li>
+    <li><code>-p, --port PORT</code> - Server port (default: 3500)</li>
+    <li><code>-t, --temp</code> - Request temperature data</li>
+    <li><code>-u, --humid</code> - Request humidity data</li>
+    <li><code>-r, --press</code> - Request pressure data</li>
+    <li><code>-a, --all</code> - Request all sensor values (default if none specified)</li>
+    <li><code>-h, --help</code> - Show help message</li>
+    <li><code>-v, --version</code> - Show version information</li>
+</ul>
+
+<p><strong>Examples:</strong></p>
+{% highlight bash %}
+$ ./EnvClient-cli                          # Request all values from localhost:3500
+$ ./EnvClient-cli -t                       # Request only temperature
+$ ./EnvClient-cli -t -u                    # Request temperature and humidity
+$ ./EnvClient-cli -p 8080 -a               # Request all from port 8080
+$ ./EnvClient-cli -H 192.168.1.100 -t      # Request temp from remote host
+{% endhighlight %}
+
+<h5>Python Client Script</h5>
+
+<p>The Python client (<a href="https://github.com/Causality-Labs/envsensord/blob/main/envSensorClient.py" target="_blank" rel="noopener">envSensorClient.py</a>) provides a portable alternative that requires no compilation.</p>
+
+<p><strong>Requirements:</strong></p>
+<ul>
+    <li>Python 3.x</li>
+    <li>No external dependencies (uses standard library only)</li>
+</ul>
+
+<p><strong>Usage:</strong></p>
+{% highlight bash %}
+$ python3 envSensorClient.py [OPTIONS]
+{% endhighlight %}
+
+<p>Or make it executable and run directly:</p>
+{% highlight bash %}
+$ chmod +x envSensorClient.py
+$ ./envSensorClient.py [OPTIONS]
+{% endhighlight %}
+
+<p><strong>Options:</strong></p>
+<ul>
+    <li><code>-H, --host</code> - Server hostname or IP (default: localhost)</li>
+    <li><code>-p, --port</code> - Server port (default: 3500)</li>
+    <li><code>-t, --temp</code> - Request temperature data</li>
+    <li><code>-u, --humid</code> - Request humidity data</li>
+    <li><code>-r, --press</code> - Request pressure data</li>
+    <li><code>-a, --all</code> - Request all sensor values (default if none specified)</li>
+</ul>
+
+<p><strong>Examples:</strong></p>
+{% highlight bash %}
+$ python3 envSensorClient.py                          # Request all values
+$ python3 envSensorClient.py -t                       # Request only temperature
+$ python3 envSensorClient.py -H 192.168.1.100 -t -u   # Request temp and humidity from remote host
+$ python3 envSensorClient.py --host server.local --port 8080 --all
+{% endhighlight %}
+
+<h4>Stress Testing</h4>
+
+<p>The <a href="https://github.com/Causality-Labs/envsensord/blob/main/test_server.sh" target="_blank" rel="noopener">test_server.sh</a> script allows you to stress test the server by running multiple concurrent client connections.</p>
+
+<p><strong>Usage:</strong></p>
+{% highlight bash %}
+$ ./test_server.sh [NUM_CLIENTS] [CLIENT_TYPE]
+{% endhighlight %}
+
+<p><strong>Arguments:</strong></p>
+<ul>
+    <li><code>NUM_CLIENTS</code> - Number of concurrent clients to run (default: 5)</li>
+    <li><code>CLIENT_TYPE</code> - Which client to test: <code>cpp</code>, <code>python</code>, or <code>both</code> (default: both)</li>
+</ul>
+
+<p><strong>Options:</strong></p>
+<ul>
+    <li><code>-h, --help</code> - Show help message</li>
+</ul>
+
+<p><strong>Features:</strong></p>
+<ul>
+    <li>Launches multiple clients concurrently with varied requests (temperature, humidity, pressure, or all)</li>
+    <li>Tracks success/failure rates for each client</li>
+    <li>Measures total duration and requests per second</li>
+    <li>Saves detailed logs to <code>logs/test_TIMESTAMP/</code> directory</li>
+    <li>Displays failed client outputs for debugging</li>
+    <li>Small stagger between launches (50ms) to simulate realistic traffic</li>
+</ul>
+
+<p><strong>Examples:</strong></p>
+{% highlight bash %}
+$ ./test_server.sh                    # Test with 5 clients of each type
+$ ./test_server.sh 20                 # Test with 20 clients of each type
+$ ./test_server.sh 50 cpp             # Test with 50 C++ clients only
+$ ./test_server.sh 100 python         # Test with 100 Python clients only
+$ ./test_server.sh 200 both           # Stress test with 200 of each type
+$ ./test_server.sh -h                 # Show help message
+{% endhighlight %}
+
+<p><strong>Output:</strong></p>
+<p>The script provides detailed statistics including:</p>
+<ul>
+    <li>Total clients launched</li>
+    <li>Success and failure counts</li>
+    <li>Test duration</li>
+    <li>Requests per second</li>
+    <li>Location of log files</li>
+    <li>Error messages from failed clients (if any)</li>
+</ul>
 
     </div>
 </div>
