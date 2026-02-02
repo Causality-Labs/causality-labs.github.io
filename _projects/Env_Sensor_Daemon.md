@@ -10,13 +10,11 @@ category: Embedded-Linux
 <h1 style="text-align: center;">Overview</h1>
 
 <div class="row">
-    <div class="col-sm mt-3 mt-md-0">
+    <div class="col-md-12">
         {% include figure.liquid path="assets/img/EnvSensord/BeagleBone.jpeg" class="img-fluid rounded z-depth-1 even-height-img" %}
     </div>
-    <div class="col-sm mt-3 mt-md-0">
-        {% include figure.liquid path="assets/img/EnvSensord/Test_Script.png" class="img-fluid rounded z-depth-1 even-height-img" %}
-    </div>
 </div>
+
 <div class="row mt-3">
     <div class="col-md-12">
         <p>The Environmental Sensor Daemon is a multi-threaded server application that provides network-accessible environmental data from a BME280 sensor. It demonstrates common Embedded Linux design patterns including network socket programming, boss-worker threading models, and client-server architecture. The daemon runs as a background service, allowing multiple concurrent clients to query real-time temperature, humidity, and pressure readings over TCP/IP.</p>
@@ -45,10 +43,13 @@ category: Embedded-Linux
 <h1 style="text-align: center;">Software</h1>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
         {% include figure.liquid path="assets/img/EnvSensord/OverallSWDiagram.png" class="img-fluid rounded z-depth-1" %}
     </div>
-    <div class="col-md-6">
+</div>
+
+<div class="row">
+    <div class="col-md-12">
         <p>This application has two parts: EnvSensord (the C++ server) and client programs written in C++ and Python.</p>
 
         <p><strong>EnvSensord (Server):</strong> This background daemon communicates with the BME280 sensor to read temperature, humidity, and pressure. The server uses a multi-threaded boss–worker architecture where worker threads handle client requests.</p>
@@ -67,14 +68,19 @@ category: Embedded-Linux
          </ul>
 
          <p>Examples:</p>
-         ```
-         TEMP;
-         TEMP,PRESS;
-         TEMP,PRESS,HUMID;
-         HUMID,TEMP;
-         ```
+        <ul>
+            <li><code>TEMP;</code></li>
+            <li><code>TEMP,PRESS;</code></li>
+            <li><code>TEMP,PRESS,HUMID;</code></li>
+            <li><code>HUMID,TEMP;</code></li>
+         </ul>
         
-        <p><strong>Response format:</strong> Replies are <code>HEADER;timestamp,values</code> where HEADER matches the request and values include units (TEMP: C, PRESS: hPa, HUMID: %). Example: <code>TEMP,PRESS;1738454400,23.50C,1013.25hPa</code>.</p>
+        <p><strong>Response format:</strong> <code>HEADER;timestamp,values</code></p>
+        <ul>
+            <li><strong>HEADER</strong> matches the request fields.</li>
+            <li><strong>Values</strong> include units: TEMP (°C), PRESS (hPa), HUMID (%).</li>
+        </ul>
+        <p><strong>Example:</strong> <code>TEMP,PRESS;1738454400,23.50C,1013.25hPa</code></p>
     </div>
 </div>
 
@@ -83,37 +89,33 @@ category: Embedded-Linux
 <div class="row">
 <div class="col-md-12">
     <p>Run the server in background:</p>
-    ```bash
+    {% highlight bash linenos %}
     $ ./EnvSensord &
-    ```
+    {% endhighlight %}
 
-    <p>Use the provided clients to query the daemon — the C++ client (`EnvClient-cli`) and the Python script (`envSensorClient.py`) both support requesting TEMP, PRESS, and HUMID. Example:</p>
-    ```bash
+    <p>Use the provided clients to query the daemon — the C++ client (<code>EnvClient-cli</code>) and the Python script (<code>envSensorClient.py</code>) both support requesting TEMP, PRESS, and HUMID. Example:</p>
+
+    {% highlight bash linenos%}
     $ ./EnvClient-cli -t            # request temperature
     $ python3 envSensorClient.py -a  # request all values
-    ```
+    {% endhighlight %}
 
     <p>For full CLI options, stress-testing and implementation details see the project repository (source and scripts are included there).</p>
 
-    </div>
-</div>
-
-<div class="row mt-3">
-<div class="col-md-12">
-    <h4>Stress testing</h4>
-    <p>Run the included <code>test_server.sh</code> to simulate concurrent clients and collect performance stats.</p>
-    ```bash
+    <p>A script called test_server.sh was also included to simulate concurrent clients and collect performance stats. Before running it however make user envsensord is running in the background.</p>
+    {% highlight bash linenos %}
     $ ./test_server.sh                    # default: 5 clients of each type
     $ ./test_server.sh 20                 # 20 clients of each type
     $ ./test_server.sh 50 cpp             # 50 C++ clients only
     $ ./test_server.sh 100 python         # 100 Python clients only
     $ ./test_server.sh 200 both           # 200 of each type
-    ```
+    {% endhighlight %}
 
-    <p><strong>Output:</strong> the script reports totals, success/failure counts, duration, requests/sec, and saves logs to <code>logs/test_TIMESTAMP/</code>. Failed client outputs are shown for debugging.</p>
+    <p><strong>Output:</strong> The script reports totals, success/failure counts, duration, requests/sec.</p>
 
     </div>
 </div>
+
 
 <h1 style="text-align: center;">Conclusion</h1>
 
