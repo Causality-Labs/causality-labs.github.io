@@ -9,9 +9,10 @@ category: Embedded-Linux
 
 <h1 style="text-align: center;">Overview</h1>
 
+
 <div class="row">
     <div class="col-md-12">
-        {% include figure.liquid path="assets/img/EnvSensord/BeagleBone.jpeg" class="img-fluid rounded z-depth-1 even-height-img" %}
+        {% include figure.liquid path="assets/img/EnvSensord/BeagleBone.jpeg" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
 
