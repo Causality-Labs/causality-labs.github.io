@@ -90,15 +90,13 @@ category: Embedded-Linux
 <div class="col-md-12">
     <p>Run the server in background:</p>
     {% highlight bash linenos %}
-    $ ./EnvSensord &
-    {% endhighlight %}
+    $ ./EnvSensord &{% endhighlight %}
 
     <p>Use the provided clients to query the daemon — the C++ client (<code>EnvClient-cli</code>) and the Python script (<code>envSensorClient.py</code>) both support requesting TEMP, PRESS, and HUMID. Example:</p>
 
     {% highlight bash linenos%}
     $ ./EnvClient-cli -t            # request temperature
-    $ python3 envSensorClient.py -a  # request all values
-    {% endhighlight %}
+    $ python3 envSensorClient.py -a  # request all values{% endhighlight %}
 
     <p>For full CLI options, stress-testing and implementation details see the project repository (source and scripts are included there).</p>
 
@@ -108,8 +106,7 @@ category: Embedded-Linux
     $ ./test_server.sh 20                 # 20 clients of each type
     $ ./test_server.sh 50 cpp             # 50 C++ clients only
     $ ./test_server.sh 100 python         # 100 Python clients only
-    $ ./test_server.sh 200 both           # 200 of each type
-    {% endhighlight %}
+    $ ./test_server.sh 200 both           # 200 of each type{% endhighlight %}
 
     <p><strong>Output:</strong> The script reports totals, success/failure counts, duration, requests/sec.</p>
 
