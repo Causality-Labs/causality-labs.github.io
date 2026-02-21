@@ -105,18 +105,72 @@ TFTP is a simplified version of FTP that is commonly used in local networks to t
 
 In **Embedded Linux development**, TFTP is a cornerstone of the "Remote Boot" workflow. While NFS handles the root filesystem (the files and applications), TFTP is responsible for delivering the **Linux Kernel image** and the **Device Tree Blob (DTB)** to the board.
 
-### Why it is Relevant
+#### Why it is Relevant
 - **Minimalist Design**: TFTP has a tiny footprint, making it easy to implement inside a bootloader where space is at a premium.
 - **Speed**: Because it runs over UDP with very little overhead, it is extremely fast for transferring the relatively small kernel and DTB files (usually 10-30 MB).
 - **Avoids Flash Memory**: You don't have to write the kernel to an SD card or eMMC every time you recompile it. You simply `bitbake` on your PC, and the new kernel is automatically served to the board on the next reboot.
 - **Diskless Operation**: Combined with NFS, you can boot a board that has *no local storage* at all, which is common during early hardware bring-up.
 
-### How it is Used
+#### How it is Used
 When you power on your board and it enters the U-Boot bootloader:
 1. **Network Initialization**: U-Boot initializes the Ethernet hardware and gets an IP address (via DHCP or static assignment).
 2. **Request**: U-Boot sends a TFTP request to your host workstation asking for specific files (e.g., `Image` and the `.dtb` file).
 3. **Transfer**: The TFTP server on your PC sends these files directly into the board's RAM at specific memory addresses.
 4. **Boot**: U-Boot then executes the kernel from that RAM location.
 
-Now we will go over how to set up the TFTP server on your host machine:
+#### How to setup a tftp server on your build machine
+Begin by installing the `tftpd-hpa` package:
+{% highlight bash linenos %}
+$ sudo apt install tftpd-hpa
+{% endhighlight %}
+
+Next, configure the TFTP server by editing `/etc/default/tftpd-hpa`. We will set the directory to `/tftpboot`:
+{% highlight bash linenos %}
+TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/tftpboot"
+TFTP_ADDRESS=":69"
+TFTP_OPTIONS="--secure"
+{% endhighlight %}
+
+Create the directory and ensure it has the correct permissions so the server can access it:
+{% highlight bash linenos %}
+$ sudo mkdir -p /tftpboot
+$ sudo chmod -R 777 /tftpboot
+$ sudo chown -R tftp:tftp /tftpboot
+{% endhighlight %}
+
+Finally, restart the service to apply the new configuration:
+{% highlight bash linenos %}
+$ sudo systemctl restart tftpd-hpa
+{% endhighlight %}
+
+#### Deploying Files to the TFTP Server
+Once your bitbake build is complete, you need to copy the Kernel image (`Image`) and the Device Tree Blob (`.dtb`) to the TFTP directory. For the i.MX91, these are typically located in the deploy directory:
+
+{% highlight bash linenos %}
+$ cp <path-to-your-build-directory>/tmp/deploy/images/imx91frdm/Image /tftpboot/
+$ cp <path-to-your-build-directory>/tmp/deploy/images/imx91frdm/<your_device_tree>.dtb /tftpboot/
+{% endhighlight %}
+
+#### Booting via TFTP
+With the files in place and the server running, you can now configure U-Boot to fetch them. Enter the U-Boot console and set the server's IP address (the IP of your workstation):
+
+{% highlight bash linenos %}
+$ setenv serverip 10.10.10.10
+$ setenv ipaddr 10.10.10.30
+$ saveenv
+{% endhighlight %}
+
+To boot the device using TFTP for the kernel and NFS for the root filesystem, you can use the following commands:
+
+{% highlight bash linenos %}
+$ tftp ${loadaddr} Image; tftp ${fdt_addr} <your_device_tree>.dtb; booti ${loadaddr} - ${fdt_addr}
+{% endhighlight %}
+
+- **tftp \${loadaddr} Image**: Fetches the kernel image from the host and loads it into RAM.
+- **tftp \${fdt_addr} ...**: Fetches the Device Tree Blob.
+- **booti**: Executes the kernel image in RAM using the DTB.
+
+Now, every time you power on your board, it will automatically pull the latest kernel and DTB from your PC and mount the root filesystem via NFS—no SD card flashing required!
+
 
