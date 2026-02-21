@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-a-quick-guide-on-docker-basics",
+        },{id: "post-booting-an-image-from-a-remote-source",
+        
+          title: "Booting an Image from a remote source",
+        
+        description: "Showcasing how to boot the rootfs, kernel and dtb remotely vis NFS and TFTP",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Booting-Embedded-Linux-Image-Remotely/";
+          
+        },
+      },{id: "post-a-quick-guide-on-docker-basics",
         
           title: "A quick guide on Docker basics",
         
@@ -39,17 +50,6 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/blog/2025/Docker_Basics/";
-          
-        },
-      },{id: "post-booting-an-image-from-a-remote-source",
-        
-          title: "Booting an Image from a remote source",
-        
-        description: "Documenting using yocto in my Personal Life",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2025/Booting-Embedded-Linux-Image-Remotely/";
           
         },
       },{id: "post-getting-started-with-yocto-poky-and-first-image",
