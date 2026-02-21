@@ -41,6 +41,17 @@ ninja.data = [{
             window.location.href = "/blog/2025/Docker_Basics/";
           
         },
+      },{id: "post-booting-an-image-from-a-remote-source",
+        
+          title: "Booting an Image from a remote source",
+        
+        description: "Documenting using yocto in my Personal Life",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Booting-Embedded-Linux-Image-Remotely/";
+          
+        },
       },{id: "post-getting-started-with-yocto-poky-and-first-image",
         
           title: "Getting started with Yocto (Poky and First Image)",
