@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Booting an Image from a remote source
-date: 2025-12-17 16:40:16
-description: Documenting using yocto in my Personal Life
+date: 2026-2-20 16:40:16
+description: Showcasing how to boot the rootfs, kernel and dtb remotely vis NFS and TFTP
 tags: Embedded-Linux
 categories: Yocto
 thumbnail: assets/img/blogs/yocto-project-logo.webp
