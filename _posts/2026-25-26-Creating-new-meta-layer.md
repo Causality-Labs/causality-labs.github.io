@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Creating a new Yocto Meta Layer
-date: 2026-2-25 16:40:16
-description: Showcasing how to create a new Yocto Layer and a new recipe
+date: 2026-2-22 09:40:16
+description: Showcasing how to create a new Yocto Layer
 tags: Embedded-Linux
 categories: Yocto
 thumbnail: assets/img/blogs/yocto-project-logo.webp
@@ -10,7 +10,7 @@ thumbnail: assets/img/blogs/yocto-project-logo.webp
 
 ## Introduction
 
-This is the second post in my Yocto blog series. In this post we will go over how to create your own meta layer and how to add a custom application to your distro through the use of recipes. First we will go over what is a meta layer and why you should always create your own layer rather than modifying existing upstream layers.
+This is the third post in my Yocto blog series. In this post we will go over how to create your own meta layer. First we will go over what is a meta layer and why you should always create your own layer rather than modifying existing upstream layers.
 
 #### What is a meta-layer
 
@@ -139,8 +139,4 @@ Now inspecting the new layer we created, we can briefly go over what each of the
 - **README** – A placeholder for documentation about the layer: what it provides, how to enable it, and any special notes or requirements.
 - **recipes-example/example/example_0.1.bb** – A simple example recipe included as a template. It demonstrates the basic structure of a BitBake recipe and is meant to be replaced or used as a reference when writing your own recipes.
 
-Now that we have our own custom layers we can now add applications to our image using recipes, but first we  msut go over what a recipe actually is.
-
-
-## What is a recipe
-
+Now that we have our own custom layers we can now add applications to our image using recipes, next post we will go over how to add different applications to our custom image through the use of recipes.
