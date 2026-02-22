@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-booting-an-image-from-a-remote-source",
+        },{id: "post-creating-a-new-yocto-meta-layer",
+        
+          title: "Creating a new Yocto Meta Layer",
+        
+        description: "Showcasing how to create a new Yocto Layer",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Creating-new-meta-layer/";
+          
+        },
+      },{id: "post-booting-an-image-from-a-remote-source",
         
           title: "Booting an Image from a remote source",
         

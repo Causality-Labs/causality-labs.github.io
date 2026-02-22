@@ -1,4 +1,148 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-02-21T03:04:51+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">Booting an Image from a remote source</title><link href="https://causality-lab.github.io/blog/2026/Booting-Embedded-Linux-Image-Remotely/" rel="alternate" type="text/html" title="Booting an Image from a remote source"/><published>2026-02-20T16:40:16+00:00</published><updated>2026-02-20T16:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/Booting-Embedded-Linux-Image-Remotely</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/Booting-Embedded-Linux-Image-Remotely/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This is the second post in my Yocto blog series. I have since switched single-board computers (SBCs); I was previously using the BeagleBone Black. However, I have moved to the FRDM i.MX91 board instead because the Ethernet port on the BeagleBone Black is faulty in the Yocto Scarthgap release. Instructions for building a Yocto image for the i.MX91 board can be found <a href="https://www.nxp.com/document/guide/getting-started-with-frdm-imx91-development-board:GS-FRDM-IMX91?section=build-and-run">here</a>.</p> <p>This post explains how to set up booting Linux from a remote source. This approach avoids the need to flash an SD card every time you modify your Yocto image.</p> <h2 id="network-file-system-nfs">Network File System (NFS)</h2> <p>The first method we will go over is Network File System booting. It’s useful to first understand what a Network File System is.</p> <p>A Network File System (NFS) is a protocol that allows a user on a client computer to access and interact with files over a network as if they were stored on their own local hard drive. In our specific application, the target hardware (i.MX91) will mount its root filesystem from a remote host over the network, rather than from local storage like an SD card or eMMC.</p> <p>This is useful to the Yocto workflow as it allows us to:</p> <ul> <li> <p><strong>Rapid Iteration</strong>: In Yocto, the root filesystem can be hundreds of megabytes. Flashing this to an SD card every time you change a configuration or add a package takes minutes. With NFS, as soon as bitbake finishes building, the changes are “live” on the next reboot.</p> </li> <li> <p><strong>Storage Limitations</strong>: Development images often include debug tools and headers that make them too large for small SD cards or internal flash. NFS allows you to use your PC’s multi-terabyte drive as the board’s storage.</p> </li> <li> <p><strong>Wear Leveling</strong>: You avoid burning out SD cards with constant writes during the development and debugging phase.</p> </li> <li> <p><strong>Ease of Access</strong>: You can modify files on the target directly from your host PC using your favorite editor, and the changes are immediately visible to the running target (and vice versa).</p> </li> </ul> <p>Now we will go over how to set up NFS booting for your Yocto image:</p> <h4 id="set-up-the-nfs-server-on-the-workstation">Set up the NFS server on the workstation</h4> <p>Make sure you have the nfs-kernel package installed on your system</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-02-22T17:03:44+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">Creating a new Yocto Meta Layer</title><link href="https://causality-lab.github.io/blog/2026/Creating-new-meta-layer/" rel="alternate" type="text/html" title="Creating a new Yocto Meta Layer"/><published>2026-02-22T09:40:16+00:00</published><updated>2026-02-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/Creating-new-meta-layer</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/Creating-new-meta-layer/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This is the third post in my Yocto blog series. In this post we will go over how to create your own meta layer. First we will go over what is a meta layer and why you should always create your own layer rather than modifying existing upstream layers.</p> <h4 id="what-is-a-meta-layer">What is a meta-layer</h4> <p>In Yocto a a meta-layer is a directory that contains metadata used by the build system to generate a Linux image. It is used to tell Bitbake how to build your own custom Linux distro, a meta-layer is comprised of the following :</p> <ul> <li><strong>Configuration files (.conf)</strong> : Used to define global variables and layer dependencies.</li> <li><strong>Recipes(.bb)</strong> : Instructions on how to fetch, configure, compile, and install a specific software package.</li> <li><strong>Append files(.bbappend)</strong> : Used to extend or modify an existing recipe from another layer without modifying the original file.</li> </ul> <h4 id="why-is-it-important-to-have-your-own-layers">Why is it important to have your own layers</h4> <p>Yocto uses a modular, layered architecture: each layer is stacked on top of others, reusing and extending the functionality provided by the layers below it. By creating your own layer, you can reuse and extend the functionality provided by the layers you depend on, without ever modifying them directly.</p> <p>Creating your own layer also gives you independence, because it lets you customize your OS without “breaking” the official code from the Yocto Project or your hardware vendor. If you edit their layers directly, you can’t easily pull in updates or security fixes when a new Yocto release (for example, moving from Scarthgap to the next version) comes out. A custom layer keeps all your changes in a separate “bucket” that survives upgrades.</p> <h2 id="how-to-create-your-layer">How to create your layer</h2> <p>Creating a layer is fairly simple, enter you Yocto build enviroment and activate bitbake. If you are using the imx91 frdm board and follwoed the getting started instructions provided by NXP here <a href="https://www.nxp.com/document/guide/getting-started-with-frdm-imx91-development-board:GS-FRDM-IMX91?section=build-and-run">here</a>. So to get my build enviroment stared I use the following command:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">source </span>setup-environment frdm-imx91/
+</pre></td></tr></tbody></table></code></pre></figure> <p>Then use this command to find which layers are currently included in you image</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td><td class="code"><pre><span class="nv">$ </span>bitbake-layers show-layers
+</pre></td></tr></tbody></table></code></pre></figure> <p>For me when I run this command I see the following output:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+</pre></td><td class="code"><pre>layer                 path                                                                    priority
+<span class="o">========================================================================================================</span>
+core                  /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta                         5
+yocto                 /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta-poky                    5
+openembedded-layer    /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-oe         5
+multimedia-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-multimedia  5
+meta-python           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-python     5
+freescale-layer       /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale                    5
+freescale-3rdparty    /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-3rdparty           4
+freescale-distro      /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-distro             4
+fsl-bsp-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-bsp             8
+fsl-sdk-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-sdk             8
+imx-machine-learning  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-ml              8
+v2x-imx               /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-v2x             9
+imx-demo              /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-demo-experience          7
+nxp-matter-baseline   /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-matter-baseline  7
+nxp-openthread        /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-openthread  7
+meta-arm              /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm                 5
+arm-toolchain         /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm-toolchain       5
+clang-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-clang                        7
+gnome-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-gnome      5
+networking-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-networking  5
+filesystems-layer     /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-filesystems  5
+qt6-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-qt6                          5
+parsec-layer          /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-parsec         5
+tpm-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-tpm            6
+virtualization-layer  /home/ime/Yocto_Scarthgap_NXP/sources/meta-virtualization               8
+imx-frdm-release      /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-bsp        8
+imx-frdm-sdk-release  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-sdk        8
+imx-frdm-demo         /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-nxp-demo-experience  7
+</pre></td></tr></tbody></table></code></pre></figure> <p>Meaning the layer here with the highest priority is v2x-imx, we want our new layer to have the highest priority. The reason for this will be come clear when I explain what layer priority levels mean within Yocto.</p> <h4 id="explaining-layer-priority">Explaining Layer Priority</h4> <p>In Yocto, layer priority is simply the rule that decides which layer “wins” if multiple layers provide or modify the same recipe or configuration. Each layer is assigned a numeric priority in its layer.conf, and the layer with the higher number takes precedence. We want our layer to have the highest priority so the changes we make to features provided by other layers take precedence.</p> <p>From the list above, we want our new layer to have a higher priority than v2x-imx, so we’ll create it with priority 10. Following the meta-<layer-name> naming convention, we’ll call it meta-causality-labs and create it with the following command.</layer-name></p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td><td class="code"><pre><span class="nv">$ </span>bitbake-layers create-layer <span class="nt">-p</span> 10 meta-causality-labs
+</pre></td></tr></tbody></table></code></pre></figure> <p>Now inspect the new layers list with the <code class="language-plaintext highlighter-rouge">bitbake-layers show-layers</code> command and you will see your own new Yocto layer</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+</pre></td><td class="code"><pre>layer                 path                                                                    priority
+<span class="o">========================================================================================================</span>
+core                  /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta                         5
+yocto                 /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta-poky                    5
+openembedded-layer    /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-oe         5
+multimedia-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-multimedia  5
+meta-python           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-python     5
+freescale-layer       /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale                    5
+freescale-3rdparty    /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-3rdparty           4
+freescale-distro      /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-distro             4
+fsl-bsp-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-bsp             8
+fsl-sdk-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-sdk             8
+imx-machine-learning  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-ml              8
+v2x-imx               /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-v2x             9
+imx-demo              /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-demo-experience          7
+nxp-matter-baseline   /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-matter-baseline  7
+nxp-openthread        /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-openthread  7
+meta-arm              /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm                 5
+arm-toolchain         /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm-toolchain       5
+clang-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-clang                        7
+gnome-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-gnome      5
+networking-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-networking  5
+filesystems-layer     /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-filesystems  5
+qt6-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-qt6                          5
+parsec-layer          /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-parsec         5
+tpm-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-tpm            6
+virtualization-layer  /home/ime/Yocto_Scarthgap_NXP/sources/meta-virtualization               8
+imx-frdm-release      /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-bsp        8
+imx-frdm-sdk-release  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-sdk        8
+imx-frdm-demo         /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-nxp-demo-experience  7
+meta-causality-labs   /home/ime/Yocto_Scarthgap_NXP/frdm-imx91/meta-causality-labs            10
+</pre></td></tr></tbody></table></code></pre></figure> <p>Now inspecting the new layer we created, we can briefly go over what each of these files does:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="code"><pre><span class="nb">.</span>
+├── conf
+│   └── layer.conf
+├── COPYING.MIT
+├── README
+└── recipes-example
+    └── example
+        └── example_0.1.bb
+</pre></td></tr></tbody></table></code></pre></figure> <ul> <li><strong>conf/layer.conf</strong> – The main configuration file for the layer. It tells BitBake where to find recipes in this layer, what the layer’s priority is, and which other layers it depends on.</li> <li><strong>COPYING.MIT</strong> – A copy of the MIT license, added by default to describe the license under which the layer’s metadata is distributed.</li> <li><strong>README</strong> – A placeholder for documentation about the layer: what it provides, how to enable it, and any special notes or requirements.</li> <li><strong>recipes-example/example/example_0.1.bb</strong> – A simple example recipe included as a template. It demonstrates the basic structure of a BitBake recipe and is meant to be replaced or used as a reference when writing your own recipes.</li> </ul> <p>Now that we have our own custom layers we can now add applications to our image using recipes, next post we will go over how to add different applications to our custom image through the use of recipes.</p>]]></content><author><name></name></author><category term="Yocto"/><category term="Embedded-Linux"/><summary type="html"><![CDATA[Showcasing how to create a new Yocto Layer]]></summary></entry><entry><title type="html">Booting an Image from a remote source</title><link href="https://causality-lab.github.io/blog/2026/Booting-Embedded-Linux-Image-Remotely/" rel="alternate" type="text/html" title="Booting an Image from a remote source"/><published>2026-02-20T16:40:16+00:00</published><updated>2026-02-20T16:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/Booting-Embedded-Linux-Image-Remotely</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/Booting-Embedded-Linux-Image-Remotely/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This is the second post in my Yocto blog series. I have since switched single-board computers (SBCs); I was previously using the BeagleBone Black. However, I have moved to the FRDM i.MX91 board instead because the Ethernet port on the BeagleBone Black is faulty in the Yocto Scarthgap release. Instructions for building a Yocto image for the i.MX91 board can be found <a href="https://www.nxp.com/document/guide/getting-started-with-frdm-imx91-development-board:GS-FRDM-IMX91?section=build-and-run">here</a>.</p> <p>This post explains how to set up booting Linux from a remote source. This approach avoids the need to flash an SD card every time you modify your Yocto image.</p> <h2 id="network-file-system-nfs">Network File System (NFS)</h2> <p>The first method we will go over is Network File System booting. It’s useful to first understand what a Network File System is.</p> <p>A Network File System (NFS) is a protocol that allows a user on a client computer to access and interact with files over a network as if they were stored on their own local hard drive. In our specific application, the target hardware (i.MX91) will mount its root filesystem from a remote host over the network, rather than from local storage like an SD card or eMMC.</p> <p>This is useful to the Yocto workflow as it allows us to:</p> <ul> <li> <p><strong>Rapid Iteration</strong>: In Yocto, the root filesystem can be hundreds of megabytes. Flashing this to an SD card every time you change a configuration or add a package takes minutes. With NFS, as soon as bitbake finishes building, the changes are “live” on the next reboot.</p> </li> <li> <p><strong>Storage Limitations</strong>: Development images often include debug tools and headers that make them too large for small SD cards or internal flash. NFS allows you to use your PC’s multi-terabyte drive as the board’s storage.</p> </li> <li> <p><strong>Wear Leveling</strong>: You avoid burning out SD cards with constant writes during the development and debugging phase.</p> </li> <li> <p><strong>Ease of Access</strong>: You can modify files on the target directly from your host PC using your favorite editor, and the changes are immediately visible to the running target (and vice versa).</p> </li> </ul> <p>Now we will go over how to set up NFS booting for your Yocto image:</p> <h4 id="set-up-the-nfs-server-on-the-workstation">Set up the NFS server on the workstation</h4> <p>Make sure you have the nfs-kernel package installed on your system</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 </pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">sudo </span>apt <span class="nb">install </span>nfs-kernel-server
 </pre></td></tr></tbody></table></code></pre></figure> <p>Then create a directory where you wish to store your rootfs</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 </pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">sudo mkdir</span> <span class="nt">-m</span> 777 /nfs
