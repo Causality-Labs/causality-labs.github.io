@@ -1,6 +1,6 @@
 ---
 layout: page
-title: EnvSensord (December 2025 - January 2026)
+title: envsensord (December 2025 - January 2026)
 description: Environmental sensor daemon that exposes BME280 temperature, pressure, and humidity data over TCP/IP with C++ and Python client implementations for remote monitoring.
 img: assets/img/EnvSensord/BeagleBone.jpeg
 importance: 1
