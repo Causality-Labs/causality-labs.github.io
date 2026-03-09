@@ -14,7 +14,7 @@ This is the third post in my Yocto blog series. In this post we will go over how
 
 #### What is a meta-layer
 
-In Yocto a a meta-layer is a directory that contains metadata used by the build system to generate a Linux image. It is used to tell Bitbake how to build your own custom Linux distro, a meta-layer is comprised of the following :
+In Yocto a meta-layer is a directory that contains metadata used by the build system to generate a Linux image. It is used to tell Bitbake how to build your own custom Linux distro, a meta-layer is comprised of the following :
 
 - **Configuration files (.conf)** : Used to define global variables and layer dependencies.
 - **Recipes(.bb)** : Instructions on how to fetch, configure, compile, and install a specific software package.
