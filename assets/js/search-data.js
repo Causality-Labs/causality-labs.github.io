@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-creating-a-new-yocto-meta-layer",
+        },{id: "post-yocto-sdk",
+        
+          title: "Yocto-SDK",
+        
+        description: "Deploying a Yocto SDK in a Docker Container for Embedded Linux Development",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Yocto-SDK/";
+          
+        },
+      },{id: "post-creating-a-new-yocto-meta-layer",
         
           title: "Creating a new Yocto Meta Layer",
         
