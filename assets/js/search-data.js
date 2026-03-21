@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-yocto-sdk",
+        },{id: "post-adding-bme280-kernel-support-in-yocto",
+        
+          title: "Adding BME280 Kernel Support in Yocto",
+        
+        description: "Adding device tree and kernel driver support for the BME280 sensor using Yocto",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Yocto-BME280-Kernel-Support/";
+          
+        },
+      },{id: "post-yocto-sdk",
         
           title: "Yocto-SDK",
         
