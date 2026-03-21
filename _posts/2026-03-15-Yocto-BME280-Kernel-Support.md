@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Adding BME280 Kernel Support in Yocto
+title: Adding BME280 Kernel Support in Yocto P5
 date: 2026-03-15 09:40:16
 description: Adding device tree and kernel driver support for the BME280 sensor using Yocto
 tags: Embedded-Linux

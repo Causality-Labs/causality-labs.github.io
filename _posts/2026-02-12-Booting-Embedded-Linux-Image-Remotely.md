@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Booting an Image from a remote source
+title: Booting an Image from a remote source P2
 date: 2026-2-20 16:40:16
 description: Showcasing how to boot the rootfs, kernel and dtb remotely vis NFS and TFTP
 tags: Embedded-Linux
