@@ -10,7 +10,7 @@ thumbnail: assets/img/blogs/yocto-project-logo.webp
 
 ## Introduction
 
-This is the fourth post in my Yocto blog series. In this post we will go over how to add kernel support for the BME280 sensor for our [envsensord](https://causality-labs.github.io/projects/Env_Sensor_Daemon/) application. envsensord is the Environmental Sensor Daemon, a multi-threaded server application that provides network-accessible environmental data from a BME280 sensor.
+This is the fifth post in my Yocto blog series. In this post we will go over how to add kernel support for the BME280 sensor for our [envsensord](https://causality-labs.github.io/projects/Env_Sensor_Daemon/) application. envsensord is the Environmental Sensor Daemon, a multi-threaded server application that provides network-accessible environmental data from a BME280 sensor.
 
 Here is an overview of the steps we will follow:
 
