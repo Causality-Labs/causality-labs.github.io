@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Creating a new Yocto Meta Layer
+title: Creating a new Yocto Meta Layer P3
 date: 2026-2-22 09:40:16
 description: Showcasing how to create a new Yocto Layer
 tags: Embedded-Linux
