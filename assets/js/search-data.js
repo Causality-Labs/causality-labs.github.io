@@ -30,9 +30,20 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-adding-bme280-kernel-support-in-yocto",
+        },{id: "post-building-envsensord-in-yocto-p6",
         
-          title: "Adding BME280 Kernel Support in Yocto",
+          title: "Building envsensord in Yocto P6",
+        
+        description: "Writing a Yocto recipe to build and deploy envsensord as a Daemon",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Yocto-envsensord-recipe/";
+          
+        },
+      },{id: "post-adding-bme280-kernel-support-in-yocto-p5",
+        
+          title: "Adding BME280 Kernel Support in Yocto P5",
         
         description: "Adding device tree and kernel driver support for the BME280 sensor using Yocto",
         section: "Posts",
@@ -41,9 +52,9 @@ ninja.data = [{
             window.location.href = "/blog/2026/Yocto-BME280-Kernel-Support/";
           
         },
-      },{id: "post-yocto-sdk",
+      },{id: "post-yocto-sdk-p4",
         
-          title: "Yocto-SDK",
+          title: "Yocto-SDK P4",
         
         description: "Deploying a Yocto SDK in a Docker Container for Embedded Linux Development",
         section: "Posts",
@@ -52,9 +63,9 @@ ninja.data = [{
             window.location.href = "/blog/2026/Yocto-SDK/";
           
         },
-      },{id: "post-creating-a-new-yocto-meta-layer",
+      },{id: "post-creating-a-new-yocto-meta-layer-p3",
         
-          title: "Creating a new Yocto Meta Layer",
+          title: "Creating a new Yocto Meta Layer P3",
         
         description: "Showcasing how to create a new Yocto Layer",
         section: "Posts",
@@ -63,9 +74,9 @@ ninja.data = [{
             window.location.href = "/blog/2026/Creating-new-meta-layer/";
           
         },
-      },{id: "post-booting-an-image-from-a-remote-source",
+      },{id: "post-booting-an-image-from-a-remote-source-p2",
         
-          title: "Booting an Image from a remote source",
+          title: "Booting an Image from a remote source P2",
         
         description: "Showcasing how to boot the rootfs, kernel and dtb remotely vis NFS and TFTP",
         section: "Posts",
@@ -85,9 +96,9 @@ ninja.data = [{
             window.location.href = "/blog/2025/Docker_Basics/";
           
         },
-      },{id: "post-getting-started-with-yocto-poky-and-first-image",
+      },{id: "post-getting-started-with-yocto-poky-and-first-image-p1",
         
-          title: "Getting started with Yocto (Poky and First Image)",
+          title: "Getting started with Yocto (Poky and First Image) P1",
         
         description: "Documenting using yocto in my Personal Life",
         section: "Posts",
