@@ -14,18 +14,18 @@ mcu-co is a professional-grade, real-time I/O accelerator that bridges a Linux h
 
 ## Core Features
 
-### Digital I/O
+#### Digital I/O
 
 - **Standard GPIO** — high-speed pin state manipulation (High/Low) and input sensing
 - **Bounded Features** — logic-locked pins that react to internal states without software intervention
 - **Precision Pulses** — single or repeating pulses with nanosecond-level accuracy
 
-### PWM & Analog Control
+#### PWM & Analog Control
 
 - **Advanced PWM** — jitter-free pulse-width modulation for motor control and power electronics
 - **ADC** — single-shot analog reads, streaming is planned for future releases
 
-### Safety & Reliability
+#### Safety & Reliability
 
 - **Hardware Watchdog** — monitors the connection between host and MCU; triggers safety protocols if the link is lost
 - **Safe State Management** — user-defined default pin states for power-on or emergency scenarios
@@ -43,6 +43,8 @@ The mcu-co stack is a complete "Vertical" solution, ranging from low-level firmw
 | Tools | mcu-co CLI | A powerful Command Line Interface for testing and field diagnostics |
 | Dev Kit | C & Python SDKs | Native C library and Python module for fast application development |
 
+
+
 ## Why use mcu-co?
 
 Unlike standard Linux GPIO, which suffers from "jitter" (unpredictable delays), mcu-co ensures that your hardware reacts at the exact same time, every time. It is the bridge between the intelligence of Linux and the speed of silicon.
@@ -54,13 +56,13 @@ The following block diagram shows the high-level architecture of the mcu-co syst
 {% include figure.liquid path="assets/img/mcu-co/mcu-co_block-diagram.png" class="img-fluid rounded z-depth-1" zoomable=true %}
 
 
-### MCU
+#### MCU
 
 The micro-controller (MCU) I decided to go with is the STM32G474RE. I chose this MCU because it is a high-performance Cortex-M4 with advanced timer peripherals capable of generating high-precision pulses and PWM, a 12-bit ADC, a built-in USB peripheral for host communication, and an independent hardware watchdog, covering the entire mcu-co feature set on a single chip.
 
 The firmware will be a bare metal application that parses commands received from the Linux host. The physical link between the SoC and the MCU is USB CDC. I chose USB because it is portable and widely supported across Linux distributions, aligning with mcu-co's goal of being plug and play for end users.
 
-### Linux
+#### Linux
 
 On the Linux side, the software will consist of a Linux daemon, and an SDK that includes a dynamic C library, a Python package, and a command line interface. These tools are SoC agnostic and will work on any Linux-capable SoC, keeping with mcu-co's core theme of being plug and play.
 
