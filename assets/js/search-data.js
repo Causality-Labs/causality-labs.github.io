@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-building-envsensord-in-yocto-p6",
+        },{id: "post-mcu-co-proposal-mcu-co-p1",
+        
+          title: "mcu-co Proposal (mcu-co P1)",
+        
+        description: "Introducing mcu-co, a professional-grade real-time I/O accelerator that bridges a Linux host to a dedicated co-processor for deterministic hardware execution",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_Proposal/";
+          
+        },
+      },{id: "post-building-envsensord-in-yocto-p6",
         
           title: "Building envsensord in Yocto P6",
         
