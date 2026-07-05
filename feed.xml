@@ -1,4 +1,674 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-03-24T04:26:39+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">mcu-co Proposal (mcu-co P1)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/" rel="alternate" type="text/html" title="mcu-co Proposal (mcu-co P1)"/><published>2026-03-22T09:40:16+00:00</published><updated>2026-03-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_Proposal</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/"><![CDATA[<h2 id="what-is-mcu-co">What is mcu-co</h2> <p>mcu-co is a professional-grade, real-time I/O accelerator that bridges a Linux host to a dedicated co-processor. It provides deterministic hardware execution by offloading time-critical tasks from the Linux kernel to dedicated hardware, all accessible via C and Python SDKs.</p> <h2 id="core-features">Core Features</h2> <h4 id="digital-io">Digital I/O</h4> <ul> <li><strong>Standard GPIO</strong> — high-speed pin state manipulation (High/Low) and input sensing</li> <li><strong>Bounded Features</strong> — logic-locked pins that react to internal states without software intervention</li> <li><strong>Precision Pulses</strong> — single or repeating pulses with nanosecond-level accuracy</li> </ul> <h4 id="pwm--analog-control">PWM &amp; Analog Control</h4> <ul> <li><strong>Advanced PWM</strong> — jitter-free pulse-width modulation for motor control and power electronics</li> <li><strong>ADC</strong> — single-shot analog reads, streaming is planned for future releases</li> </ul> <h4 id="safety--reliability">Safety &amp; Reliability</h4> <ul> <li><strong>Hardware Watchdog</strong> — monitors the connection between host and MCU; triggers safety protocols if the link is lost</li> <li><strong>Safe State Management</strong> — user-defined default pin states for power-on or emergency scenarios</li> <li><strong>E-Stop</strong> — immediate hardware-level shutdown of all critical outputs</li> </ul> <h2 id="software-for-mcu-co">Software for mcu-co</h2> <p>The mcu-co stack is a complete “Vertical” solution, ranging from low-level firmware to high-level application code:</p> <table> <thead> <tr> <th>Layer</th> <th>Component</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>Hardware</td> <td>MCU Firmware</td> <td>Optimized real-time firmware for an STM32G474RE MCU</td> </tr> <tr> <td>OS Layer</td> <td>Yocto Layer</td> <td>meta-mcu-co recipes for seamless integration into custom Linux builds</td> </tr> <tr> <td>System</td> <td>mcu-co Daemon</td> <td>A background service that manages concurrency and hardware communication</td> </tr> <tr> <td>Tools</td> <td>mcu-co CLI</td> <td>A powerful Command Line Interface for testing and field diagnostics</td> </tr> <tr> <td>Dev Kit</td> <td>C &amp; Python SDKs</td> <td>Native C library and Python module for fast application development</td> </tr> </tbody> </table> <h2 id="why-use-mcu-co">Why use mcu-co?</h2> <p>Unlike standard Linux GPIO, which suffers from “jitter” (unpredictable delays), mcu-co ensures that your hardware reacts at the exact same time, every time. It is the bridge between the intelligence of Linux and the speed of silicon.</p> <h2 id="design">Design</h2> <p>The following block diagram shows the high-level architecture of the mcu-co system:</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_block-diagram-480.webp 480w,/assets/img/mcu-co/mcu-co_block-diagram-800.webp 800w,/assets/img/mcu-co/mcu-co_block-diagram-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_block-diagram.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <h4 id="mcu">MCU</h4> <p>The micro-controller (MCU) I decided to go with is the STM32G474RE. I chose this MCU because it is a high-performance Cortex-M4 with advanced timer peripherals capable of generating high-precision pulses and PWM, a 12-bit ADC, a built-in USB peripheral for host communication, and an independent hardware watchdog, covering the entire mcu-co feature set on a single chip.</p> <p>The firmware will be a bare metal application that parses commands received from the Linux host. The physical link between the SoC and the MCU is USB CDC. I chose USB because it is portable and widely supported across Linux distributions, aligning with mcu-co’s goal of being plug and play for end users.</p> <h4 id="linux">Linux</h4> <p>On the Linux side, the software will consist of a Linux daemon, and an SDK that includes a dynamic C library, a Python package, and a command line interface. These tools are SoC agnostic and will work on any Linux-capable SoC, keeping with mcu-co’s core theme of being plug and play.</p> <h4 id="linux-daemon">Linux Daemon</h4> <p>The Linux daemon is a C program designed to be a lightweight, always-on background service that manages all communication between the Linux host and the STM32 co-processor. It abstracts the USB CDC link from the rest of the software stack, exposes a Unix socket for SDK and CLI clients, and handles multiple concurrent client connections.</p> <h4 id="sdk">SDK</h4> <p>The SDK is comprised of a dynamic C library, a Python package, and a command line interface. It allows developers to easily integrate mcu-co into their applications without needing to understand the underlying communication protocol or daemon internals. The C library targets performance-critical applications, the Python package enables rapid prototyping and scripting, and the CLI is designed for testing and field diagnostics.</p> <h4 id="yocto-meta-mcu-co">Yocto (meta-mcu-co)</h4> <p>The Yocto layer (meta-mcu-co) will package the daemon and the SDK, allowing developers working with Yocto to include mcu-co in their own custom Embedded Linux images with minimal effort.</p> <h2 id="conclusion">Conclusion</h2> <p>I believe mcu-co is actually a super useful tool and will give Linux developers real-time control, which is something Linux is known to struggle with. With mcu-co one can offload time-critical tasks to dedicated hardware, unlocking deterministic control over GPIO, PWM, and analog signals from any Linux application without leaving the comfort of a high-level API.</p> <p>mcu-co also serves as a great learning opportunity for me and for you, the reader. I plan on making this a series, so those who are interested and follow along will have the opportunity to learn a thing or two about multiple fields in embedded software, from bare-metal firmware to Linux software to Yocto development. This project will cover a lot of ground, so there is something in it for everyone. For me, this is the first time I have taken on a project of such depth and so many moving parts, it will give me the opportunity to elevate my skills as an engineer by quite a bit. I am very excited to work on this project and to share my progress with you all. In the next post I will go over the MCU firmware for the project, see you then!</p>]]></content><author><name></name></author><category term="mcu-co"/><category term="Embedded-Linux"/><category term="MCU"/><summary type="html"><![CDATA[Introducing mcu-co, a professional-grade real-time I/O accelerator that bridges a Linux host to a dedicated co-processor for deterministic hardware execution]]></summary></entry><entry><title type="html">Building envsensord in Yocto P6</title><link href="https://causality-lab.github.io/blog/2026/Yocto-envsensord-recipe/" rel="alternate" type="text/html" title="Building envsensord in Yocto P6"/><published>2026-03-20T09:40:16+00:00</published><updated>2026-03-20T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/Yocto-envsensord-recipe</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/Yocto-envsensord-recipe/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This is the sixth post in my Yocto blog series. In this post we will go over how to build <a href="https://causality-labs.github.io/projects/Env_Sensor_Daemon/">envsensord</a> in Yocto as a recipe. We will also add it as a SysVinit init script, so the program will be able to start up on boot.</p> <p>Here is an overview of the steps we will follow:</p> <ol> <li>Write a BitBake recipe to fetch and build envsensord.</li> <li>Write an init script for envsensord.</li> <li>Add the recipe to the image.</li> <li>Test envsensord on the board.</li> </ol> <h2 id="bitbake-recipes">Bitbake Recipes</h2> <p>A recipe is a plain-text file with a .bb extension (e.g., envsensord_1.0.bb). It tells BitBake everything it needs to know about one package: where to get the source, how to build it, what it depends on, and what to put in the final image. The filename itself is meaningful; by convention it encodes the package name and version.</p> <h2 id="sysvinit">SysVinit</h2> <p>SysVinit is the traditional Unix init system. When the Linux kernel finishes booting, it launches <code class="language-plaintext highlighter-rouge">/sbin/init</code> (PID 1), which reads <code class="language-plaintext highlighter-rouge">/etc/inittab</code> to determine the default runlevel and then executes the init scripts in <code class="language-plaintext highlighter-rouge">/etc/init.d/</code> in the order defined by the symlinks in <code class="language-plaintext highlighter-rouge">/etc/rc&lt;runlevel&gt;.d/</code>.</p> <p>Each service is managed by a shell script in <code class="language-plaintext highlighter-rouge">/etc/init.d/</code> that accepts standard arguments:</p> <ul> <li><code class="language-plaintext highlighter-rouge">start</code> — start the daemon</li> <li><code class="language-plaintext highlighter-rouge">stop</code> — stop the daemon</li> <li><code class="language-plaintext highlighter-rouge">restart</code> — stop then start</li> <li><code class="language-plaintext highlighter-rouge">status</code> — report whether the daemon is running</li> </ul> <p>The symlinks in <code class="language-plaintext highlighter-rouge">/etc/rc&lt;runlevel&gt;.d/</code> are named with a prefix of <code class="language-plaintext highlighter-rouge">S</code> (start) or <code class="language-plaintext highlighter-rouge">K</code> (kill) followed by a two-digit priority number that controls the order in which scripts run. The <code class="language-plaintext highlighter-rouge">update-rc.d</code> tool manages these symlinks automatically.</p> <h2 id="creating-a-recipe">Creating a recipe</h2> <p>To create a recipe, navigate your meta layer, and create a directory called <code class="language-plaintext highlighter-rouge">recipes-&lt;category&gt;</code>, then in that directory create another one called <code class="language-plaintext highlighter-rouge">&lt;package-name&gt;</code>. In our case we will create a directory called <code class="language-plaintext highlighter-rouge">recipes-services/envsensord</code>.</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-07-05T22:48:59+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">mcu-co Proposal (mcu-co P1)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/" rel="alternate" type="text/html" title="mcu-co Proposal (mcu-co P1)"/><published>2026-03-22T09:40:16+00:00</published><updated>2026-03-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_Proposal</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/"><![CDATA[<h2 id="what-is-mcu-co">What is mcu-co</h2> <p>mcu-co is a professional-grade, real-time I/O accelerator that bridges a Linux host to a dedicated co-processor. It provides deterministic hardware execution by offloading time-critical tasks from the Linux kernel to dedicated hardware, all accessible via C and Python SDKs.</p> <h2 id="core-features">Core Features</h2> <h4 id="digital-io">Digital I/O</h4> <ul> <li><strong>Standard GPIO</strong> — high-speed pin state manipulation (High/Low) and input sensing</li> <li><strong>Bounded Features</strong> — logic-locked pins that react to internal states without software intervention</li> <li><strong>Precision Pulses</strong> — single or repeating pulses with nanosecond-level accuracy</li> </ul> <h4 id="pwm--analog-control">PWM &amp; Analog Control</h4> <ul> <li><strong>Advanced PWM</strong> — jitter-free pulse-width modulation for motor control and power electronics</li> <li><strong>ADC</strong> — single-shot analog reads, streaming is planned for future releases</li> </ul> <h4 id="safety--reliability">Safety &amp; Reliability</h4> <ul> <li><strong>Hardware Watchdog</strong> — monitors the connection between host and MCU; triggers safety protocols if the link is lost</li> <li><strong>Safe State Management</strong> — user-defined default pin states for power-on or emergency scenarios</li> <li><strong>E-Stop</strong> — immediate hardware-level shutdown of all critical outputs</li> </ul> <h2 id="software-for-mcu-co">Software for mcu-co</h2> <p>The mcu-co stack is a complete “Vertical” solution, ranging from low-level firmware to high-level application code:</p> <table> <thead> <tr> <th>Layer</th> <th>Component</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>Hardware</td> <td>MCU Firmware</td> <td>Optimized real-time firmware for an STM32G474RE MCU</td> </tr> <tr> <td>OS Layer</td> <td>Yocto Layer</td> <td>meta-mcu-co recipes for seamless integration into custom Linux builds</td> </tr> <tr> <td>System</td> <td>mcu-co Daemon</td> <td>A background service that manages concurrency and hardware communication</td> </tr> <tr> <td>Tools</td> <td>mcu-co CLI</td> <td>A powerful Command Line Interface for testing and field diagnostics</td> </tr> <tr> <td>Dev Kit</td> <td>C &amp; Python SDKs</td> <td>Native C library and Python module for fast application development</td> </tr> </tbody> </table> <h2 id="why-use-mcu-co">Why use mcu-co?</h2> <p>Unlike standard Linux GPIO, which suffers from “jitter” (unpredictable delays), mcu-co ensures that your hardware reacts at the exact same time, every time. It is the bridge between the intelligence of Linux and the speed of silicon.</p> <h2 id="design">Design</h2> <p>The following block diagram shows the high-level architecture of the mcu-co system:</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_block-diagram-480.webp 480w,/assets/img/mcu-co/mcu-co_block-diagram-800.webp 800w,/assets/img/mcu-co/mcu-co_block-diagram-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_block-diagram.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <h4 id="mcu">MCU</h4> <p>The micro-controller (MCU) I decided to go with is the STM32G474RE. I chose this MCU because it is a high-performance Cortex-M4 with advanced timer peripherals capable of generating high-precision pulses and PWM, a 12-bit ADC, a built-in USB peripheral for host communication, and an independent hardware watchdog, covering the entire mcu-co feature set on a single chip.</p> <p>The firmware will be a bare metal application that parses commands received from the Linux host. The physical link between the SoC and the MCU is USB CDC. I chose USB because it is portable and widely supported across Linux distributions, aligning with mcu-co’s goal of being plug and play for end users.</p> <h4 id="linux">Linux</h4> <p>On the Linux side, the software will consist of a Linux daemon, and an SDK that includes a dynamic C library, a Python package, and a command line interface. These tools are SoC agnostic and will work on any Linux-capable SoC, keeping with mcu-co’s core theme of being plug and play.</p> <h4 id="linux-daemon">Linux Daemon</h4> <p>The Linux daemon is a C program designed to be a lightweight, always-on background service that manages all communication between the Linux host and the STM32 co-processor. It abstracts the USB CDC link from the rest of the software stack, exposes a Unix socket for SDK and CLI clients, and handles multiple concurrent client connections.</p> <h4 id="sdk">SDK</h4> <p>The SDK is comprised of a dynamic C library, a Python package, and a command line interface. It allows developers to easily integrate mcu-co into their applications without needing to understand the underlying communication protocol or daemon internals. The C library targets performance-critical applications, the Python package enables rapid prototyping and scripting, and the CLI is designed for testing and field diagnostics.</p> <h4 id="yocto-meta-mcu-co">Yocto (meta-mcu-co)</h4> <p>The Yocto layer (meta-mcu-co) will package the daemon and the SDK, allowing developers working with Yocto to include mcu-co in their own custom Embedded Linux images with minimal effort.</p> <h2 id="conclusion">Conclusion</h2> <p>I believe mcu-co is actually a super useful tool and will give Linux developers real-time control, which is something Linux is known to struggle with. With mcu-co one can offload time-critical tasks to dedicated hardware, unlocking deterministic control over GPIO, PWM, and analog signals from any Linux application without leaving the comfort of a high-level API.</p> <p>mcu-co also serves as a great learning opportunity for me and for you, the reader. I plan on making this a series, so those who are interested and follow along will have the opportunity to learn a thing or two about multiple fields in embedded software, from bare-metal firmware to Linux software to Yocto development. This project will cover a lot of ground, so there is something in it for everyone. For me, this is the first time I have taken on a project of such depth and so many moving parts, it will give me the opportunity to elevate my skills as an engineer by quite a bit. I am very excited to work on this project and to share my progress with you all. In the next post I will go over the MCU firmware for the project, see you then!</p>]]></content><author><name></name></author><category term="mcu-co"/><category term="Embedded-Linux"/><category term="MCU"/><summary type="html"><![CDATA[Introducing mcu-co, a professional-grade real-time I/O accelerator that bridges a Linux host to a dedicated co-processor for deterministic hardware execution]]></summary></entry><entry><title type="html">mcu-co How to write a UART driver (mcu-co P2)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_How_to_write_good_Driver/" rel="alternate" type="text/html" title="mcu-co How to write a UART driver (mcu-co P2)"/><published>2026-03-22T09:40:16+00:00</published><updated>2026-03-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_How_to_write_good_Driver</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_How_to_write_good_Driver/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>For the mcu-co, I decided to go bare-metal rather than the CubeMX route, simply because I wanted to extract as much knowledge as possible from doing this project, and by using the drivers and the HAL that CubeMX gives me, I felt I would be missing out on this experience. Going the bare-metal route definitely adds a lot more complexity and increases the amount of time it takes to finish the project; however, I feel it is well worth it because of the experience that it will grant me. Because we are going bare-metal, I will have to write my own drivers for the peripherals I will be using on the MCU. One of the most common peripherals that one might have to write their own driver for is a UART peripheral. In this post, I will go over how to write a good driver and the practices I like to follow when writing a driver.</p> <p>I will not be going over what UART is at a high level, as that is not the focus of this post, but if you would like to learn more about UART in detail, here is a [website] you can use to do that. For this post, all I will say is UART is a common serial communication protocol that is often used for debug/logging consoles, bootloaders/firmware flashing, and GPS modules. For mcu-co, we will be using UART for two things: debugging/logging and as the communication link from the MCU to the SoC running Linux.</p> <h2 id="data-structures">Data Structures</h2> <p>First thing to go over are the data structures used for this driver.</p> <p><strong>uart_config_t</strong>: A struct that allows the user to configure the UART peripheral. Here is what it looks like:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="code"><pre><span class="cm">/** @brief UART peripheral configuration parameters. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">uart_baudrate_t</span> <span class="n">baudrate</span><span class="p">;</span>
+    <span class="n">uart_parity_t</span> <span class="n">parity</span><span class="p">;</span>
+    <span class="n">uart_data_width_t</span> <span class="n">data_width</span><span class="p">;</span>
+    <span class="n">uart_stop_bits_t</span> <span class="n">stop_bits</span><span class="p">;</span>
+    <span class="n">uart_mode_t</span> <span class="n">mode</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">uart_config_t</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>And here are the enumerations the user can use to set these fields:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+</pre></td><td class="code"><pre><span class="cm">/** @brief Supported baud rates. */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UART_BAUD_9600</span>   <span class="o">=</span> <span class="mi">9600U</span><span class="p">,</span>
+    <span class="n">UART_BAUD_19200</span>  <span class="o">=</span> <span class="mi">19200U</span><span class="p">,</span>
+    <span class="n">UART_BAUD_38400</span>  <span class="o">=</span> <span class="mi">38400U</span><span class="p">,</span>
+    <span class="n">UART_BAUD_57600</span>  <span class="o">=</span> <span class="mi">57600U</span><span class="p">,</span>
+    <span class="n">UART_BAUD_115200</span> <span class="o">=</span> <span class="mi">115200U</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">uart_baudrate_t</span><span class="p">;</span>
+
+<span class="cm">/** @brief Parity mode selection. */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UART_PARITY_NONE</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
+    <span class="n">UART_PARITY_EVEN</span> <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
+    <span class="n">UART_PARITY_ODD</span>  <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">uart_parity_t</span><span class="p">;</span>
+
+<span class="cm">/** @brief Data frame width selection. */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UART_DATA_8BIT</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
+    <span class="n">UART_DATA_9BIT</span> <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
+    <span class="n">UART_DATA_7BIT</span> <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">uart_data_width_t</span><span class="p">;</span>
+
+<span class="cm">/** @brief Number of stop bits. */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UART_STOP_1BIT</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
+    <span class="n">UART_STOP_2BIT</span> <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">uart_stop_bits_t</span><span class="p">;</span>
+
+<span class="cm">/** @brief TX, RX, or bidirectional mode. */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UART_MODE_TX</span>    <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
+    <span class="n">UART_MODE_RX</span>    <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
+    <span class="n">UART_MODE_TX_RX</span> <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">uart_mode_t</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>By using C <strong>enums</strong> we force the user to only configure UART with known values, as if they try to set other values their program would not compile.</p> <p><strong>uart_instance_t</strong>: This is an enum that allows the user to select whichever UART channel/bus they would like to use. The MCU we are using, the STM32G474RE, has 6 UART channels; for mcu-co, we will be using two of them.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="code"><pre><span class="cm">/** @brief UART peripheral instance identifiers. */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UART_INSTANCE_USART1</span>  <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
+    <span class="n">UART_INSTANCE_USART2</span>  <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
+    <span class="n">UART_INSTANCE_USART3</span>  <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
+    <span class="n">UART_INSTANCE_UART4</span>   <span class="o">=</span> <span class="mi">3U</span><span class="p">,</span>
+    <span class="n">UART_INSTANCE_UART5</span>   <span class="o">=</span> <span class="mi">4U</span><span class="p">,</span>
+    <span class="n">UART_INSTANCE_LPUART1</span> <span class="o">=</span> <span class="mi">5U</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">uart_instance_t</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_rx_buffer_t</strong>: This is the data structure for the receive buffer. It’s a struct comprising a <strong>uint8_t</strong> pointer and a size variable. The buffer is then set up as a ring buffer that the UART peripheral will pass received characters into.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre><span class="cm">/**
+ * @brief Caller-supplied RX ring buffer storage.
+ *
+ * @p buffer must remain valid for the lifetime of the UART instance.
+ * @p size must be a power of 2.
+ */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">buffer</span><span class="p">;</span>
+    <span class="kt">uint16_t</span> <span class="n">size</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">uart_rx_buffer_t</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></figure> <h2 id="apis">API’s</h2> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre><span class="cm">/**
+ * @brief Initialise a UART peripheral.
+ *
+ * Enables the peripheral clock, configures GPIO pins, baud rate, frame
+ * format, and mode. For RX-capable modes, initialises the ring buffer
+ * and enables the RXNE interrupt.
+ *
+ * @param instance  UART peripheral to initialise
+ * @param config    Pointer to frame and mode configuration
+ * @param rx_buffer Caller-supplied RX buffer; required for RX/TX_RX modes, NULL for TX-only
+ * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on bad arguments,
+ *         STATUS_ERR_BUSY if already initialised or its pins are in use,
+ *         STATUS_ERR_NOT_INIT if the clock/GPIO could not be brought up,
+ *         STATUS_ERR_TIMEOUT if the peripheral did not become ready.
+ */</span>
+<span class="n">status_t</span> <span class="nf">uart_init</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="k">const</span> <span class="n">uart_config_t</span> <span class="o">*</span><span class="n">config</span><span class="p">,</span>
+                   <span class="k">const</span> <span class="n">uart_rx_buffer_t</span> <span class="o">*</span><span class="n">rx_buffer</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_init</strong>: This is the function used to initialize the UART channel of choice with your specific configuration and receive buffer. Here are some ways this function can be used to initialize a TX-only UART instance and a RX/TX UART instance:</p> <p>Say you wanted to make a logger that only transmits characters. There would be no need to create a receive buffer in this use case, so here is an example of how one could set up the UART channel:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td><td class="code"><pre><span class="k">static</span> <span class="k">const</span> <span class="n">uart_instance_t</span> <span class="n">uart_logger</span> <span class="o">=</span> <span class="n">UART_INSTANCE_USART1</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">init_uart_logger_hw</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="n">uart_config_t</span> <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">.</span><span class="n">baudrate</span>   <span class="o">=</span> <span class="n">UART_BAUD_115200</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">data_width</span> <span class="o">=</span> <span class="n">UART_DATA_8BIT</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">parity</span>     <span class="o">=</span> <span class="n">UART_PARITY_NONE</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">stop_bits</span>  <span class="o">=</span> <span class="n">UART_STOP_1BIT</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">mode</span>       <span class="o">=</span> <span class="n">UART_MODE_TX</span><span class="p">,</span>
+    <span class="p">};</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_init</span><span class="p">(</span><span class="n">uart_logger</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>Now say you want to set up a terminal instance, meaning you want to be able to write characters into your UART peripheral. This means you would want to have initialized a receive buffer; here’s how that could look:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+</pre></td><td class="code"><pre><span class="cp">#define TERMINAL_BUFFER_SIZE 64U
+</span>
+<span class="k">static</span> <span class="k">const</span> <span class="n">uart_instance_t</span> <span class="n">uart_terminal</span> <span class="o">=</span> <span class="n">UART_INSTANCE_USART2</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">uart_terminal_rx_buffer</span><span class="p">[</span><span class="n">TERMINAL_BUFFER_SIZE</span><span class="p">];</span>
+
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">init_uart_terminal_hw</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="n">uart_config_t</span> <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">.</span><span class="n">baudrate</span>   <span class="o">=</span> <span class="n">UART_BAUD_115200</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">data_width</span> <span class="o">=</span> <span class="n">UART_DATA_8BIT</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">parity</span>     <span class="o">=</span> <span class="n">UART_PARITY_NONE</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">stop_bits</span>  <span class="o">=</span> <span class="n">UART_STOP_1BIT</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">mode</span>       <span class="o">=</span> <span class="n">UART_MODE_TX_RX</span><span class="p">,</span>
+    <span class="p">};</span>
+
+    <span class="k">const</span> <span class="n">uart_rx_buffer_t</span> <span class="n">rx_buffer</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">uart_terminal_rx_buffer</span><span class="p">,</span>
+        <span class="p">.</span><span class="n">size</span>   <span class="o">=</span> <span class="n">TERMINAL_BUFFER_SIZE</span><span class="p">,</span>
+    <span class="p">};</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_init</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rx_buffer</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>Something worth noting when using <strong>uart_init</strong>: the <code class="language-plaintext highlighter-rouge">config</code> struct and the <code class="language-plaintext highlighter-rouge">rx_buffer</code> wrapper can both be declared on the stack, since <code class="language-plaintext highlighter-rouge">uart_init</code> only reads them during the call. The RX storage array itself, however, cannot be a stack local. The driver keeps using that memory on every incoming byte for as long as the UART instance is initialized, so it needs to be declared where it can have a lifetime that outlives the init function (like a global variable or a static variable).</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="code"><pre><span class="cm">/**
+ * @brief Transmit a buffer of bytes.
+ *
+ * Calls the internal TX helper for each byte. Fails early if any byte
+ * times out waiting for the transmit register to empty.
+ *
+ * @param instance UART peripheral to write to
+ * @param data     Pointer to transmit buffer
+ * @param length   Number of bytes to transmit
+ * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on bad arguments,
+ *         STATUS_ERR_NOT_INIT if not initialised, STATUS_ERR_INVALID_STATE if
+ *         the instance is not in a TX-capable mode, STATUS_ERR_TIMEOUT if a
+ *         byte timed out waiting for the transmit register to empty.
+ */</span>
+<span class="n">status_t</span> <span class="nf">uart_write_buffer</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">length</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_write_buffer</strong>: This is the function that is used to transmit characters on the UART TX line. It is used as follows:</p> <p>Again, say you want to transmit data onto a terminal using your terminal module, you would use the <strong>uart_write_buffer</strong> function like this:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre><span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_send_greeting</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">message</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"Hello from mcu-co</span><span class="se">\r\n</span><span class="s">"</span><span class="p">;</span>
+
+    <span class="cm">/* sizeof - 1 to drop the trailing NUL terminator */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_buffer</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1U</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>The driver also provides a function with more granularity if one wants to transmit single bytes on the TX line: <strong>uart_write_byte</strong>.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="code"><pre><span class="cm">/**
+ * @brief Transmit a single byte.
+ *
+ * Blocks until the transmit data register is empty, then writes the byte.
+ *
+ * @param instance UART peripheral to write to
+ * @param data     Byte to transmit
+ * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on an invalid instance,
+ *         STATUS_ERR_NOT_INIT if not initialised, STATUS_ERR_INVALID_STATE if
+ *         the instance is not in a TX-capable mode, STATUS_ERR_TIMEOUT if the
+ *         transmit register did not empty in time.
+ */</span>
+<span class="n">status_t</span> <span class="nf">uart_write_byte</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">data</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_write_byte</strong>: This function is used to transmit single bytes over the UART TX line. It can be used as follows:</p> <p>Say you want your UART terminal to print out a payload that follows a specific structure. You can use <strong>uart_write_byte</strong> for finer control of the characters in the message:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+</pre></td><td class="code"><pre><span class="cp">#define FRAME_START 0x7EU
+#define FRAME_END   0x7FU
+</span>
+<span class="cm">/*
+ * Send a structured log frame:
+ *
+ *   [START][LENGTH][ ...payload... ][CHECKSUM][END]
+ *
+ * The START, LENGTH, CHECKSUM and END bytes are computed here rather than
+ * stored anywhere, so uart_write_byte lets us emit them around the payload
+ * one at a time instead of building a separate contiguous buffer.
+ */</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_send_log_frame</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">payload</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">length</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">checksum</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">FRAME_START</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">payload</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">checksum</span> <span class="o">^=</span> <span class="n">payload</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">checksum</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">FRAME_END</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre><span class="cm">/**
+ * @brief Read available bytes from the RX ring buffer.
+ *
+ * Drains the ring buffer up to @p length bytes. Stops early if the buffer
+ * empties before @p length is reached; draining an empty buffer is not an
+ * error and yields @p bytes_read == 0 with STATUS_OK.
+ *
+ * @param instance   UART peripheral to read from
+ * @param data       Output buffer to write received bytes into
+ * @param length     Maximum number of bytes to read
+ * @param bytes_read Output parameter set to the number of bytes read (0 to length)
+ * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on bad arguments,
+ *         STATUS_ERR_NOT_INIT if not initialised, STATUS_ERR_INVALID_STATE if
+ *         the instance is not in an RX-capable mode.
+ */</span>
+<span class="n">status_t</span> <span class="nf">uart_read_buffer</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">length</span><span class="p">,</span>
+                          <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">bytes_read</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_read_buffer</strong>: This function reads multiple bytes stored in the RX ring buffer and places them in an output buffer the user provides. The ring buffer serves as temporary storage for the bytes held in the UART peripheral’s shift register. The driver has an interrupt service routine that fires every time our enabled UART peripheral has data in its shift register. That data is then stored in the ring buffer, where it is ready to be consumed by the <strong>uart_read_buffer</strong> function.</p> <p>An example use case using this function is as follows:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="code"><pre><span class="cm">/* Pull whatever the terminal has sent us into a local buffer. */</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_read_command</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">max_len</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">received</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_read_buffer</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">max_len</span><span class="p">,</span> <span class="n">received</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>This function also serves as a burst read: it drains as many bytes from the ring buffer as are available, up to the maximum length of the output buffer.</p> <p>If you need finer control, for an application like a state machine where you want to transition states based on the byte you receive, you’re better off using <strong>uart_read_byte</strong>, as detailed below.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre><span class="cm">/**
+ * @brief Read a single byte from the RX ring buffer.
+ *
+ * Returns immediately if no byte is available.
+ *
+ * @param instance UART peripheral to read from
+ * @param data     Output parameter for the received byte
+ * @return STATUS_OK on success, STATUS_ERR_EMPTY if no byte is available,
+ *         STATUS_ERR_INVALID_ARG on bad arguments, STATUS_ERR_NOT_INIT if not
+ *         initialised, STATUS_ERR_INVALID_STATE if not in an RX-capable mode.
+ */</span>
+<span class="n">status_t</span> <span class="nf">uart_read_byte</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_read_byte</strong>: This function is used to pop a single byte from the RX ring buffer, and it provides the user with more precise control, as seen in the example below:</p> <p>Below we have a state machine that is used to parse an incoming payload. We want to read one byte at a time, since each byte determines what state we transition to while parsing the payload.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+</pre></td><td class="code"><pre><span class="cm">/*
+ * Receive-side counterpart to the framed log sender. We pull one byte at a
+ * time and feed it into a small state machine, which lets us parse the frame
+ * as it streams in without buffering the whole thing first.
+ *
+ *   [START][LENGTH][ ...payload... ][CHECKSUM][END]
+ */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">FRAME_WAIT_START</span><span class="p">,</span>
+    <span class="n">FRAME_WAIT_LENGTH</span><span class="p">,</span>
+    <span class="n">FRAME_READ_PAYLOAD</span><span class="p">,</span>
+    <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">frame_state_t</span><span class="p">;</span>
+
+<span class="cm">/* Returns 1 when a full, valid frame has been assembled into dst. */</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_poll_frame</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">out_len</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">static</span> <span class="n">frame_state_t</span> <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_START</span><span class="p">;</span>
+    <span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">expected_len</span><span class="p">;</span>
+    <span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">index</span><span class="p">;</span>
+    <span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">checksum</span><span class="p">;</span>
+
+    <span class="kt">uint8_t</span> <span class="n">byte</span><span class="p">;</span>
+
+    <span class="cm">/* Nothing in the ring buffer yet - come back and try again later. */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_read_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">byte</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">switch</span> <span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">FRAME_WAIT_START</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">byte</span> <span class="o">==</span> <span class="n">FRAME_START</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_LENGTH</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">case</span> <span class="n">FRAME_WAIT_LENGTH</span><span class="p">:</span>
+        <span class="n">expected_len</span> <span class="o">=</span> <span class="n">byte</span><span class="p">;</span>
+        <span class="n">index</span>    <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span>
+        <span class="n">checksum</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span>
+        <span class="n">state</span>    <span class="o">=</span> <span class="p">(</span><span class="n">expected_len</span> <span class="o">&gt;</span> <span class="mi">0U</span><span class="p">)</span> <span class="o">?</span> <span class="n">FRAME_READ_PAYLOAD</span> <span class="o">:</span> <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">;</span>
+        <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">case</span> <span class="n">FRAME_READ_PAYLOAD</span><span class="p">:</span>
+        <span class="n">dst</span><span class="p">[</span><span class="n">index</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span><span class="p">;</span>
+        <span class="n">checksum</span>    <span class="o">^=</span> <span class="n">byte</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="n">expected_len</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">case</span> <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_START</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">byte</span> <span class="o">==</span> <span class="n">checksum</span><span class="p">)</span> <span class="p">{</span>
+            <span class="o">*</span><span class="n">out_len</span> <span class="o">=</span> <span class="n">expected_len</span><span class="p">;</span>
+            <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre><span class="cm">/**
+ * @brief Deinitialise a UART peripheral.
+ *
+ * Waits for any in-progress transmission to complete, disables the
+ * peripheral and its clock, deconfigures GPIO pins, and disables the
+ * NVIC interrupt if RX was active.
+ *
+ * @param instance UART peripheral to deinitialise
+ * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on an invalid instance,
+ *         STATUS_ERR_NOT_INIT if the peripheral was not initialised.
+ */</span>
+<span class="n">status_t</span> <span class="nf">uart_deinit</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_deinit</strong>: This function is used to deinitialize the UART channel in use. It disables the clock for the specific UART bus and marks its state as uninitialized in the driver. It can be used as follows:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="code"><pre><span class="k">static</span> <span class="kt">int</span> <span class="nf">shutdown_uart_terminal</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">uart_deinit</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <h2 id="general-trends">General Trends</h2> <p>Each function above returns a status to let the user know whether the operation was successful or not. Also, when a function fails, it returns a different status code, giving the user a better idea of what caused the failure, which is great for debugging purposes. Below is the status enumeration and the different status values the functions can return:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">STATUS_OK</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>            <span class="cm">/**&lt; Operation completed successfully.            */</span>
+    <span class="n">STATUS_ERR_INVALID_ARG</span><span class="p">,</span>   <span class="cm">/**&lt; NULL pointer or out-of-range enum argument.  */</span>
+    <span class="n">STATUS_ERR_INVALID_PIN</span><span class="p">,</span>   <span class="cm">/**&lt; Pin number out of range or a reserved pin.   */</span>
+    <span class="n">STATUS_ERR_INVALID_STATE</span><span class="p">,</span> <span class="cm">/**&lt; Resource not configured for this operation.  */</span>
+    <span class="n">STATUS_ERR_NOT_INIT</span><span class="p">,</span>      <span class="cm">/**&lt; Peripheral or clock not initialised yet.     */</span>
+    <span class="n">STATUS_ERR_BUSY</span><span class="p">,</span>          <span class="cm">/**&lt; Resource already initialised or in use.      */</span>
+    <span class="n">STATUS_ERR_TIMEOUT</span><span class="p">,</span>       <span class="cm">/**&lt; Hardware did not respond within the timeout. */</span>
+    <span class="n">STATUS_ERR_UNSUPPORTED</span><span class="p">,</span>   <span class="cm">/**&lt; Valid request the driver cannot satisfy.     */</span>
+    <span class="n">STATUS_ERR_EMPTY</span><span class="p">,</span>         <span class="cm">/**&lt; No data available (e.g. RX buffer empty).    */</span>
+<span class="p">}</span> <span class="n">status_t</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></figure>]]></content><author><name></name></author><category term="mcu-co"/><category term="MCU"/><summary type="html"><![CDATA[Learn the fundamentals of writing a good driver by writing one for a UART peripheral]]></summary></entry><entry><title type="html">Building envsensord in Yocto P6</title><link href="https://causality-lab.github.io/blog/2026/Yocto-envsensord-recipe/" rel="alternate" type="text/html" title="Building envsensord in Yocto P6"/><published>2026-03-20T09:40:16+00:00</published><updated>2026-03-20T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/Yocto-envsensord-recipe</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/Yocto-envsensord-recipe/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This is the sixth post in my Yocto blog series. In this post we will go over how to build <a href="https://causality-labs.github.io/projects/Env_Sensor_Daemon/">envsensord</a> in Yocto as a recipe. We will also add it as a SysVinit init script, so the program will be able to start up on boot.</p> <p>Here is an overview of the steps we will follow:</p> <ol> <li>Write a BitBake recipe to fetch and build envsensord.</li> <li>Write an init script for envsensord.</li> <li>Add the recipe to the image.</li> <li>Test envsensord on the board.</li> </ol> <h2 id="bitbake-recipes">Bitbake Recipes</h2> <p>A recipe is a plain-text file with a .bb extension (e.g., envsensord_1.0.bb). It tells BitBake everything it needs to know about one package: where to get the source, how to build it, what it depends on, and what to put in the final image. The filename itself is meaningful; by convention it encodes the package name and version.</p> <h2 id="sysvinit">SysVinit</h2> <p>SysVinit is the traditional Unix init system. When the Linux kernel finishes booting, it launches <code class="language-plaintext highlighter-rouge">/sbin/init</code> (PID 1), which reads <code class="language-plaintext highlighter-rouge">/etc/inittab</code> to determine the default runlevel and then executes the init scripts in <code class="language-plaintext highlighter-rouge">/etc/init.d/</code> in the order defined by the symlinks in <code class="language-plaintext highlighter-rouge">/etc/rc&lt;runlevel&gt;.d/</code>.</p> <p>Each service is managed by a shell script in <code class="language-plaintext highlighter-rouge">/etc/init.d/</code> that accepts standard arguments:</p> <ul> <li><code class="language-plaintext highlighter-rouge">start</code> — start the daemon</li> <li><code class="language-plaintext highlighter-rouge">stop</code> — stop the daemon</li> <li><code class="language-plaintext highlighter-rouge">restart</code> — stop then start</li> <li><code class="language-plaintext highlighter-rouge">status</code> — report whether the daemon is running</li> </ul> <p>The symlinks in <code class="language-plaintext highlighter-rouge">/etc/rc&lt;runlevel&gt;.d/</code> are named with a prefix of <code class="language-plaintext highlighter-rouge">S</code> (start) or <code class="language-plaintext highlighter-rouge">K</code> (kill) followed by a two-digit priority number that controls the order in which scripts run. The <code class="language-plaintext highlighter-rouge">update-rc.d</code> tool manages these symlinks automatically.</p> <h2 id="creating-a-recipe">Creating a recipe</h2> <p>To create a recipe, navigate your meta layer, and create a directory called <code class="language-plaintext highlighter-rouge">recipes-&lt;category&gt;</code>, then in that directory create another one called <code class="language-plaintext highlighter-rouge">&lt;package-name&gt;</code>. In our case we will create a directory called <code class="language-plaintext highlighter-rouge">recipes-services/envsensord</code>.</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 </pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">mkdir</span> <span class="nt">-p</span> recipes-services/envsensord
 </pre></td></tr></tbody></table></code></pre></figure> <p>Now create a file called envsensord_0.1.bb in the envsensord directory; this will be our recipe file. Now we can create our recipe which should look like this:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2

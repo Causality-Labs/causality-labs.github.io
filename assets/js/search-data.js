@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-proposal-mcu-co-p1",
+        },{id: "post-mcu-co-how-to-write-a-uart-driver-mcu-co-p2",
+        
+          title: "mcu-co How to write a UART driver (mcu-co P2)",
+        
+        description: "Learn the fundamentals of writing a good driver by writing one for a UART peripheral",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_How_to_write_good_Driver/";
+          
+        },
+      },{id: "post-mcu-co-proposal-mcu-co-p1",
         
           title: "mcu-co Proposal (mcu-co P1)",
         
