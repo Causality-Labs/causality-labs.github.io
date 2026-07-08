@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-write-a-uart-driver-mcu-co-p2",
+        },{id: "post-mcu-co-how-to-write-a-type-agnostic-ring-buffer-mcu-co-p3",
+        
+          title: "mcu-co How to write a type agnostic Ring Buffer (mcu-co P3)",
+        
+        description: "How to write a type agnostic ring buffer in C, the ring buffer can be used for any data struct.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_Type_Agnostic_Ring_Buffer/";
+          
+        },
+      },{id: "post-mcu-co-how-to-write-a-uart-driver-mcu-co-p2",
         
           title: "mcu-co How to write a UART driver (mcu-co P2)",
         
