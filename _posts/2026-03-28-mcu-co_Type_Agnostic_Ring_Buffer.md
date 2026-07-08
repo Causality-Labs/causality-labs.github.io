@@ -9,7 +9,7 @@ thumbnail: assets/img/blogs/mcu-co_Visual.png
 ---
 
 ## Introduction
-Ring buffers are one of the most common data structures used in embedded software, I will be using ring buffers in multiple modules for the firmware in mcu-co, it will be used in my UART driver, logger module and possibly more. This post will go over how to write a type agnostic ring buffer, it will be type agnostic meaning one can store any type of data structure in the ring buffer. To learn the basics of how a ring buffer work you can do so here [website](https://en.wikipedia.org/wiki/Circular_buffer), as the scope of this post will only go over how to implement one via software.
+Ring buffers are one of the most common data structures used in embedded software, I will be using ring buffers in multiple modules for the firmware in mcu-co, it will be used in my UART driver, logger module and possibly more. This post will go over how to write a type agnostic ring buffer, it will be type agnostic meaning one can store any type of data structure in the ring buffer. To learn the basics of how a ring buffer works you can do so here [website](https://en.wikipedia.org/wiki/Circular_buffer), as the scope of this post will only go over how to implement one via software.
 
 ## Data Structure
 
@@ -160,12 +160,12 @@ The last step is to increment `head`, wrapping it back to 0 once it reaches `cap
 
 For example, with a `capacity` of 8 (`mask = 0b0111`), incrementing `head` from 7 wraps it back to 0:
 
-```
+{% highlight c linenos %}
 head + 1 = 0b1000 (8)
 mask     = 0b0111 (7)
 -----------------------
 result   = 0b0000 (0)
-```
+{% endhighlight %}
 
 Any `head` value less than `capacity` is left untouched by the mask, since none of its bits extend past `mask`. For example, `head + 1 = 3` (`0b0011`) ANDed with `mask` (`0b0111`) is still `0b0011`, i.e. 3.
 
