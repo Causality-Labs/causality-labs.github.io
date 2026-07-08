@@ -1,6 +1,6 @@
 <!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> mcu-co How to write a type agnostic Ring Buffer (mcu-co P3) | Causality-Labs </title> <meta name="author" content="Ime Asamudo"> <meta name="description" content="How to write a type agnostic ring buffer in C, the ring buffer can be used for any data struct."> <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website"> <link rel="stylesheet" href="/assets/css/bootstrap.min.css?a4b3f509e79c54a512b890d73235ef04"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="/assets/css/academicons.min.css?f0b7046b84e425c55f3463ac249818f5"> <link defer rel="stylesheet" href="/assets/css/scholar-icons.css?62b2ac103a88034e6882a5be5f3e2772"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e"> <link rel="canonical" href="https://causality-lab.github.io/blog/2026/mcu-co_Type_Agnostic_Ring_Buffer/"> <script src="/assets/js/theme.js?61a71b4bf8cc88f490e9b04fb200867e"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
     initTheme();
-  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Causality-Labs </a> <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">About </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">Blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">Projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">Repositories </a> </li> <li class="nav-item"> <button id="search-toggle" title="Search" onclick="openSearchModal()"> <span class="nav-link">ctrl k <i class="ti ti-search"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" title="Change theme"> <i class="ti ti-sun-moon" id="light-toggle-system"></i> <i class="ti ti-moon-filled" id="light-toggle-dark"></i> <i class="ti ti-sun-filled" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">mcu-co How to write a type agnostic Ring Buffer (mcu-co P3)</h1> <p class="post-meta"> Created on March 22, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/mcu"> <i class="fa-solid fa-hashtag fa-sm"></i> MCU</a>   ·   <a href="/blog/category/mcu-co"> <i class="fa-solid fa-tag fa-sm"></i> mcu-co</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="introduction">Introduction</h2> <p>Ring buffers are one of the most common data structures used in embedded software, I will be using ring buffers in multiple modules for the firmware in mcu-co, it will be used in my UART driver, logger module and possibly more. This post will go over how to write a type agnostic ring buffer, it will be type agnostic meaning one can store any type of data structure in the ring buffer. To learn the basics of how a ring buffer works you can do so here <a href="https://en.wikipedia.org/wiki/Circular_buffer" rel="external nofollow noopener" target="_blank">website</a>, as the scope of this post will only go over how to implement one via software.</p> <h2 id="data-structure">Data Structure</h2> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> Causality-Labs </a> <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">About </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">Blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">Projects </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">Repositories </a> </li> <li class="nav-item"> <button id="search-toggle" title="Search" onclick="openSearchModal()"> <span class="nav-link">ctrl k <i class="ti ti-search"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" title="Change theme"> <i class="ti ti-sun-moon" id="light-toggle-system"></i> <i class="ti ti-moon-filled" id="light-toggle-dark"></i> <i class="ti ti-sun-filled" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">mcu-co How to write a type agnostic Ring Buffer (mcu-co P3)</h1> <p class="post-meta"> Created on June 14, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/mcu"> <i class="fa-solid fa-hashtag fa-sm"></i> MCU</a>   ·   <a href="/blog/category/mcu-co"> <i class="fa-solid fa-tag fa-sm"></i> mcu-co</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="introduction">Introduction</h2> <p>Ring buffers are one of the most common data structures used in embedded software, I will be using ring buffers in multiple modules for the firmware in mcu-co, it will be used in my UART driver, logger module and possibly more. This post will go over how to write a type agnostic ring buffer, it will be type agnostic meaning one can store any type of data structure in the ring buffer. To learn the basics of how a ring buffer works you can do so here <a href="https://en.wikipedia.org/wiki/Circular_buffer" rel="external nofollow noopener" target="_blank">website</a>, as the scope of this post will only go over how to implement one via software.</p> <h2 id="data-structure">Data Structure</h2> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -9,72 +9,18 @@
 6
 7
 8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Generic fixed-capacity ring (circular) buffer.
- *
- * Stores elements of an arbitrary, caller-defined size via memcpy over
- * caller-supplied backing storage. Safe for single-producer/single-consumer
- * use (e.g. an ISR writing, the main loop reading): the producer owns @p head
- * and the consumer owns @p tail.
- *
- * One slot is reserved to distinguish full from empty, so a buffer with
- * @p capacity slots holds at most @p capacity - 1 elements.
- *
- * Do not modify the fields directly; use the ring_buffer_* API.
- */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="kt">void</span> <span class="o">*</span><span class="n">buffer</span><span class="p">;</span>         <span class="cm">/**&lt; Caller-supplied backing storage. */</span>
-    <span class="kt">size_t</span> <span class="n">element_size</span><span class="p">;</span>  <span class="cm">/**&lt; Size in bytes of a single element. */</span>
-    <span class="kt">uint16_t</span> <span class="n">capacity</span><span class="p">;</span>    <span class="cm">/**&lt; Total slot count; must be a power of two. */</span>
-    <span class="kt">uint16_t</span> <span class="n">head</span><span class="p">;</span>        <span class="cm">/**&lt; Write index (producer-owned). */</span>
-    <span class="kt">uint16_t</span> <span class="n">tail</span><span class="p">;</span>        <span class="cm">/**&lt; Read index (consumer-owned). */</span>
-    <span class="kt">uint16_t</span> <span class="n">mask</span><span class="p">;</span>        <span class="cm">/**&lt; capacity - 1, used for index wraparound. */</span>
+</pre></td> <td class="code"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">buffer</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">element_size</span><span class="p">;</span>
+    <span class="kt">uint16_t</span> <span class="n">capacity</span><span class="p">;</span>
+    <span class="kt">uint16_t</span> <span class="n">head</span><span class="p">;</span>
+    <span class="kt">uint16_t</span> <span class="n">tail</span><span class="p">;</span>
+    <span class="kt">uint16_t</span> <span class="n">mask</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">ring_buffer_t</span><span class="p">;</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_t</strong>: This is the data structure for the ring buffer, it contains the following members:</p> <ul> <li> <strong>buffer</strong>: A void pointer to the backing storage. It’s <code class="language-plaintext highlighter-rouge">void</code> because the ring buffer is type agnostic, letting it be cast to whatever data type is actually being stored.</li> <li> <strong>element_size</strong>: This the meber that the user can use to tell us the the size(in bytes) of the data structure that the ring buffer will be using.</li> <li> <strong>capacity</strong>: This is the member that tells us the total number of element slots the ring buffer has room for. It must be a power of two, which is what lets <code class="language-plaintext highlighter-rouge">mask</code> be used for index wraparound instead of a more expensive modulo operation.</li> <li> <strong>head</strong>: This is the index of the next free slot the ring buffer will write into. It’s owned by the producer and gets advanced every time <code class="language-plaintext highlighter-rouge">ring_buffer_write</code> succeeds.</li> <li> <strong>tail</strong>: This is the index of the oldest slot the ring buffer will read from next. It’s owned by the consumer and gets advanced every time <code class="language-plaintext highlighter-rouge">ring_buffer_read</code> succeeds.</li> <li> <strong>mask</strong>: This is <code class="language-plaintext highlighter-rouge">capacity - 1</code>, precomputed so that <code class="language-plaintext highlighter-rouge">head</code> and <code class="language-plaintext highlighter-rouge">tail</code> can be wrapped back into range with a cheap bitwise AND instead of a modulo, which only works because <code class="language-plaintext highlighter-rouge">capacity</code> is a power of two.</li> </ul> <p><strong>Power of 2 rule</strong>: Requiring <code class="language-plaintext highlighter-rouge">capacity</code> to be a power of two lets index wraparound be done with <code class="language-plaintext highlighter-rouge">index &amp; mask</code> instead of <code class="language-plaintext highlighter-rouge">index % capacity</code>. Bitwise AND is a single fast instruction on almost any MCU, while modulo on a non-power-of-two involves a much slower division operation, so this trades a small restriction on buffer sizes for cheaper reads and writes.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_t</strong>: This is the data structure for the ring buffer, it contains the following members:</p> <ul> <li> <strong>buffer</strong>: A void pointer to the backing storage. It’s <code class="language-plaintext highlighter-rouge">void</code> because the ring buffer is type agnostic, letting it be cast to whatever data type is actually being stored.</li> <li> <strong>element_size</strong>: This is the member that the user can use to tell us the size (in bytes) of the data structure that the ring buffer will be using.</li> <li> <strong>capacity</strong>: This is the member that tells us the total number of element slots the ring buffer has room for. It must be a power of two, which is what lets <code class="language-plaintext highlighter-rouge">mask</code> be used for index wraparound instead of a more expensive modulo operation.</li> <li> <strong>head</strong>: This is the index of the next free slot the ring buffer will write into. It’s owned by the producer and gets advanced every time <code class="language-plaintext highlighter-rouge">ring_buffer_write</code> succeeds.</li> <li> <strong>tail</strong>: This is the index of the oldest slot the ring buffer will read from next. It’s owned by the consumer and gets advanced every time <code class="language-plaintext highlighter-rouge">ring_buffer_read</code> succeeds.</li> <li> <strong>mask</strong>: This is <code class="language-plaintext highlighter-rouge">capacity - 1</code>, precomputed so that <code class="language-plaintext highlighter-rouge">head</code> and <code class="language-plaintext highlighter-rouge">tail</code> can be wrapped back into range with a cheap bitwise AND instead of a modulo, which only works because <code class="language-plaintext highlighter-rouge">capacity</code> is a power of two.</li> </ul> <p><strong>Power of 2 rule</strong>: Requiring <code class="language-plaintext highlighter-rouge">capacity</code> to be a power of two lets index wraparound be done with <code class="language-plaintext highlighter-rouge">index &amp; mask</code> instead of <code class="language-plaintext highlighter-rouge">index % capacity</code>. Bitwise AND is a single fast instruction on almost any MCU, while modulo on a non-power-of-two involves a much slower division operation, so this trades a small restriction on buffer sizes for cheaper reads and writes.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Initialise a ring buffer over caller-supplied storage.
- *
- * @p buffer must remain valid for the lifetime of the ring buffer and be at
- * least @p capacity * @p element_size bytes. @p capacity must be a power of
- * two so index wraparound can use a bitmask.
- *
- * @param rb           Ring buffer to initialise
- * @param buffer       Backing storage for @p capacity elements
- * @param capacity     Number of slots; must be a non-zero power of two
- * @param element_size Size in bytes of a single element; must be non-zero
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on a NULL pointer, zero
- *         @p element_size, or a @p capacity that is zero or not a power of two.
- */</span>
-<span class="n">status_t</span> <span class="nf">ring_buffer_init</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">buffer</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">capacity</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">element_size</span><span class="p">);</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_init</strong>: This is the function used to initialize the ring buffer, when initiazing the ring bufffer one must provide the API with a buffer, the capacity they want and the size of the data structure the ring buffer should be created for, below is the the actual implementation of the initialization fucntion:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> <td class="code"><pre><span class="n">status_t</span> <span class="nf">ring_buffer_init</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">buffer</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">capacity</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">element_size</span><span class="p">);</span>
+</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_init</strong>: This is the function used to initialize the ring buffer. When initializing the ring buffer, one must provide the API with a buffer, the capacity they want, and the size of the data structure the ring buffer should be created for. Below is the actual implementation of the initialization function:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -162,31 +108,7 @@
 <span class="p">}</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <p>This example stores <code class="language-plaintext highlighter-rouge">sensor_sample_t</code> structs rather than raw bytes, which is the point of making the ring buffer type agnostic: the same <code class="language-plaintext highlighter-rouge">ring_buffer_init</code>/<code class="language-plaintext highlighter-rouge">ring_buffer_write</code>/<code class="language-plaintext highlighter-rouge">ring_buffer_read</code> functions work regardless of what <code class="language-plaintext highlighter-rouge">element_size</code> you initialize it with.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Copy one element into the buffer.
- *
- * Copies @p element_size bytes from @p element into the next free slot and
- * advances the head. Fails if the buffer is full; existing data is never
- * overwritten.
- *
- * @param rb      Ring buffer to write to
- * @param element Pointer to the element to copy in
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on a NULL pointer,
- *         STATUS_ERR_FULL if the buffer is full.
- */</span>
-<span class="n">status_t</span> <span class="nf">ring_buffer_write</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">element</span><span class="p">);</span>
+</pre></td> <td class="code"><pre><span class="n">status_t</span> <span class="nf">ring_buffer_write</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">element</span><span class="p">);</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_write</strong>: This API is used to add new elements to the ring buffer and updating the head member to point to the next available spot. Below is the implementation:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
@@ -212,7 +134,7 @@
 
     <span class="k">return</span> <span class="n">STATUS_OK</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>As you can see above the implementation of the <strong>ring_buffer_write()</strong> is fairly simple, we first check to see if any of the input elements are NULL, then we calcaulate the destination address we want to store our new element, with the equation :</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dst = buffer + (head * element_size)
+</pre></td> </tr></tbody></table></code></pre></figure> <p>As you can see above the implementation of the <strong>ring_buffer_write()</strong> is fairly simple, we first check to see if any of the input elements are NULL, then we calculate the destination address we want to store our new element, with the equation :</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dst = buffer + (head * element_size)
 </code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">buffer</code> is the base address of the backing storage, and <code class="language-plaintext highlighter-rouge">head * element_size</code> is the byte offset of the next free slot, since each slot is <code class="language-plaintext highlighter-rouge">element_size</code> bytes wide. Adding that offset to the base address gives us the exact address we want to store our element in.</p> <p>We then use <code class="language-plaintext highlighter-rouge">memcpy</code>, a C standard library function that copies a block of raw bytes from one memory address to another. We use it here because it lets us copy an element of any size into the ring buffer, regardless of its type.</p> <p>The last step is to increment <code class="language-plaintext highlighter-rouge">head</code>, wrapping it back to 0 once it reaches <code class="language-plaintext highlighter-rouge">capacity</code>. The naive way to do this is <code class="language-plaintext highlighter-rouge">head = (head + 1) % capacity</code>, but since <code class="language-plaintext highlighter-rouge">capacity</code> is a power of two, <code class="language-plaintext highlighter-rouge">(head + 1) &amp; mask</code> gives the exact same result: once <code class="language-plaintext highlighter-rouge">head + 1</code> reaches <code class="language-plaintext highlighter-rouge">capacity</code>, ANDing it with <code class="language-plaintext highlighter-rouge">mask</code> (<code class="language-plaintext highlighter-rouge">capacity - 1</code>) clears the bit that would have made it equal to <code class="language-plaintext highlighter-rouge">capacity</code>, snapping it back down to 0. Same wraparound behavior as modulo, just with a single fast bitwise AND instead of a slower division.</p> <p>For example, with a <code class="language-plaintext highlighter-rouge">capacity</code> of 8 (<code class="language-plaintext highlighter-rouge">mask = 0b0111</code>), incrementing <code class="language-plaintext highlighter-rouge">head</code> from 7 wraps it back to 0:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
@@ -251,29 +173,7 @@
 <span class="p">}</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Copy one element out of the buffer.
- *
- * Copies @p element_size bytes from the oldest slot into @p element and
- * advances the tail.
- *
- * @param rb      Ring buffer to read from
- * @param element Destination for the element (at least @p element_size bytes)
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on a NULL pointer,
- *         STATUS_ERR_EMPTY if the buffer is empty.
- */</span>
-<span class="n">status_t</span> <span class="nf">ring_buffer_read</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">element</span><span class="p">);</span>
+</pre></td> <td class="code"><pre><span class="n">status_t</span> <span class="nf">ring_buffer_read</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">element</span><span class="p">);</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_read</strong>: This API allows the user to read elements from the ring buffer and pop them off it. It pops the element off by moving the tail pointer to the next element.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
@@ -326,19 +226,7 @@
 <span class="p">}</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Test whether the buffer holds no elements.
- *
- * @param rb Ring buffer to query
- * @return true if empty; false if it holds one or more elements or @p rb is NULL.
- */</span>
-<span class="n">bool</span> <span class="nf">ring_buffer_is_empty</span><span class="p">(</span><span class="k">const</span> <span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">);</span>
+</pre></td> <td class="code"><pre><span class="n">bool</span> <span class="nf">ring_buffer_is_empty</span><span class="p">(</span><span class="k">const</span> <span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">);</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_is_empty</strong>: This API tells the caller whether the ring buffer currently holds any elements. Below is the implementation:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
@@ -383,19 +271,7 @@
 <span class="p">}</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Test whether the buffer cannot accept another element.
- *
- * @param rb Ring buffer to query
- * @return true if full; false if space remains or @p rb is NULL.
- */</span>
-<span class="n">bool</span> <span class="nf">ring_buffer_is_full</span><span class="p">(</span><span class="k">const</span> <span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">);</span>
+</pre></td> <td class="code"><pre><span class="n">bool</span> <span class="nf">ring_buffer_is_full</span><span class="p">(</span><span class="k">const</span> <span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">);</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_is_full</strong>: This API tells the caller whether the ring buffer has room for another element. Below is the implementation:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
@@ -432,23 +308,7 @@
 <span class="p">}</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Discard all buffered elements.
- *
- * Resets the head and tail to empty. The backing storage is left untouched.
- *
- * @param rb Ring buffer to flush
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG if @p rb is NULL.
- */</span>
-<span class="n">status_t</span> <span class="nf">ring_buffer_flush</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">);</span>
+</pre></td> <td class="code"><pre><span class="n">status_t</span> <span class="nf">ring_buffer_flush</span><span class="p">(</span><span class="n">ring_buffer_t</span> <span class="o">*</span><span class="n">rb</span><span class="p">);</span>
 </pre></td> </tr></tbody></table></code></pre></figure> <p><strong>ring_buffer_flush</strong>: This API discards any buffered elements without touching the backing storage itself. Below is the implementation:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
