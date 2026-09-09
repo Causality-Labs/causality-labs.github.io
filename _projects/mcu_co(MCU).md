@@ -30,10 +30,13 @@ category: MCU
 <h1 style="text-align: center;">Hardware</h1>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
         {% include figure.liquid path="assets/img/mcu-co/Hardware_Diagram.png" class="img-fluid rounded z-depth-1" %}
     </div>
-    <div class="col-md-6">
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
         <p>The hardware side is two devices and one link between them:</p>
 
         <p><strong>Linux Host:</strong> The SBC that runs the application logic. Every operation starts here, as a command it sends over the link.</p>
@@ -70,10 +73,13 @@ category: MCU
 <h1 style="text-align: center;">Software</h1>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
         {% include figure.liquid path="assets/img/mcu-co/Firmware_Diagram.png" class="img-fluid rounded z-depth-1" %}
     </div>
-    <div class="col-md-6">
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
         <p>The firmware is a bare-metal C99 application built with CMake and the arm-none-eabi toolchain, and it is made up of the following modules:</p>
 
         <p><strong>Frame Parser:</strong> Turns the incoming byte stream into complete command frames, and builds the response frames that go back to the host.</p>
