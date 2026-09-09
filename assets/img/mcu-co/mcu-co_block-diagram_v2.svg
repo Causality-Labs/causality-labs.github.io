@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="695" height="470" viewBox="0 0 695 470" font-family="Helvetica, Arial, sans-serif">
+  <rect width="695" height="470" fill="#ffffff"/>
+
+  <!-- Linux SoC container -->
+  <rect x="52" y="28" width="586" height="242" fill="#cfe8f7" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="88" y="46" font-size="12" font-weight="bold" fill="#000">Linux</text>
+  <text x="88" y="60" font-size="12" font-weight="bold" fill="#000">SoC</text>
+
+  <!-- Application layer -->
+  <rect x="137" y="38" width="401" height="90" fill="#e3c800" stroke="#b09500" stroke-width="1.5"/>
+  <text x="146" y="55" font-size="11" font-weight="bold" fill="#000">Application</text>
+  <rect x="220" y="58" width="245" height="50" fill="#ffffff" stroke="#666666" stroke-width="1.5"/>
+  <text x="342" y="87" font-size="11" fill="#000" text-anchor="middle">User made Applications</text>
+
+  <!-- arrow: application <-> SDK -->
+  <line x1="342" y1="132" x2="342" y2="164" stroke="#000" stroke-width="1.5"/>
+  <polygon points="342,128 337,138 347,138" fill="#000"/>
+  <polygon points="342,168 337,158 347,158" fill="#000"/>
+
+  <!-- SDK layer -->
+  <rect x="137" y="170" width="401" height="90" fill="#9673a6" stroke="#6a4b7a" stroke-width="1.5"/>
+  <text x="146" y="187" font-size="11" font-weight="bold" fill="#000">SDK</text>
+  <rect x="197" y="192" width="145" height="50" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+  <text x="269" y="215" font-size="11" fill="#000" text-anchor="middle">C Shared</text>
+  <text x="269" y="229" font-size="11" fill="#000" text-anchor="middle">Library</text>
+  <rect x="342" y="192" width="145" height="50" fill="#ffe6cc" stroke="#d79b00" stroke-width="1.5"/>
+  <text x="414" y="215" font-size="11" fill="#000" text-anchor="middle">Command Line</text>
+  <text x="414" y="229" font-size="11" fill="#000" text-anchor="middle">Interface</text>
+
+  <!-- arrow: SoC <-> MCU -->
+  <line x1="342" y1="278" x2="342" y2="342" stroke="#000" stroke-width="1.5"/>
+  <polygon points="342,274 337,284 347,284" fill="#000"/>
+  <polygon points="342,346 337,336 347,336" fill="#000"/>
+  <text x="356" y="314" font-size="11" fill="#000">mcu-co protocol / UART</text>
+
+  <!-- MCU -->
+  <rect x="52" y="352" width="586" height="94" fill="#fad7ac" stroke="#b46504" stroke-width="1.5"/>
+  <text x="61" y="370" font-size="11" font-weight="bold" fill="#000">STM32 G474RE</text>
+  <rect x="220" y="378" width="245" height="52" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+  <text x="342" y="408" font-size="11" fill="#000" text-anchor="middle">MCU Firmware</text>
+</svg>
