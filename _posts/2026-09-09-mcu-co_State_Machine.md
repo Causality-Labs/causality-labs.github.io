@@ -295,7 +295,7 @@ Note what `FRAME_READY` does **not** mean. It does not mean the frame is good �
 
 Put together, the machine looks like this:
 
-{% highlight text %}
+{% highlight text linenos%}
              any byte != 0xA5
                  ┌──────┐
                  │      ▼
