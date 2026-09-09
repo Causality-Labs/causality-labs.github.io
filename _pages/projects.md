@@ -2,7 +2,7 @@
 layout: page
 title: Projects
 permalink: /projects/
-description: Some projects I have worked on I have split the according if they are MCU, FPGA or SBC based.
+description: Some projects I have worked on I have split the according if they are MCU, FPGA or Embedded Linux based.
 nav: true
 nav_order: 2
 display_categories: [MCU, Embedded-Linux, FPGA]
