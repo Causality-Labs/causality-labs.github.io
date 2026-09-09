@@ -204,7 +204,7 @@ frame_results_t frame_parser_feed(command_frame_t *frame, uint8_t data_byte)
 
 That is the entire parser. One switch, one byte in, one result out, no loops and no blocking. Here is what each state is actually doing.
 
-#### SOF — the resync anchor
+#### SOF
 
 {% highlight c linenos %}
     case SOF:
@@ -223,11 +223,11 @@ In this state the parser throws away everything that is not `0xA5`. That sounds 
 
 Notice this state is also the only one that does not store the byte anywhere. `0xA5` is a marker, not data, and it is deliberately *not* covered by the CRC for that reason.
 
-#### OPCODE — the trivial state
+#### OPCODE
 
 Take the byte, store it, move on. Not every state has to be interesting. Worth noting: the parser does **not** check whether the opcode is one it knows. That is the dispatcher's job, and mixing the two would mean teaching the parser about every command in the protocol.
 
-#### LENGTH — the one that has to be paranoid
+#### LENGTH
 
 {% highlight c linenos %}
     case LENGTH:
@@ -267,7 +267,7 @@ A zero-length frame has no payload at all, so `PAYLOAD` must be skipped entirely
 
 The `payload_idx = 0` in the other branch is the state machine resetting its own scratch variable on the way into the state that uses it, rather than trusting that whoever finished the last frame cleaned up. States that initialize what they need on entry are much harder to break than states that assume.
 
-#### PAYLOAD — the state that repeats
+#### PAYLOAD
 
 {% highlight c linenos %}
     case PAYLOAD:
@@ -285,7 +285,7 @@ The `payload_idx = 0` in the other branch is the state machine resetting its own
 
 Every other state consumes exactly one byte and moves on. This one stays put and counts. That is the pattern for any variable-length field: the state does not change until a counter says the field is complete, which is what lets a six-state machine parse a frame of any length between 5 and 37 bytes.
 
-#### CRC_LOW and CRC_HIGH — finishing
+#### CRC_LOW and CRC_HIGH
 
 The two CRC bytes are stored raw and separately, and `CRC_HIGH` is what returns `FRAME_READY` and puts the state back to `SOF` so the next byte starts a new frame.
 
@@ -333,182 +333,32 @@ Put together, the machine looks like this:
 
 Every path leads back to `SOF`, whether the frame completed, was rejected, or was never really there. A state machine that can get stuck somewhere with no way back is a state machine that will eventually wedge your link.
 
-## The helper functions
+## The helpers around it
 
-The state machine gets you a complete frame. Four small functions do the rest of the work around it.
+The state machine assembles frames and nothing else — it does not know what a CRC is, and it never touches the transport. Four small functions in the same module fill the gap between "a frame is complete" and "a frame has been answered":
 
 {% highlight c linenos %}
-/**
- * @brief Lay a received frame's CRC-covered bytes out contiguously.
- *
- * Writes OPCODE, LENGTH and PAYLOAD - exactly the range crc16_compute() runs
- * over, with the start-of-frame marker and the CRC excluded.
- *
- * @return Number of bytes written (2 + the frame's LENGTH), or -1 on a NULL
- *         pointer, a buffer too small to hold them, or a LENGTH above
- *         ::RX_MAX_PAYLOAD.
- */
+/* Lay a received frame's CRC-covered bytes out contiguously, so the CRC
+ * routine can run over them. Returns 2 + LENGTH, or -1 on bad input. */
 int frame_parser_serialize(command_frame_t *frame, uint8_t *serialized_frame_buffer, uint8_t serialized_frame_size);
-{% endhighlight %}
 
-**frame_parser_serialize**: The CRC has to be computed over the frame's bytes *as they appeared on the wire*, but the parser has scattered them across struct members. This function lays them back out contiguously so the CRC routine can run over them:
-
-{% highlight c linenos %}
-int frame_parser_serialize(command_frame_t *frame, uint8_t *serialized_frame_buffer, uint8_t serialized_frame_size)
-{
-    if (frame == NULL || serialized_frame_buffer == NULL)
-    {
-        return -1;
-    }
-
-    if (serialized_frame_size < (2 + frame->length))
-    {
-        return -1;
-    }
-
-    if (frame->length > RX_MAX_PAYLOAD)
-    {
-        return -1;
-    }
-
-    int size = 2;
-
-    serialized_frame_buffer[RX_OPCODE_IDX] = frame->opcode;
-    serialized_frame_buffer[RX_LENGTH_IDX] = frame->length;
-
-    for (uint8_t i = 0; i < frame->length; i++)
-    {
-        serialized_frame_buffer[RX_PAYLOAD_IDX + i] = frame->payload[i];
-        size++;
-    }
-
-    return size;
-}
-{% endhighlight %}
-
-The `length` check appears here again even though `frame_parser_feed` already rejected oversized lengths. That is deliberate. This function writes into a caller-supplied buffer using `length` as a bound, so it validates `length` itself rather than trusting that it was validated somewhere else. A function that can smash memory should not depend on another function's good behaviour to stay safe.
-
-{% highlight c linenos %}
-/**
- * @brief Recombine a received frame's two CRC bytes into one value.
- *
- * @return 0 on success, -1 if either pointer is NULL.
- */
+/* Recombine the frame's two received CRC bytes into one value. */
 int frame_parser_get_crc(command_frame_t *frame, uint16_t *crc);
-{% endhighlight %}
 
-**frame_parser_get_crc**: The parser stored the CRC as two separate bytes because that is how they arrived. This puts them back together, and it is the one place in the module that knows the CRC is little-endian on the wire:
-
-{% highlight c linenos %}
-int frame_parser_get_crc(command_frame_t *frame, uint16_t *crc)
-{
-    if (frame == NULL || crc == NULL)
-    {
-        return -1;
-    }
-
-    *crc = (uint16_t)((uint16_t)frame->crc_high << 8 | frame->crc_low);
-
-    return 0;
-}
-{% endhighlight %}
-
-Note the cast on `frame->crc_high` before the shift. `crc_high` is a `uint8_t`, and shifting it left by 8 without widening it first is exactly how you end up with a CRC that is always zero on some compilers. Widen first, then shift.
-
-{% highlight c linenos %}
-/**
- * @brief Build a response frame's wire bytes, up to but excluding the CRC.
- *
- * LEN counts the ACK byte along with DATA.
- *
- * @return Number of bytes written (3 + @p response's data_len), or -1 on a NULL
- *         pointer, a data_len above ::TX_DATA_MAX, or a buffer too small.
- */
+/* Build a response frame's wire bytes, up to but excluding the CRC. */
 int frame_parser_serialize_response(response_frame_t *response, uint8_t *serialized_response,
                                     uint8_t serialized_response_size);
-{% endhighlight %}
 
-**frame_parser_serialize_response**: The outgoing direction. There is no state machine needed here — we are the ones producing the bytes, so we can write the whole frame in one go:
-
-{% highlight c linenos %}
-int frame_parser_serialize_response(response_frame_t *response, uint8_t *serialized_response,
-                                    uint8_t serialized_response_size)
-{
-    if (response == NULL || serialized_response == NULL)
-    {
-        return -1;
-    }
-
-    if (response->data_len > TX_DATA_MAX)
-    {
-        return -1;
-    }
-
-    uint8_t body_len  = (uint8_t)(TX_ACK_LEN + response->data_len);
-    uint8_t frame_len = (uint8_t)(TX_HEADER_LEN + body_len);
-
-    if (serialized_response_size < frame_len)
-    {
-        return -1;
-    }
-
-    serialized_response[TX_SOF_IDX] = SOF_BYTE;
-    serialized_response[TX_LEN_IDX] = body_len;
-    serialized_response[TX_ACK_IDX] = response->ack ? 1U : 0U;
-
-    for (uint8_t i = 0U; i < response->data_len; i++)
-    {
-        serialized_response[TX_DATA_IDX + i] = response->data[i];
-    }
-
-    return (int)frame_len;
-}
-{% endhighlight %}
-
-`data_len` gets the same treatment `length` got on the receive side: it is checked against `TX_DATA_MAX` before it is used as a copy bound. It comes from our own code rather than off the wire, but the check costs one comparison and removes a whole class of bug.
-
-The other detail is that the buffer size check happens *after* `frame_len` is computed and *before* anything is written. Working out how much room you need, checking you have it, then writing, is a much easier pattern to get right than checking as you go.
-
-{% highlight c linenos %}
-/**
- * @brief Append a little-endian CRC to a partly built frame.
- *
- * @return The frame's total length (@p current_length + 2), or -1 on a NULL
- *         pointer or a buffer with no room for both CRC bytes.
- */
+/* Append a little-endian CRC to a partly built frame. */
 int frame_parser_append_crc(uint8_t *serialized_frame_buffer, uint8_t current_length, uint8_t buffer_size, uint16_t crc);
 {% endhighlight %}
 
-**frame_parser_append_crc**: The last two bytes of an outgoing frame. Small function, one subtle bug in it worth showing:
+The receive pair exists because the parser scattered the frame across struct members, and the CRC has to be computed over those bytes laid out the way they arrived: `frame_parser_serialize` puts OPCODE, LENGTH and PAYLOAD back together contiguously, and `frame_parser_get_crc` reassembles the two CRC bytes the frame carried so the caller has something to compare against.
 
-{% highlight c linenos %}
-int frame_parser_append_crc(uint8_t *serialized_frame_buffer, uint8_t current_length, uint8_t buffer_size, uint16_t crc)
-{
-    if (serialized_frame_buffer == NULL)
-    {
-        return -1;
-    }
+The transmit pair is the mirror image, and needs no state machine at all — we are the ones producing the bytes, so `frame_parser_serialize_response` writes the whole frame in one go and `frame_parser_append_crc` puts the checksum on the end.
 
-    /* Widened deliberately: current_length + CRC_SIZE wraps to 0 in uint8_t
-     * arithmetic at current_length = 254, which would let the check pass and
-     * the writes below land past the end of the buffer. */
-    if (((uint16_t)current_length + CRC_SIZE) > (uint16_t)buffer_size)
-    {
-        return -1;
-    }
+Two habits carry over from the state machine into all four. Each one **validates the length it is about to index with**, even where the state machine already checked it — a function that can write past the end of a buffer should not depend on another function's good behaviour to stay safe. And each **works out how much room it needs, checks the caller's buffer is big enough, and only then writes**, rather than checking as it goes. The one genuinely subtle case is in `frame_parser_append_crc`, where the bounds check adds two `uint8_t` values and has to widen them first — `254 + 2` wraps to `0` in byte arithmetic, which would let the check pass and the write land past the end of the buffer. The [source](https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/frame_parser.c) has the full implementations if you want them.
 
-    serialized_frame_buffer[current_length]      = (uint8_t)(crc & 0x00FFU);
-    serialized_frame_buffer[current_length + 1U] = (uint8_t)(crc >> 8);
-
-    int frame_size = current_length + CRC_SIZE;
-
-    return frame_size;
-}
-{% endhighlight %}
-
-Read that comment carefully, because this is a genuinely easy mistake to make. If both operands are `uint8_t` and `current_length` is 254, then `current_length + CRC_SIZE` is 256, which does not fit in a byte and wraps to 0. Zero is less than any buffer size, so the bounds check passes and the function happily writes two bytes past the end of the buffer — the exact thing the check was written to prevent. Casting one operand to `uint16_t` first makes the arithmetic happen in a type wide enough to hold the answer.
-
-This class of bug shows up constantly in embedded code, because we use small types everywhere for good reasons. The rule of thumb: **any time you add two values in a bounds check, ask what happens if the sum does not fit in the type you are adding in.**
 
 ## Putting it together
 
