@@ -249,7 +249,7 @@
         <span class="k">return</span> <span class="n">FRAME_READY</span><span class="p">;</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>That is the entire parser. One switch, one byte in, one result out, no loops and no blocking. Here is what each state is actually doing.</p> <h4 id="sof--the-resync-anchor">SOF — the resync anchor</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>That is the entire parser. One switch, one byte in, one result out, no loops and no blocking. Here is what each state is actually doing.</p> <h4 id="sof">SOF</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -270,7 +270,7 @@
         <span class="p">{</span>
             <span class="k">return</span> <span class="n">FRAME_PENDING</span><span class="p">;</span>
         <span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>In this state the parser throws away everything that is not <code class="language-plaintext highlighter-rouge">0xA5</code>. That sounds wasteful, but it is the property that makes the link recoverable. Suppose the host is halfway through sending a frame and the cable is unplugged, or a byte is lost to noise. The parser is now out of step with the sender and every subsequent byte it interprets will be interpreted as the wrong field. Without a resync rule, it stays wrong forever. With one, the damaged frame eventually fails its CRC or runs to its end, the parser lands back in <code class="language-plaintext highlighter-rouge">SOF</code>, and it silently discards bytes until the next <code class="language-plaintext highlighter-rouge">0xA5</code> — which is the start of a real frame. The link heals itself with no intervention from either end.</p> <p>Notice this state is also the only one that does not store the byte anywhere. <code class="language-plaintext highlighter-rouge">0xA5</code> is a marker, not data, and it is deliberately <em>not</em> covered by the CRC for that reason.</p> <h4 id="opcode--the-trivial-state">OPCODE — the trivial state</h4> <p>Take the byte, store it, move on. Not every state has to be interesting. Worth noting: the parser does <strong>not</strong> check whether the opcode is one it knows. That is the dispatcher’s job, and mixing the two would mean teaching the parser about every command in the protocol.</p> <h4 id="length--the-one-that-has-to-be-paranoid">LENGTH — the one that has to be paranoid</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>In this state the parser throws away everything that is not <code class="language-plaintext highlighter-rouge">0xA5</code>. That sounds wasteful, but it is the property that makes the link recoverable. Suppose the host is halfway through sending a frame and the cable is unplugged, or a byte is lost to noise. The parser is now out of step with the sender and every subsequent byte it interprets will be interpreted as the wrong field. Without a resync rule, it stays wrong forever. With one, the damaged frame eventually fails its CRC or runs to its end, the parser lands back in <code class="language-plaintext highlighter-rouge">SOF</code>, and it silently discards bytes until the next <code class="language-plaintext highlighter-rouge">0xA5</code> — which is the start of a real frame. The link heals itself with no intervention from either end.</p> <p>Notice this state is also the only one that does not store the byte anywhere. <code class="language-plaintext highlighter-rouge">0xA5</code> is a marker, not data, and it is deliberately <em>not</em> covered by the CRC for that reason.</p> <h4 id="opcode">OPCODE</h4> <p>Take the byte, store it, move on. Not every state has to be interesting. Worth noting: the parser does <strong>not</strong> check whether the opcode is one it knows. That is the dispatcher’s job, and mixing the two would mean teaching the parser about every command in the protocol.</p> <h4 id="length">LENGTH</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -316,7 +316,7 @@
 
             <span class="k">return</span> <span class="n">FRAME_IN_PROGRESS</span><span class="p">;</span>
         <span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>A zero-length frame has no payload at all, so <code class="language-plaintext highlighter-rouge">PAYLOAD</code> must be skipped entirely. If you fall into <code class="language-plaintext highlighter-rouge">PAYLOAD</code> with <code class="language-plaintext highlighter-rouge">length == 0</code>, the exit condition <code class="language-plaintext highlighter-rouge">payload_idx == length</code> is checked <em>after</em> the first byte is written, so the parser would swallow one byte of the CRC as payload and then be permanently one byte out of step. Zero is a legitimate frame shape in this protocol, so it needs an explicit path.</p> <p>The <code class="language-plaintext highlighter-rouge">payload_idx = 0</code> in the other branch is the state machine resetting its own scratch variable on the way into the state that uses it, rather than trusting that whoever finished the last frame cleaned up. States that initialize what they need on entry are much harder to break than states that assume.</p> <h4 id="payload--the-state-that-repeats">PAYLOAD — the state that repeats</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>A zero-length frame has no payload at all, so <code class="language-plaintext highlighter-rouge">PAYLOAD</code> must be skipped entirely. If you fall into <code class="language-plaintext highlighter-rouge">PAYLOAD</code> with <code class="language-plaintext highlighter-rouge">length == 0</code>, the exit condition <code class="language-plaintext highlighter-rouge">payload_idx == length</code> is checked <em>after</em> the first byte is written, so the parser would swallow one byte of the CRC as payload and then be permanently one byte out of step. Zero is a legitimate frame shape in this protocol, so it needs an explicit path.</p> <p>The <code class="language-plaintext highlighter-rouge">payload_idx = 0</code> in the other branch is the state machine resetting its own scratch variable on the way into the state that uses it, rather than trusting that whoever finished the last frame cleaned up. States that initialize what they need on entry are much harder to break than states that assume.</p> <h4 id="payload">PAYLOAD</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -339,7 +339,7 @@
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">FRAME_IN_PROGRESS</span><span class="p">;</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>Every other state consumes exactly one byte and moves on. This one stays put and counts. That is the pattern for any variable-length field: the state does not change until a counter says the field is complete, which is what lets a six-state machine parse a frame of any length between 5 and 37 bytes.</p> <h4 id="crc_low-and-crc_high--finishing">CRC_LOW and CRC_HIGH — finishing</h4> <p>The two CRC bytes are stored raw and separately, and <code class="language-plaintext highlighter-rouge">CRC_HIGH</code> is what returns <code class="language-plaintext highlighter-rouge">FRAME_READY</code> and puts the state back to <code class="language-plaintext highlighter-rouge">SOF</code> so the next byte starts a new frame.</p> <p>Note what <code class="language-plaintext highlighter-rouge">FRAME_READY</code> does <strong>not</strong> mean. It does not mean the frame is good — the parser has not checked the CRC and does not know how. It means the frame is <em>complete</em>. Verifying it is a separate step, done by the caller with the helpers below. Keeping “is it whole” separate from “is it correct” is what lets the parser stay a pure state machine with no idea what a CRC is.</p> <h4 id="the-state-diagram">The state diagram</h4> <p>Put together, the machine looks like this:</p> <figure class="highlight"><pre><code class="language-text" data-lang="text"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>Every other state consumes exactly one byte and moves on. This one stays put and counts. That is the pattern for any variable-length field: the state does not change until a counter says the field is complete, which is what lets a six-state machine parse a frame of any length between 5 and 37 bytes.</p> <h4 id="crc_low-and-crc_high">CRC_LOW and CRC_HIGH</h4> <p>The two CRC bytes are stored raw and separately, and <code class="language-plaintext highlighter-rouge">CRC_HIGH</code> is what returns <code class="language-plaintext highlighter-rouge">FRAME_READY</code> and puts the state back to <code class="language-plaintext highlighter-rouge">SOF</code> so the next byte starts a new frame.</p> <p>Note what <code class="language-plaintext highlighter-rouge">FRAME_READY</code> does <strong>not</strong> mean. It does not mean the frame is good — the parser has not checked the CRC and does not know how. It means the frame is <em>complete</em>. Verifying it is a separate step, done by the caller with the helpers below. Keeping “is it whole” separate from “is it correct” is what lets the parser stay a pure state machine with no idea what a CRC is.</p> <h4 id="the-state-diagram">The state diagram</h4> <p>Put together, the machine looks like this:</p> <figure class="highlight"><pre><code class="language-text" data-lang="text"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -406,30 +406,7 @@
     │     ┌─────────────┐
     └─────┤   CRC_HIGH  │──►  FRAME_READY
           └─────────────┘
-</pre></td> </tr></tbody></table></code></pre></figure> <p>Every path leads back to <code class="language-plaintext highlighter-rouge">SOF</code>, whether the frame completed, was rejected, or was never really there. A state machine that can get stuck somewhere with no way back is a state machine that will eventually wedge your link.</p> <h2 id="the-helper-functions">The helper functions</h2> <p>The state machine gets you a complete frame. Four small functions do the rest of the work around it.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
-<td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Lay a received frame's CRC-covered bytes out contiguously.
- *
- * Writes OPCODE, LENGTH and PAYLOAD - exactly the range crc16_compute() runs
- * over, with the start-of-frame marker and the CRC excluded.
- *
- * @return Number of bytes written (2 + the frame's LENGTH), or -1 on a NULL
- *         pointer, a buffer too small to hold them, or a LENGTH above
- *         ::RX_MAX_PAYLOAD.
- */</span>
-<span class="kt">int</span> <span class="nf">frame_parser_serialize</span><span class="p">(</span><span class="n">command_frame_t</span> <span class="o">*</span><span class="n">frame</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">serialized_frame_buffer</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">serialized_frame_size</span><span class="p">);</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>frame_parser_serialize</strong>: The CRC has to be computed over the frame’s bytes <em>as they appeared on the wire</em>, but the parser has scattered them across struct members. This function lays them back out contiguously so the CRC routine can run over them:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>Every path leads back to <code class="language-plaintext highlighter-rouge">SOF</code>, whether the frame completed, was rejected, or was never really there. A state machine that can get stuck somewhere with no way back is a state machine that will eventually wedge your link.</p> <h2 id="the-helpers-around-it">The helpers around it</h2> <p>The state machine assembles frames and nothing else — it does not know what a CRC is, and it never touches the transport. Four small functions in the same module fill the gap between “a frame is complete” and “a frame has been answered”:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -443,236 +420,20 @@
 11
 12
 13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-</pre></td> <td class="code"><pre><span class="kt">int</span> <span class="nf">frame_parser_serialize</span><span class="p">(</span><span class="n">command_frame_t</span> <span class="o">*</span><span class="n">frame</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">serialized_frame_buffer</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">serialized_frame_size</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">frame</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="n">serialized_frame_buffer</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
+</pre></td> <td class="code"><pre><span class="cm">/* Lay a received frame's CRC-covered bytes out contiguously, so the CRC
+ * routine can run over them. Returns 2 + LENGTH, or -1 on bad input. */</span>
+<span class="kt">int</span> <span class="nf">frame_parser_serialize</span><span class="p">(</span><span class="n">command_frame_t</span> <span class="o">*</span><span class="n">frame</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">serialized_frame_buffer</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">serialized_frame_size</span><span class="p">);</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">serialized_frame_size</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">))</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">RX_MAX_PAYLOAD</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-
-    <span class="n">serialized_frame_buffer</span><span class="p">[</span><span class="n">RX_OPCODE_IDX</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">opcode</span><span class="p">;</span>
-    <span class="n">serialized_frame_buffer</span><span class="p">[</span><span class="n">RX_LENGTH_IDX</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">;</span>
-
-    <span class="k">for</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="n">serialized_frame_buffer</span><span class="p">[</span><span class="n">RX_PAYLOAD_IDX</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">payload</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-        <span class="n">size</span><span class="o">++</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="n">size</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>The <code class="language-plaintext highlighter-rouge">length</code> check appears here again even though <code class="language-plaintext highlighter-rouge">frame_parser_feed</code> already rejected oversized lengths. That is deliberate. This function writes into a caller-supplied buffer using <code class="language-plaintext highlighter-rouge">length</code> as a bound, so it validates <code class="language-plaintext highlighter-rouge">length</code> itself rather than trusting that it was validated somewhere else. A function that can smash memory should not depend on another function’s good behaviour to stay safe.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
-<td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Recombine a received frame's two CRC bytes into one value.
- *
- * @return 0 on success, -1 if either pointer is NULL.
- */</span>
+<span class="cm">/* Recombine the frame's two received CRC bytes into one value. */</span>
 <span class="kt">int</span> <span class="nf">frame_parser_get_crc</span><span class="p">(</span><span class="n">command_frame_t</span> <span class="o">*</span><span class="n">frame</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">crc</span><span class="p">);</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>frame_parser_get_crc</strong>: The parser stored the CRC as two separate bytes because that is how they arrived. This puts them back together, and it is the one place in the module that knows the CRC is little-endian on the wire:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
-<td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-</pre></td> <td class="code"><pre><span class="kt">int</span> <span class="nf">frame_parser_get_crc</span><span class="p">(</span><span class="n">command_frame_t</span> <span class="o">*</span><span class="n">frame</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">crc</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">frame</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="n">crc</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
 
-    <span class="o">*</span><span class="n">crc</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)((</span><span class="kt">uint16_t</span><span class="p">)</span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">crc_high</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span> <span class="o">|</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">crc_low</span><span class="p">);</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>Note the cast on <code class="language-plaintext highlighter-rouge">frame-&gt;crc_high</code> before the shift. <code class="language-plaintext highlighter-rouge">crc_high</code> is a <code class="language-plaintext highlighter-rouge">uint8_t</code>, and shifting it left by 8 without widening it first is exactly how you end up with a CRC that is always zero on some compilers. Widen first, then shift.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
-<td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Build a response frame's wire bytes, up to but excluding the CRC.
- *
- * LEN counts the ACK byte along with DATA.
- *
- * @return Number of bytes written (3 + @p response's data_len), or -1 on a NULL
- *         pointer, a data_len above ::TX_DATA_MAX, or a buffer too small.
- */</span>
+<span class="cm">/* Build a response frame's wire bytes, up to but excluding the CRC. */</span>
 <span class="kt">int</span> <span class="nf">frame_parser_serialize_response</span><span class="p">(</span><span class="n">response_frame_t</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">serialized_response</span><span class="p">,</span>
                                     <span class="kt">uint8_t</span> <span class="n">serialized_response_size</span><span class="p">);</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>frame_parser_serialize_response</strong>: The outgoing direction. There is no state machine needed here — we are the ones producing the bytes, so we can write the whole frame in one go:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
-<td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-</pre></td> <td class="code"><pre><span class="kt">int</span> <span class="nf">frame_parser_serialize_response</span><span class="p">(</span><span class="n">response_frame_t</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">serialized_response</span><span class="p">,</span>
-                                    <span class="kt">uint8_t</span> <span class="n">serialized_response_size</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">response</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="n">serialized_response</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">response</span><span class="o">-&gt;</span><span class="n">data_len</span> <span class="o">&gt;</span> <span class="n">TX_DATA_MAX</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="kt">uint8_t</span> <span class="n">body_len</span>  <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">TX_ACK_LEN</span> <span class="o">+</span> <span class="n">response</span><span class="o">-&gt;</span><span class="n">data_len</span><span class="p">);</span>
-    <span class="kt">uint8_t</span> <span class="n">frame_len</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">TX_HEADER_LEN</span> <span class="o">+</span> <span class="n">body_len</span><span class="p">);</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">serialized_response_size</span> <span class="o">&lt;</span> <span class="n">frame_len</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="n">serialized_response</span><span class="p">[</span><span class="n">TX_SOF_IDX</span><span class="p">]</span> <span class="o">=</span> <span class="n">SOF_BYTE</span><span class="p">;</span>
-    <span class="n">serialized_response</span><span class="p">[</span><span class="n">TX_LEN_IDX</span><span class="p">]</span> <span class="o">=</span> <span class="n">body_len</span><span class="p">;</span>
-    <span class="n">serialized_response</span><span class="p">[</span><span class="n">TX_ACK_IDX</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">-&gt;</span><span class="n">ack</span> <span class="o">?</span> <span class="mi">1U</span> <span class="o">:</span> <span class="mi">0U</span><span class="p">;</span>
-
-    <span class="k">for</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">response</span><span class="o">-&gt;</span><span class="n">data_len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="n">serialized_response</span><span class="p">[</span><span class="n">TX_DATA_IDX</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">frame_len</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p><code class="language-plaintext highlighter-rouge">data_len</code> gets the same treatment <code class="language-plaintext highlighter-rouge">length</code> got on the receive side: it is checked against <code class="language-plaintext highlighter-rouge">TX_DATA_MAX</code> before it is used as a copy bound. It comes from our own code rather than off the wire, but the check costs one comparison and removes a whole class of bug.</p> <p>The other detail is that the buffer size check happens <em>after</em> <code class="language-plaintext highlighter-rouge">frame_len</code> is computed and <em>before</em> anything is written. Working out how much room you need, checking you have it, then writing, is a much easier pattern to get right than checking as you go.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
-<td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-</pre></td> <td class="code"><pre><span class="cm">/**
- * @brief Append a little-endian CRC to a partly built frame.
- *
- * @return The frame's total length (@p current_length + 2), or -1 on a NULL
- *         pointer or a buffer with no room for both CRC bytes.
- */</span>
+<span class="cm">/* Append a little-endian CRC to a partly built frame. */</span>
 <span class="kt">int</span> <span class="nf">frame_parser_append_crc</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">serialized_frame_buffer</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">current_length</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">crc</span><span class="p">);</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p><strong>frame_parser_append_crc</strong>: The last two bytes of an outgoing frame. Small function, one subtle bug in it worth showing:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
-<td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-</pre></td> <td class="code"><pre><span class="kt">int</span> <span class="nf">frame_parser_append_crc</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">serialized_frame_buffer</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">current_length</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">crc</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">serialized_frame_buffer</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="cm">/* Widened deliberately: current_length + CRC_SIZE wraps to 0 in uint8_t
-     * arithmetic at current_length = 254, which would let the check pass and
-     * the writes below land past the end of the buffer. */</span>
-    <span class="k">if</span> <span class="p">(((</span><span class="kt">uint16_t</span><span class="p">)</span><span class="n">current_length</span> <span class="o">+</span> <span class="n">CRC_SIZE</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)</span><span class="n">buffer_size</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="n">serialized_frame_buffer</span><span class="p">[</span><span class="n">current_length</span><span class="p">]</span>      <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">crc</span> <span class="o">&amp;</span> <span class="mh">0x00FFU</span><span class="p">);</span>
-    <span class="n">serialized_frame_buffer</span><span class="p">[</span><span class="n">current_length</span> <span class="o">+</span> <span class="mi">1U</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">crc</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">);</span>
-
-    <span class="kt">int</span> <span class="n">frame_size</span> <span class="o">=</span> <span class="n">current_length</span> <span class="o">+</span> <span class="n">CRC_SIZE</span><span class="p">;</span>
-
-    <span class="k">return</span> <span class="n">frame_size</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>Read that comment carefully, because this is a genuinely easy mistake to make. If both operands are <code class="language-plaintext highlighter-rouge">uint8_t</code> and <code class="language-plaintext highlighter-rouge">current_length</code> is 254, then <code class="language-plaintext highlighter-rouge">current_length + CRC_SIZE</code> is 256, which does not fit in a byte and wraps to 0. Zero is less than any buffer size, so the bounds check passes and the function happily writes two bytes past the end of the buffer — the exact thing the check was written to prevent. Casting one operand to <code class="language-plaintext highlighter-rouge">uint16_t</code> first makes the arithmetic happen in a type wide enough to hold the answer.</p> <p>This class of bug shows up constantly in embedded code, because we use small types everywhere for good reasons. The rule of thumb: <strong>any time you add two values in a bounds check, ask what happens if the sum does not fit in the type you are adding in.</strong></p> <h2 id="putting-it-together">Putting it together</h2> <p>Here is the parser in use, from mcu-co’s main loop. This is the whole receive path: pull a byte, feed it, and when a frame completes, verify it and hand it on.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>The receive pair exists because the parser scattered the frame across struct members, and the CRC has to be computed over those bytes laid out the way they arrived: <code class="language-plaintext highlighter-rouge">frame_parser_serialize</code> puts OPCODE, LENGTH and PAYLOAD back together contiguously, and <code class="language-plaintext highlighter-rouge">frame_parser_get_crc</code> reassembles the two CRC bytes the frame carried so the caller has something to compare against.</p> <p>The transmit pair is the mirror image, and needs no state machine at all — we are the ones producing the bytes, so <code class="language-plaintext highlighter-rouge">frame_parser_serialize_response</code> writes the whole frame in one go and <code class="language-plaintext highlighter-rouge">frame_parser_append_crc</code> puts the checksum on the end.</p> <p>Two habits carry over from the state machine into all four. Each one <strong>validates the length it is about to index with</strong>, even where the state machine already checked it — a function that can write past the end of a buffer should not depend on another function’s good behaviour to stay safe. And each <strong>works out how much room it needs, checks the caller’s buffer is big enough, and only then writes</strong>, rather than checking as it goes. The one genuinely subtle case is in <code class="language-plaintext highlighter-rouge">frame_parser_append_crc</code>, where the bounds check adds two <code class="language-plaintext highlighter-rouge">uint8_t</code> values and has to widen them first — <code class="language-plaintext highlighter-rouge">254 + 2</code> wraps to <code class="language-plaintext highlighter-rouge">0</code> in byte arithmetic, which would let the check pass and the write land past the end of the buffer. The <a href="https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/frame_parser.c" rel="external nofollow noopener" target="_blank">source</a> has the full implementations if you want them.</p> <h2 id="putting-it-together">Putting it together</h2> <p>Here is the parser in use, from mcu-co’s main loop. This is the whole receive path: pull a byte, feed it, and when a frame completes, verify it and hand it on.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
