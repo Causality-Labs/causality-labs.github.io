@@ -17,7 +17,7 @@ category: MCU
 
 <div class="row mt-3">
     <div class="col-md-12">
-        <p>mcu-co is a real-time I/O accelerator that pairs a Linux single board computer with a dedicated microcontroller. Linux is excellent at application logic but poor at timing: scheduling, preemption, and driver latency all add jitter to anything you try to do directly from userspace GPIO. mcu-co moves that time-critical pin work onto a microcontroller that has nothing else to do, and leaves the application logic on the host where it belongs. The full stack spans firmware, a Linux daemon, C and Python SDKs, a CLI, and a Yocto layer — the original plan for all of it is in the <a href="{% post_url 2026-03-22-mcu-co_Proposal %}">mcu-co proposal</a>.</p>
+        <p>mcu-co is a real-time I/O accelerator that pairs a Linux single board computer with a dedicated microcontroller. Linux is excellent at application logic but poor at timing: scheduling, preemption, and driver latency all add jitter to anything you try to do directly from userspace GPIO. mcu-co moves that time-critical pin work onto a microcontroller that has nothing else to do, and leaves the application logic on the host where it belongs. The full stack spans the firmware, a Linux shared library, and a CLI tool built on top of it. The plan for the whole project is laid out in the <a href="{% post_url 2026-03-22-mcu-co_Proposal %}">mcu-co proposal</a>.</p>
 
         <p>This post covers the co-processor portion of the project: the bare-metal firmware that runs on the MCU. The firmware turns an STM32G474RE into an I/O co-processor that listens on a serial link, executes binary-framed commands from the host, and answers every one of them. It gives the host GPIO configuration and control, pin-change interrupts, interrupt-to-output bindings that the MCU services entirely on its own, and twelve PWM outputs — all behind a checked command protocol with CRC-verified frames and an ACK or a NACK with a reason code for every command.</p>
 
@@ -40,7 +40,7 @@ category: MCU
 
         <p><strong>Communication Link (UART):</strong> A single serial connection between the two, carrying commands one way and ACK/NACK replies the other. The firmware uses USART2 for command traffic and keeps a second UART free for its own log output, so debug logging never interferes with the protocol.</p>
 
-        <p><strong>MCU (STM32G474RE):</strong> A Cortex-M4F running at 170 MHz. It owns the pins and does nothing on its own; it executes the commands the host sends and answers each one. I chose it because its advanced timer peripherals cover the PWM and precision-pulse feature set on a single chip.</p>
+        <p><strong>MCU (STM32G474RE):</strong> A Cortex-M4F running at 170 MHz. It owns the pins and does nothing on its own; it executes the commands the host sends and answers each one. I chose it because its advanced timer peripherals cover the whole PWM feature set on a single chip.</p>
 
         <p><strong>GPIO (Output):</strong> Pins the MCU drives high or low on command.</p>
 
@@ -148,7 +148,7 @@ SOF · LEN · ACK/NACK [ · DATA ] · CRC_L · CRC_H
     <div class="col-md-12">
         <p>Everything the firmware does is one of these exchanges. Configuring PA5 as an output and driving it high looks like this on the wire:</p>
 
-{% highlight text %}
+{% highlight bash linenos %}
 cmd   A5 30 03  01 00 05  AB E1     gpio cfg output A 5
                │  │  └ PIN  = 5
                │  └ PORT = A
@@ -161,7 +161,7 @@ ack   A5 01  01        1F 3E
 
         <p>Bringing up PWM group 0 (TIM2) at 1 kHz:</p>
 
-{% highlight text %}
+{% highlight bash linenos %}
 cmd   A5 40 05  E8 03 00 00  00  DE CD     pwm group cfg 1000 0
                 │            └ GROUP = 0 (TIM2)
                 └ FREQ = 0x000003E8 = 1000 Hz
@@ -170,7 +170,7 @@ ack   A5 01  01        1F 3E
 
         <p>And the interesting one — binding a rising edge on an input pin to a toggle on an output pin. After this single command the MCU handles the edge itself; the host never sees it and never has to respond to it:</p>
 
-{% highlight text %}
+{% highlight bash linenos %}
 gpio irq cfg rising A 0        arm PA0 for rising edges
 gpio irq bind rising A 0 toggle A 5    PA0 rising -> toggle PA5
 {% endhighlight %}
@@ -183,8 +183,8 @@ gpio irq bind rising A 0 toggle A 5    PA0 rising -> toggle PA5
 
 <div class="row">
     <div class="col-md-12">
-        <p>The co-processor now covers the digital half of what mcu-co set out to do: GPIO, pin-change interrupts, autonomous interrupt-to-output bindings, and PWM, all behind a protocol that is checked end to end. Still to come on the firmware side are the ADC, the hardware watchdog on the host link, safe-state pin defaults, and the E-stop path — the safety features that turn this from a capable I/O board into something you would trust to drive real hardware.</p>
+        <p>The co-processor now covers everything mcu-co asks of the MCU: GPIO, pin-change interrupts, autonomous interrupt-to-output bindings, and PWM, all behind a protocol that is checked end to end.</p>
 
-        <p>Next up is the Linux side of the project: the daemon that owns the serial link and multiplexes clients over a Unix socket, the C and Python SDKs, the CLI, and the meta-mcu-co Yocto layer that packages all of it. Feel free to fork the firmware repo and build on it — and if you are following the series, the next post picks up on the host side.</p>
+        <p>Next up is the Linux side of the project: the shared library written in C that owns the serial link and speaks this protocol on the host's behalf, and the CLI tool built on top of it. Feel free to fork the firmware repo and build on it — and if you are following the series, the next post picks up on the host side.</p>
     </div>
 </div>
