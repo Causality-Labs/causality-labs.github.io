@@ -11,7 +11,7 @@ category: MCU
 
 <div class="row">
     <div class="col-md-12">
-        {% include figure.liquid path="assets/img/mcu-co/mcu-co_block-diagram.png" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/mcu-co/mcu-co_block-diagram_v2.png" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
 
