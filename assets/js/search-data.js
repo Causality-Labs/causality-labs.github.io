@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-write-a-type-agnostic-ring-buffer-mcu-co-p3",
+        },{id: "post-mcu-co-how-to-write-a-state-machine-mcu-co-p4",
+        
+          title: "mcu-co How to write a state machine (mcu-co P4)",
+        
+        description: "How to turn a stream of bytes into complete messages with a state machine in C, using the mcu-co frame parser as the example",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_State_Machine/";
+          
+        },
+      },{id: "post-mcu-co-how-to-write-a-type-agnostic-ring-buffer-mcu-co-p3",
         
           title: "mcu-co How to write a type agnostic Ring Buffer (mcu-co P3)",
         
