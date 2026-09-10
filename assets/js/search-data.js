@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-write-a-state-machine-mcu-co-p4",
+        },{id: "post-mcu-co-how-to-write-a-command-dispatcher-mcu-co-p5",
+        
+          title: "mcu-co How to write a command dispatcher (mcu-co P5)",
+        
+        description: "How to route commands to their handlers with a table of function pointers instead of a giant switch statement, using the mcu-co command dispatcher as the example",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_Command_Dispatcher/";
+          
+        },
+      },{id: "post-mcu-co-how-to-write-a-state-machine-mcu-co-p4",
         
           title: "mcu-co How to write a state machine (mcu-co P4)",
         
