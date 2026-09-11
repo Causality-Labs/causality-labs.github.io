@@ -10,16 +10,6 @@ thumbnail: assets/img/blogs/mcu-co_Visual.png
 
 ## Introduction
 
-In [P2]({% post_url 2026-03-28-mcu-co_How_to_write_good_Driver %}) I wrote the UART driver that mcu-co uses to talk to the Linux host, and at the end of that post I showed a small state machine as an example of why you would want to read one byte at a time. This post is that idea done properly: the frame parser that mcu-co actually ships.
-
-The problem is this. A UART hands you one byte at a time and tells you nothing else. It does not tell you where a message starts, where it ends, or whether the byte you just received is the middle of a good message or the tail of a corrupted one. All you get is a stream. Somewhere between "a byte arrived" and "a command is ready to execute", something has to reassemble that stream into whole messages, and that something is the frame parser.
-
-There are two ways to go about it. The first is to buffer bytes until you think you have enough, then parse the buffer. This works fine when messages are fixed size, but ours are not, and it means the parsing code has to be able to say "not enough bytes yet, call me again" without losing its place. The second is a **state machine**: you keep a variable saying which field of the message you are expecting next, and each byte that arrives is interpreted according to that variable and then advances it. No buffering of raw bytes, no re-parsing, no blocking waiting for the rest of a message. That is what we will build here.
-
-Everything below is the real `frame_parser` module from the mcu-co firmware, which you can find [here](https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/frame_parser.c).
-
---------
-
 In this post we are going to learn about one of the most common embedded software design paradigms, the **state machine**. A state machine is computational model that represents a system with a finite number of distinct states, where the system can transition between those states based on specific inputs or events.
 
 - Mealy state machine: In a Mealy state machine the output depends on both the current state AND the input received. The output is determined by examining what state you're in AND what data arrives at that state.
