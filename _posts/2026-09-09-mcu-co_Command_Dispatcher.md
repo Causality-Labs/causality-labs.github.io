@@ -21,7 +21,7 @@ In mcu-co we are using the serial communication approach: we get a command on th
 
 ## High Level Overview
 
-{% include figure.liquid path="assets/img/mcu-co/mcu-co_command_dispatch.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+{% include figure.liquid path="assets/img/mcu-co/mcu-co_command_dispatch.png" class="img-fluid rounded z-depth-1" width="50%" zoomable=true %}
 
 The block diagram above illustrates the purpose of the command dispatcher: it takes in command frames built by the frame parser and passes a payload (the controller instructions) to the GPIO and PWM controllers.
 
