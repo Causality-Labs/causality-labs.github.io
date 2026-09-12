@@ -19,6 +19,11 @@ In this post we will go over the **command dispatcher**. In super simple terms, 
 
 In mcu-co we are using the serial communication approach: we get a command on the UART bus, look at its opcode, and dispatch the function tied to that opcode. In this post I will go over how I designed the command dispatcher to fit mcu-co's needs. The full implementation can be found [here](https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/command_dispatcher.c).
 
+## High Level Overview
+
+{% include figure.liquid path="assets/img/mcu-co/mcu-co_command_dispatch.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+
+The block diagram above illustrates the purpose of the command dispatcher: it takes in command frames built by the frame parser and passes a payload (the controller instructions) to the GPIO and PWM controllers.
 
 ## Data Structures
 
