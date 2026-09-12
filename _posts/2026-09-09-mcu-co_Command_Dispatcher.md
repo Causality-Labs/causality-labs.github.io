@@ -250,3 +250,4 @@ if (disp_status != STATUS_OK)
      * a populated NACK on every dispatch failure path. */
     LOG_ERROR(MODULE_NAME, "dispatch_command() failed (%s), sending NACK", status_to_str(disp_status));
 }
+{% endhighlight %}
