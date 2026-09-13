@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-write-a-command-dispatcher-mcu-co-p5",
+        },{id: "post-mcu-co-how-to-write-gpio-and-pwm-controllers-mcu-co-p6",
+        
+          title: "mcu-co How to write GPIO and PWM controllers (mcu-co P6)",
+        
+        description: "How to decode a validated command payload into pin and channel actions on real hardware, using the mcu-co GPIO and PWM controllers as the example",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_gpio_and_pwm_controllers/";
+          
+        },
+      },{id: "post-mcu-co-how-to-write-a-command-dispatcher-mcu-co-p5",
         
           title: "mcu-co How to write a command dispatcher (mcu-co P5)",
         
