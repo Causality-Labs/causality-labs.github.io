@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-write-gpio-and-pwm-controllers-mcu-co-p6",
+        },{id: "post-mcu-co-how-to-unit-test-embedded-c-mcu-co-p7",
+        
+          title: "mcu-co How to unit test embedded C (mcu-co P7)",
+        
+        description: "How to unit test embedded C , using the mcu-co&#39;s modules as an example",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_unit_tests/";
+          
+        },
+      },{id: "post-mcu-co-how-to-write-gpio-and-pwm-controllers-mcu-co-p6",
         
           title: "mcu-co How to write GPIO and PWM controllers (mcu-co P6)",
         

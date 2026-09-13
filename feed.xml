@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-09-13T20:53:21+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">mcu-co How to write GPIO and PWM controllers (mcu-co P6)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_gpio_and_pwm_controllers/" rel="alternate" type="text/html" title="mcu-co How to write GPIO and PWM controllers (mcu-co P6)"/><published>2026-09-13T09:40:16+00:00</published><updated>2026-09-13T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_gpio_and_pwm_controllers</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_gpio_and_pwm_controllers/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This post will go over the controller layer of mcu-co. Its job is to decode the incoming payload and translate it into calls on the general-purpose peripheral drivers (<code class="language-plaintext highlighter-rouge">gpio.c</code>, <code class="language-plaintext highlighter-rouge">pwm</code>/timer). Abstracting away the low-level behavior of those drivers keeps the controller code modular and testable, which matters a lot in embedded software design.</p> <p>The full implementation can be found <a href="https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/gpio_controller.c">here</a> and <a href="https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/pwm_controller.c">here</a>.</p> <h2 id="high-level-overview">High Level Overview</h2> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_controllers-480.webp 480w,/assets/img/mcu-co/mcu-co_controllers-800.webp 800w,/assets/img/mcu-co/mcu-co_controllers-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_controllers.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>The block diagram above illustrates the purpose of the GPIO and PWM controllers: it simply takes the raw payload bytes handed to it by the dispatcher, validates and decodes them into pin or channel arguments, and calls into the underlying GPIO or timer driver to carry out the operation.</p> <h2 id="gpio-controller">GPIO Controller</h2> <p>Here are some sample functions to get a hint of how the gpio controller works:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-09-13T21:59:28+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">mcu-co How to write GPIO and PWM controllers (mcu-co P6)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_gpio_and_pwm_controllers/" rel="alternate" type="text/html" title="mcu-co How to write GPIO and PWM controllers (mcu-co P6)"/><published>2026-09-13T09:40:16+00:00</published><updated>2026-09-13T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_gpio_and_pwm_controllers</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_gpio_and_pwm_controllers/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This post will go over the controller layer of mcu-co. Its job is to decode the incoming payload and translate it into calls on the general-purpose peripheral drivers (<code class="language-plaintext highlighter-rouge">gpio.c</code>, <code class="language-plaintext highlighter-rouge">pwm</code>/timer). Abstracting away the low-level behavior of those drivers keeps the controller code modular and testable, which matters a lot in embedded software design.</p> <p>The full implementation can be found <a href="https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/gpio_controller.c">here</a> and <a href="https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/pwm_controller.c">here</a>.</p> <h2 id="high-level-overview">High Level Overview</h2> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_controllers-480.webp 480w,/assets/img/mcu-co/mcu-co_controllers-800.webp 800w,/assets/img/mcu-co/mcu-co_controllers-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_controllers.png" class="img-fluid rounded z-depth-1" width="50%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>The block diagram above illustrates the purpose of the GPIO and PWM controllers: it simply takes the raw payload bytes handed to it by the dispatcher, validates and decodes them into pin or channel arguments, and calls into the underlying GPIO or timer driver to carry out the operation.</p> <h2 id="gpio-controller">GPIO Controller</h2> <p>Here are some sample functions to get a hint of how the gpio controller works:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2
 3
 4
@@ -456,7 +456,247 @@
 
     <span class="k">return</span> <span class="n">timer_pwm_get_duty</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">duty_permille</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><code class="language-plaintext highlighter-rouge">pwm_controller_channel_get</code> validates the payload, resolves the pin to its timer/channel, and reads that channel’s current duty cycle into <code class="language-plaintext highlighter-rouge">duty_permille</code>.</p>]]></content><author><name></name></author><category term="mcu-co"/><category term="MCU"/><summary type="html"><![CDATA[How to decode a validated command payload into pin and channel actions on real hardware, using the mcu-co GPIO and PWM controllers as the example]]></summary></entry><entry><title type="html">mcu-co How to write a command dispatcher (mcu-co P5)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_Command_Dispatcher/" rel="alternate" type="text/html" title="mcu-co How to write a command dispatcher (mcu-co P5)"/><published>2026-09-09T10:40:16+00:00</published><updated>2026-09-09T10:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_Command_Dispatcher</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_Command_Dispatcher/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>In this post we will go over the <strong>command dispatcher</strong>. In super simple terms, a command dispatcher is a function that takes a command as input and calls the appropriate handler function to execute it. It is a very common design paradigm in embedded systems, or in programming in general. Here are some common applications for it:</p> <ul> <li>Serial communication: Host sends commands over UART → dispatcher executes them</li> <li>CLI interfaces: Parsing text input from a debug terminal</li> <li>Message handling: Processing messages from a queue or interrupt handler</li> <li>Task scheduling: Dispatching different operations based on command IDs</li> </ul> <p>In mcu-co we are using the serial communication approach: we get a command on the UART bus, look at its opcode, and dispatch the function tied to that opcode. In this post I will go over how I designed the command dispatcher to fit mcu-co’s needs. The full implementation can be found <a href="https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/command_dispatcher.c">here</a>.</p> <h2 id="high-level-overview">High Level Overview</h2> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_command_dispatch-480.webp 480w,/assets/img/mcu-co/mcu-co_command_dispatch-800.webp 800w,/assets/img/mcu-co/mcu-co_command_dispatch-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_command_dispatch.png" class="img-fluid rounded z-depth-1" width="50%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>The block diagram above illustrates the purpose of the command dispatcher: it takes in command frames built by the frame parser and passes a payload (the controller instructions) to the GPIO and PWM controllers.</p> <h2 id="data-structures">Data Structures</h2> <p>These are the data structures I created for use in the command dispatcher module.</p> <p>The first data structure to bring up is the <strong>function pointer</strong>: a variable that stores the address of a function, allowing you to call that function indirectly through the pointer instead of calling it by name. We will use function pointers in the command dispatcher to map commands to their handler functions in a lookup table. By doing this we can avoid large switch statements and large if/else blocks. It also makes it easy to add new commands without changing the dispatcher logic. Below is the syntax used for function pointers:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td></tr></tbody></table></code></pre></figure> <p><code class="language-plaintext highlighter-rouge">pwm_controller_channel_get</code> validates the payload, resolves the pin to its timer/channel, and reads that channel’s current duty cycle into <code class="language-plaintext highlighter-rouge">duty_permille</code>.</p>]]></content><author><name></name></author><category term="mcu-co"/><category term="MCU"/><summary type="html"><![CDATA[How to decode a validated command payload into pin and channel actions on real hardware, using the mcu-co GPIO and PWM controllers as the example]]></summary></entry><entry><title type="html">mcu-co How to unit test embedded C (mcu-co P7)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_unit_tests/" rel="alternate" type="text/html" title="mcu-co How to unit test embedded C (mcu-co P7)"/><published>2026-09-13T09:40:16+00:00</published><updated>2026-09-13T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_unit_tests</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_unit_tests/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>In this post we will go over Test Driven Development, why unit tests are important, and how to write them, using mcu-co as a reference. Before you can write unit tests for your software, that software first has to be testable in the first place — which means the code has to be modular in design. That modularity is also what makes the code robust and reusable. I have been following the practices from the well-known book <em>Test-Driven Development for Embedded C</em> by James Grenning, which you can find for purchase on Amazon <a href="TODO">here</a>, or read this <a href="TODO">paper</a> for a high-level summary of what the book teaches.</p> <p>The full test suite can be found <a href="https://github.com/Causality-Labs/mcu-co_firmware/tree/main/tests/unit-tests">here</a>.</p> <h4 id="what-is-test-driven-development">What is Test Driven Development</h4> <p>Test Driven Development is a workflow where you write a test before writing the code it tests, this means you write a failing test, make it pass, then clean up. Writing the test first forces you to define what “done” means before you start, pushes you toward designs with clear boundaries (code that’s hard to test is usually code that’s tangled), and catches breakage seconds after you cause it rather than days later. The tests you accumulate then act as a safety net that makes refactoring something you can do without fear.</p> <h4 id="why-are-unit-tests-important">Why are Unit Tests important</h4> <p>I believe unit tests are vital for any well-designed codebase. A good suite catches bugs seconds after you write them instead of days later, and points at exactly which function broke rather than leaving you to guess. It lets you refactor without fear, since a passing suite is proof you haven’t changed behavior. It exercises edge cases you’d never think to hit by hand, and once a bug is fixed, a regression test makes sure it stays fixed. In embedded work specifically, a host-side test suite also lets you tell a software bug apart from a hardware one before you ever pick up a probe. And as a side effect, the tests themselves end up documenting how a module is meant to be used.</p> <h2 id="how-to-write-unit-tests">How to write unit tests</h2> <p>There are two types of unit tests we need to worry about: tests that are pure logic, and tests that depend on hardware. Logic-bound tests like writing a test for ring buffer or a math library are easier to write because the code under test has no external dependencies — you construct it, feed it known inputs, and assert on the output, and it runs the same way every time on the host. Hardware-dependent tests, like writing tests for a sensor driver, are more complex because the code under test calls real registers and peripherals that don’t exist on the host, so that boundary has to be faked before the test can run at all.</p> <p>In mcu-co we have two modules that demonstrate this perfectly: the ring buffer is our logic-bound test, which we covered in <a href="/blog/2026/mcu-co_Type_Agnostic_Ring_Buffer/">P3</a>, and the GPIO and PWM controllers are our hardware-bound tests, which we covered in <a href="/blog/2026/mcu-co_gpio_and_pwm_controllers/">P6</a>.</p> <p>The tests below use <a href="https://cpputest.github.io/">CppUTest</a>, the framework the Grenning book teaches with. Each test file declares a <code class="language-plaintext highlighter-rouge">TEST_GROUP</code> whose <code class="language-plaintext highlighter-rouge">setup()</code> runs before every single test, so no test inherits state from the one before it.</p> <h4 id="testing-the-ring-buffer">Testing the ring buffer</h4> <p>The ring buffer has no hardware underneath it, so there is nothing to fake. Every test gets a fresh buffer and known storage:</p> <figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre><span class="cp">#define CAPACITY 4U </span><span class="cm">/* 1 slot reserved: holds at most CAPACITY - 1 elements */</span><span class="cp">
+</span>
+<span class="n">TEST_GROUP</span><span class="p">(</span><span class="n">RingBuffer</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">storage</span><span class="p">[</span><span class="n">CAPACITY</span><span class="p">];</span>
+    <span class="n">ring_buffer_t</span> <span class="n">rb</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="n">setup</span><span class="p">()</span> <span class="k">override</span>
+    <span class="p">{</span>
+        <span class="n">ring_buffer_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="n">storage</span><span class="p">,</span> <span class="n">CAPACITY</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">uint8_t</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>From there a test is just “feed it a known sequence, assert on what comes back”. The interesting cases are the edges — a full buffer, an empty one, and the wraparound in between:</p> <figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="code"><pre><span class="c1">// With overwrite=false, writing to a full buffer should fail and leave the</span>
+<span class="c1">// existing (oldest) data untouched.</span>
+<span class="n">TEST</span><span class="p">(</span><span class="n">RingBuffer</span><span class="p">,</span> <span class="n">WriteFailsWhenBufferIsFull</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">oldest</span> <span class="o">=</span> <span class="mi">11</span><span class="p">;</span>
+    <span class="kt">uint8_t</span> <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">overwrite</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">oldest</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">));</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">CAPACITY</span> <span class="o">-</span> <span class="mi">1U</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+        <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">val</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="n">CHECK_TRUE</span><span class="p">(</span><span class="n">ring_buffer_is_full</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">));</span>
+
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">99</span><span class="p">;</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_ERR_FULL</span><span class="p">,</span> <span class="n">ring_buffer_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">val</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">));</span>
+    <span class="n">BYTES_EQUAL</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="n">storage</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>Note that the test does not just check the status code — it also checks that the rejected write left the oldest element alone. A buffer that returns <code class="language-plaintext highlighter-rouge">STATUS_ERR_FULL</code> <em>and</em> corrupts your data would pass a weaker test.</p> <p>The overwrite case is the same idea, except here the assertion is about ordering. Writing a fourth element into a full buffer should evict the oldest one and leave the rest readable in order:</p> <figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="code"><pre><span class="n">TEST</span><span class="p">(</span><span class="n">RingBuffer</span><span class="p">,</span> <span class="n">WriteOverwritesOldestWhenFullAndOverwriteTrue</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">no_overwrite</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">overwrite</span>    <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="n">no_overwrite</span><span class="p">));</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">,</span> <span class="n">no_overwrite</span><span class="p">));</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">,</span> <span class="n">no_overwrite</span><span class="p">));</span>
+    <span class="n">CHECK_TRUE</span><span class="p">(</span><span class="n">ring_buffer_is_full</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">));</span>
+
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_write</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">d</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">));</span>
+
+    <span class="kt">uint8_t</span> <span class="n">out</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">));</span>
+    <span class="n">BYTES_EQUAL</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">out</span><span class="p">);</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">));</span>
+    <span class="n">BYTES_EQUAL</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">out</span><span class="p">);</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">ring_buffer_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">));</span>
+    <span class="n">BYTES_EQUAL</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">out</span><span class="p">);</span>
+    <span class="n">CHECK_TRUE</span><span class="p">(</span><span class="n">ring_buffer_is_empty</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rb</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>That is the whole pattern for logic-bound code: no setup beyond the struct itself, and every assertion is on a value you can see.</p> <h4 id="testing-the-controllers">Testing the controllers</h4> <p>The controllers are the harder case. <code class="language-plaintext highlighter-rouge">gpio_controller_io_cfg()</code> ends in a call to <code class="language-plaintext highlighter-rouge">gpio_init()</code>, which writes real STM32 registers — registers that do not exist when the test runs on your laptop. The module under test cannot be compiled and run on the host until something stands in for that driver.</p> <h4 id="faking-the-driver-layer">Faking the driver layer</h4> <p>The fix is to swap the driver out at link time. <code class="language-plaintext highlighter-rouge">gpio_spy.c</code> implements the exact same function signatures as <code class="language-plaintext highlighter-rouge">gpio.c</code>, but instead of touching registers it records the arguments it was handed and returns a status the test can control:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre><span class="k">static</span> <span class="n">gpio_pin_t</span> <span class="n">last_init_pin</span><span class="p">;</span>
+<span class="k">static</span> <span class="n">gpio_config_t</span> <span class="n">last_init_config</span><span class="p">;</span>
+<span class="k">static</span> <span class="n">status_t</span> <span class="n">forced_status</span><span class="p">;</span>
+
+<span class="n">status_t</span> <span class="nf">gpio_init</span><span class="p">(</span><span class="k">const</span> <span class="n">gpio_pin_t</span> <span class="o">*</span><span class="n">gpio</span><span class="p">,</span> <span class="k">const</span> <span class="n">gpio_config_t</span> <span class="o">*</span><span class="n">config</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">last_init_pin</span>    <span class="o">=</span> <span class="o">*</span><span class="n">gpio</span><span class="p">;</span>
+    <span class="n">last_init_config</span> <span class="o">=</span> <span class="o">*</span><span class="n">config</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">forced_status</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">status_t</span> <span class="nf">gpio_set_state</span><span class="p">(</span><span class="k">const</span> <span class="n">gpio_pin_t</span> <span class="o">*</span><span class="n">gpio</span><span class="p">,</span> <span class="n">gpio_state_t</span> <span class="n">state</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">last_set_state_pin</span>   <span class="o">=</span> <span class="o">*</span><span class="n">gpio</span><span class="p">;</span>
+    <span class="n">last_set_state_state</span> <span class="o">=</span> <span class="n">state</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">forced_status</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>The spy exposes two kinds of hooks to the test: setters that decide what the driver “returns” (<code class="language-plaintext highlighter-rouge">GpioSpy_SetReturnStatus</code>), and getters that report what it was called with (<code class="language-plaintext highlighter-rouge">GpioSpy_GetLastInitPin</code>, <code class="language-plaintext highlighter-rouge">GpioSpy_GetLastInitConfig</code>). <code class="language-plaintext highlighter-rouge">GpioSpy_Reset()</code> runs in <code class="language-plaintext highlighter-rouge">setup()</code> so nothing leaks between tests.</p> <p>Nothing in the controller changes. The substitution happens in the test build, which compiles the real <code class="language-plaintext highlighter-rouge">gpio_controller.c</code> but links it against the spy instead of the real driver:</p> <figure class="highlight"><pre><code class="language-cmake" data-lang="cmake"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre><span class="si">${</span><span class="nv">FIRMWARE_ROOT</span><span class="si">}</span>/src/gpio_controller.c
+<span class="si">${</span><span class="nv">FIRMWARE_ROOT</span><span class="si">}</span>/src/gpio_irq_bindings.c
+fakes/gpio_spy.c
+
+<span class="si">${</span><span class="nv">FIRMWARE_ROOT</span><span class="si">}</span>/src/pwm_controller.c
+fakes/timer_spy.c
+</pre></td></tr></tbody></table></code></pre></figure> <p>This is why the controller layer was worth writing as its own module in the first place. Because it only ever reaches hardware through <code class="language-plaintext highlighter-rouge">gpio.h</code> and <code class="language-plaintext highlighter-rouge">timer.h</code>, there is exactly one seam to fake.</p> <h4 id="example-gpio_controller_io_cfg">Example: gpio_controller_io_cfg</h4> <p>With the spy in place, a test can assert on the <em>translation</em>, not just the return code — that the three wire bytes became the right <code class="language-plaintext highlighter-rouge">gpio_pin_t</code> and the right <code class="language-plaintext highlighter-rouge">gpio_config_t</code>:</p> <figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td><td class="code"><pre><span class="c1">// Happy path: valid input should translate the wire bytes into a correctly</span>
+<span class="c1">// populated gpio_pin_t and gpio_config_t passed to gpio_init().</span>
+<span class="n">TEST</span><span class="p">(</span><span class="n">GpioController</span><span class="p">,</span> <span class="n">IoCfgCallsGpioInitWithCorrectPinAndConfig</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">payload</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">GPIO_MODE_OUTPUT</span><span class="p">,</span> <span class="n">GPIO_PORT_B</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
+
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">gpio_controller_io_cfg</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+
+    <span class="n">gpio_pin_t</span> <span class="n">pin</span> <span class="o">=</span> <span class="n">GpioSpy_GetLastInitPin</span><span class="p">();</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">GPIO_PORT_B</span><span class="p">,</span> <span class="n">pin</span><span class="p">.</span><span class="n">port</span><span class="p">);</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">pin</span><span class="p">.</span><span class="n">pin</span><span class="p">);</span>
+
+    <span class="n">gpio_config_t</span> <span class="n">config</span> <span class="o">=</span> <span class="n">GpioSpy_GetLastInitConfig</span><span class="p">();</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">GPIO_MODE_OUTPUT</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">mode</span><span class="p">);</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">GPIO_TYPE_PUSH_PULL</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">type</span><span class="p">);</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">GPIO_SPEED_LOW</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">speed</span><span class="p">);</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">GPIO_PULL_NONE</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">pull</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>A controller that swapped the port and pin bytes would still return <code class="language-plaintext highlighter-rouge">STATUS_OK</code>. It would not survive this test.</p> <p>The other half is failure handling. Forcing the driver to fail proves the controller passes the reason back up instead of swallowing it:</p> <figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="code"><pre><span class="c1">// A failure from gpio_init() must be propagated, not swallowed.</span>
+<span class="n">TEST</span><span class="p">(</span><span class="n">GpioController</span><span class="p">,</span> <span class="n">IoCfgPropagatesGpioInitFailure</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">GpioSpy_SetReturnStatus</span><span class="p">(</span><span class="n">STATUS_ERR_NOT_INIT</span><span class="p">);</span>
+
+    <span class="kt">uint8_t</span> <span class="n">payload</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">GPIO_MODE_OUTPUT</span><span class="p">,</span> <span class="n">GPIO_PORT_A</span><span class="p">,</span> <span class="mi">0</span><span class="p">};</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_ERR_NOT_INIT</span><span class="p">,</span> <span class="n">gpio_controller_io_cfg</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="mi">3</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>That is a path you would have real trouble producing on hardware, and it is two lines here.</p> <h4 id="example-pwm_controller_channel_set">Example: pwm_controller_channel_set</h4> <p>The PWM spy records a <em>sequence</em> of calls rather than just the last one, because the controller has to resolve the pin to a timer channel before it can set anything. The test asserts on both steps, and on the decoded duty:</p> <figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="code"><pre><span class="c1">// DUTY is the first two payload bytes, little-endian: E8 03 is 1000, and read</span>
+<span class="c1">// the other way round it would be 59395 - a value the driver would reject, so a</span>
+<span class="c1">// byte-swapped decode can't hide behind a passing status.</span>
+<span class="n">TEST</span><span class="p">(</span><span class="n">PwmController</span><span class="p">,</span> <span class="n">ChannelSetForwardsDecodedDutyToTheDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">uint8_t</span> <span class="n">payload</span><span class="p">[</span><span class="n">SET_LEN</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">0xE8</span><span class="p">,</span> <span class="mh">0x03</span><span class="p">,</span> <span class="n">GPIO_PORT_B</span><span class="p">,</span> <span class="mi">7</span><span class="p">};</span>
+
+    <span class="n">TimerSpy_SetLookupResult</span><span class="p">(</span><span class="n">TIMER_TIM4</span><span class="p">,</span> <span class="n">TIMER_CH2</span><span class="p">);</span>
+
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">STATUS_OK</span><span class="p">,</span> <span class="n">pwm_controller_channel_set</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">SET_LEN</span><span class="p">));</span>
+
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">TIMER_CALL_PWM_SET_DUTY</span><span class="p">,</span> <span class="n">TimerSpy_GetCall</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">TimerSpy_GetLastDuty</span><span class="p">());</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">TIMER_TIM4</span><span class="p">,</span> <span class="n">TimerSpy_GetLastInstance</span><span class="p">());</span>
+    <span class="n">LONGS_EQUAL</span><span class="p">(</span><span class="n">TIMER_CH2</span><span class="p">,</span> <span class="n">TimerSpy_GetLastChannel</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>The choice of <code class="language-plaintext highlighter-rouge">0xE8 0x03</code> is deliberate. Little-endian it is 1000, and byte-swapped it is 59395 — a duty the driver would reject outright, so an endianness bug cannot hide behind a passing status. Picking test values that <em>fail loudly</em> when the code is wrong is most of what makes a test worth having.</p>]]></content><author><name></name></author><category term="mcu-co"/><category term="MCU"/><summary type="html"><![CDATA[How to unit test embedded C , using the mcu-co's modules as an example]]></summary></entry><entry><title type="html">mcu-co How to write a command dispatcher (mcu-co P5)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_Command_Dispatcher/" rel="alternate" type="text/html" title="mcu-co How to write a command dispatcher (mcu-co P5)"/><published>2026-09-09T10:40:16+00:00</published><updated>2026-09-09T10:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_Command_Dispatcher</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_Command_Dispatcher/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>In this post we will go over the <strong>command dispatcher</strong>. In super simple terms, a command dispatcher is a function that takes a command as input and calls the appropriate handler function to execute it. It is a very common design paradigm in embedded systems, or in programming in general. Here are some common applications for it:</p> <ul> <li>Serial communication: Host sends commands over UART → dispatcher executes them</li> <li>CLI interfaces: Parsing text input from a debug terminal</li> <li>Message handling: Processing messages from a queue or interrupt handler</li> <li>Task scheduling: Dispatching different operations based on command IDs</li> </ul> <p>In mcu-co we are using the serial communication approach: we get a command on the UART bus, look at its opcode, and dispatch the function tied to that opcode. In this post I will go over how I designed the command dispatcher to fit mcu-co’s needs. The full implementation can be found <a href="https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/command_dispatcher.c">here</a>.</p> <h2 id="high-level-overview">High Level Overview</h2> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_command_dispatch-480.webp 480w,/assets/img/mcu-co/mcu-co_command_dispatch-800.webp 800w,/assets/img/mcu-co/mcu-co_command_dispatch-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_command_dispatch.png" class="img-fluid rounded z-depth-1" width="50%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>The block diagram above illustrates the purpose of the command dispatcher: it takes in command frames built by the frame parser and passes a payload (the controller instructions) to the GPIO and PWM controllers.</p> <h2 id="data-structures">Data Structures</h2> <p>These are the data structures I created for use in the command dispatcher module.</p> <p>The first data structure to bring up is the <strong>function pointer</strong>: a variable that stores the address of a function, allowing you to call that function indirectly through the pointer instead of calling it by name. We will use function pointers in the command dispatcher to map commands to their handler functions in a lookup table. By doing this we can avoid large switch statements and large if/else blocks. It also makes it easy to add new commands without changing the dispatcher logic. Below is the syntax used for function pointers:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2
 3
 4
@@ -2665,148 +2905,4 @@ DELTA_KERNEL_DEFCONFIG <span class="o">=</span> <span class="s2">"bmp.cfg"</span
 2
 </pre></td><td class="code"><pre><span class="nv">$ </span>docker build <span class="nt">-t</span> yocto-sdk:imx91 <span class="nb">.</span>
 <span class="nv">$ </span>docker run <span class="nt">-it</span> yocto-sdk:imx91
-</pre></td></tr></tbody></table></code></pre></figure> <p>Now a developer can leverage the SDK to compile their application for a FRDM i.MX91 target.</p>]]></content><author><name></name></author><category term="Yocto"/><category term="Embedded-Linux"/><summary type="html"><![CDATA[Deploying a Yocto SDK in a Docker Container for Embedded Linux Development]]></summary></entry><entry><title type="html">Creating a new Yocto Meta Layer P3</title><link href="https://causality-lab.github.io/blog/2026/Creating-new-meta-layer/" rel="alternate" type="text/html" title="Creating a new Yocto Meta Layer P3"/><published>2026-02-22T09:40:16+00:00</published><updated>2026-02-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/Creating-new-meta-layer</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/Creating-new-meta-layer/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>This is the third post in my Yocto blog series. In this post we will go over how to create your own meta layer. First we will go over what is a meta layer and why you should always create your own layer rather than modifying existing upstream layers.</p> <h4 id="what-is-a-meta-layer">What is a meta-layer</h4> <p>In Yocto a meta-layer is a directory that contains metadata used by the build system to generate a Linux image. It is used to tell Bitbake how to build your own custom Linux distro, a meta-layer is comprised of the following :</p> <ul> <li><strong>Configuration files (.conf)</strong> : Used to define global variables and layer dependencies.</li> <li><strong>Recipes(.bb)</strong> : Instructions on how to fetch, configure, compile, and install a specific software package.</li> <li><strong>Append files(.bbappend)</strong> : Used to extend or modify an existing recipe from another layer without modifying the original file.</li> </ul> <h4 id="why-is-it-important-to-have-your-own-layers">Why is it important to have your own layers</h4> <p>Yocto uses a modular, layered architecture: each layer is stacked on top of others, reusing and extending the functionality provided by the layers below it. By creating your own layer, you can reuse and extend the functionality provided by the layers you depend on, without ever modifying them directly.</p> <p>Creating your own layer also gives you independence, because it lets you customize your OS without “breaking” the official code from the Yocto Project or your hardware vendor. If you edit their layers directly, you can’t easily pull in updates or security fixes when a new Yocto release (for example, moving from Scarthgap to the next version) comes out. A custom layer keeps all your changes in a separate “bucket” that survives upgrades.</p> <h2 id="how-to-create-your-layer">How to create your layer</h2> <p>Creating a layer is fairly simple, enter you Yocto build enviroment and activate bitbake. If you are using the imx91 frdm board and follwoed the getting started instructions provided by NXP here <a href="https://www.nxp.com/document/guide/getting-started-with-frdm-imx91-development-board:GS-FRDM-IMX91?section=build-and-run">here</a>. So to get my build enviroment stared I use the following command:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-</pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">source </span>setup-environment frdm-imx91/
-</pre></td></tr></tbody></table></code></pre></figure> <p>Then use this command to find which layers are currently included in you image</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-</pre></td><td class="code"><pre><span class="nv">$ </span>bitbake-layers show-layers
-</pre></td></tr></tbody></table></code></pre></figure> <p>For me when I run this command I see the following output:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-</pre></td><td class="code"><pre>layer                 path                                                                    priority
-<span class="o">========================================================================================================</span>
-core                  /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta                         5
-yocto                 /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta-poky                    5
-openembedded-layer    /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-oe         5
-multimedia-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-multimedia  5
-meta-python           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-python     5
-freescale-layer       /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale                    5
-freescale-3rdparty    /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-3rdparty           4
-freescale-distro      /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-distro             4
-fsl-bsp-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-bsp             8
-fsl-sdk-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-sdk             8
-imx-machine-learning  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-ml              8
-v2x-imx               /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-v2x             9
-imx-demo              /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-demo-experience          7
-nxp-matter-baseline   /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-matter-baseline  7
-nxp-openthread        /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-openthread  7
-meta-arm              /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm                 5
-arm-toolchain         /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm-toolchain       5
-clang-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-clang                        7
-gnome-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-gnome      5
-networking-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-networking  5
-filesystems-layer     /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-filesystems  5
-qt6-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-qt6                          5
-parsec-layer          /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-parsec         5
-tpm-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-tpm            6
-virtualization-layer  /home/ime/Yocto_Scarthgap_NXP/sources/meta-virtualization               8
-imx-frdm-release      /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-bsp        8
-imx-frdm-sdk-release  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-sdk        8
-imx-frdm-demo         /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-nxp-demo-experience  7
-</pre></td></tr></tbody></table></code></pre></figure> <p>Meaning the layer here with the highest priority is v2x-imx, we want our new layer to have the highest priority. The reason for this will be come clear when I explain what layer priority levels mean within Yocto.</p> <h4 id="explaining-layer-priority">Explaining Layer Priority</h4> <p>In Yocto, layer priority is simply the rule that decides which layer “wins” if multiple layers provide or modify the same recipe or configuration. Each layer is assigned a numeric priority in its layer.conf, and the layer with the higher number takes precedence. We want our layer to have the highest priority so the changes we make to features provided by other layers take precedence.</p> <p>From the list above, we want our new layer to have a higher priority than v2x-imx, so we’ll create it with priority 10. Following the meta-<layer-name> naming convention, we’ll call it meta-causality-labs and create it with the following command.</layer-name></p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-</pre></td><td class="code"><pre><span class="nv">$ </span>bitbake-layers create-layer <span class="nt">-p</span> 10 meta-causality-labs
-</pre></td></tr></tbody></table></code></pre></figure> <p>Now inspect the new layers list with the <code class="language-plaintext highlighter-rouge">bitbake-layers show-layers</code> command and you will see your own new Yocto layer</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-</pre></td><td class="code"><pre>layer                 path                                                                    priority
-<span class="o">========================================================================================================</span>
-core                  /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta                         5
-yocto                 /home/ime/Yocto_Scarthgap_NXP/sources/poky/meta-poky                    5
-openembedded-layer    /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-oe         5
-multimedia-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-multimedia  5
-meta-python           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-python     5
-freescale-layer       /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale                    5
-freescale-3rdparty    /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-3rdparty           4
-freescale-distro      /home/ime/Yocto_Scarthgap_NXP/sources/meta-freescale-distro             4
-fsl-bsp-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-bsp             8
-fsl-sdk-release       /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-sdk             8
-imx-machine-learning  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-ml              8
-v2x-imx               /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx/meta-imx-v2x             9
-imx-demo              /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-demo-experience          7
-nxp-matter-baseline   /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-matter-baseline  7
-nxp-openthread        /home/ime/Yocto_Scarthgap_NXP/sources/meta-nxp-connectivity/meta-nxp-openthread  7
-meta-arm              /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm                 5
-arm-toolchain         /home/ime/Yocto_Scarthgap_NXP/sources/meta-arm/meta-arm-toolchain       5
-clang-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-clang                        7
-gnome-layer           /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-gnome      5
-networking-layer      /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-networking  5
-filesystems-layer     /home/ime/Yocto_Scarthgap_NXP/sources/meta-openembedded/meta-filesystems  5
-qt6-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-qt6                          5
-parsec-layer          /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-parsec         5
-tpm-layer             /home/ime/Yocto_Scarthgap_NXP/sources/meta-security/meta-tpm            6
-virtualization-layer  /home/ime/Yocto_Scarthgap_NXP/sources/meta-virtualization               8
-imx-frdm-release      /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-bsp        8
-imx-frdm-sdk-release  /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-imx-sdk        8
-imx-frdm-demo         /home/ime/Yocto_Scarthgap_NXP/sources/meta-imx-frdm/meta-nxp-demo-experience  7
-meta-causality-labs   /home/ime/Yocto_Scarthgap_NXP/frdm-imx91/meta-causality-labs            10
-</pre></td></tr></tbody></table></code></pre></figure> <p>Now inspecting the new layer we created, we can briefly go over what each of these files does:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-</pre></td><td class="code"><pre><span class="nb">.</span>
-├── conf
-│   └── layer.conf
-├── COPYING.MIT
-├── README
-└── recipes-example
-    └── example
-        └── example_0.1.bb
-</pre></td></tr></tbody></table></code></pre></figure> <ul> <li><strong>conf/layer.conf</strong> – The main configuration file for the layer. It tells BitBake where to find recipes in this layer, what the layer’s priority is, and which other layers it depends on.</li> <li><strong>COPYING.MIT</strong> – A copy of the MIT license, added by default to describe the license under which the layer’s metadata is distributed.</li> <li><strong>README</strong> – A placeholder for documentation about the layer: what it provides, how to enable it, and any special notes or requirements.</li> <li><strong>recipes-example/example/example_0.1.bb</strong> – A simple example recipe included as a template. It demonstrates the basic structure of a BitBake recipe and is meant to be replaced or used as a reference when writing your own recipes.</li> </ul> <p>Now that we have our own custom layers we can now add applications to our image using recipes, next post we will go over how to add different applications to our custom image through the use of recipes.</p>]]></content><author><name></name></author><category term="Yocto"/><category term="Embedded-Linux"/><summary type="html"><![CDATA[Showcasing how to create a new Yocto Layer]]></summary></entry></feed>
+</pre></td></tr></tbody></table></code></pre></figure> <p>Now a developer can leverage the SDK to compile their application for a FRDM i.MX91 target.</p>]]></content><author><name></name></author><category term="Yocto"/><category term="Embedded-Linux"/><summary type="html"><![CDATA[Deploying a Yocto SDK in a Docker Container for Embedded Linux Development]]></summary></entry></feed>
