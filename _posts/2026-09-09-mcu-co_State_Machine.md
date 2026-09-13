@@ -18,7 +18,7 @@ In this post we are going to learn about one of the most common embedded softwar
 
 In mcu-co we need a frame parser to parse the incoming protocol coming from our Linux Host on the UART wire. We can use a Mealy state machine to do this! It would have to be a Mealy state machine because the parser's output depends on both the current state AND the incoming byte.
 
-I will focus on how to implement a mealy state machine in embedded c for a common appplication to learn more about the theory of state machines see [here](some link).
+I will focus on how to implement a Mealy state machine in embedded C for a common application. To learn more about the theory of state machines, see [here](https://en.wikipedia.org/wiki/Finite-state_machine).
 
 For reference the completed frame parser used in mcu-co can be found [here](https://github.com/Causality-Labs/mcu-co_firmware/blob/main/src/frame_parser.c).
 
