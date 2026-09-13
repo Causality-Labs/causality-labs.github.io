@@ -40,7 +40,7 @@
     <span class="kt">uint8_t</span> <span class="n">crc_low</span><span class="p">;</span>
     <span class="kt">uint8_t</span> <span class="n">crc_high</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">command_frame_t</span><span class="p">;</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <ul> <li> <p><strong>Inputs/Events</strong>: a Mealy machine transitions based on its current state <em>and</em> an input or event. Here the input is the byte itself, and the event is what that byte turns out to be — <code class="language-plaintext highlighter-rouge">data_byte == SOF_BYTE</code>.</p> </li> <li> <p><strong>Transition Function</strong>: one <code class="language-plaintext highlighter-rouge">switch</code> on the current state that consumes input and updates it:</p> </li> </ul> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <ul> <li> <p><strong>Inputs/Events</strong>: a Mealy machine transitions based on its current state <em>and</em> an input or event. Here the input is the byte itself, and the event is what that byte turns out to be, such as <code class="language-plaintext highlighter-rouge">data_byte == SOF_BYTE</code>.</p> </li> <li> <p><strong>Transition Function</strong>: one <code class="language-plaintext highlighter-rouge">switch</code> on the current state that consumes input and updates it:</p> </li> </ul> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -93,7 +93,7 @@
         <span class="cm">/* ... */</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>All state machines follow this structure and you extend it for your specific application!</p> <h2 id="data-structures">Data Structures</h2> <p>This is an overview of the data structures used for the frame-parser in mcu-co.</p> <p><strong>frame_state_t</strong>: The states themselves. This enum <em>is</em> the state machine — each value is one field of the wire format.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>All state machines follow this structure and you extend it for your specific application!</p> <h2 id="data-structures">Data Structures</h2> <p>This is an overview of the data structures used for the frame-parser in mcu-co.</p> <p><strong>frame_state_t</strong>: The states themselves. This enum <em>is</em> the state machine, and each value is one field of the wire format.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -419,7 +419,7 @@
 
             <span class="k">return</span> <span class="n">FRAME_IN_PROGRESS</span><span class="p">;</span>
         <span class="p">}</span>
-</pre></td> </tr></tbody></table></code></pre></figure> <p>In this state we expect the next incoming byte to be the length of the payload. We must also verify that this is a valid payload length. If it’s invalid, we change the state back to <code class="language-plaintext highlighter-rouge">SOF</code>.</p> <p>0 is also a valid length — in that case we skip the payload state entirely and move straight into <code class="language-plaintext highlighter-rouge">CRC_LOW</code>. If the length is valid and nonzero, we update the state to <code class="language-plaintext highlighter-rouge">PAYLOAD</code> and initialize the payload index.</p> <h4 id="payload">PAYLOAD</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
+</pre></td> </tr></tbody></table></code></pre></figure> <p>In this state we expect the next incoming byte to be the length of the payload. We must also verify that this is a valid payload length. If it’s invalid, we change the state back to <code class="language-plaintext highlighter-rouge">SOF</code>.</p> <p>0 is also a valid length. In that case we skip the payload state entirely and move straight into <code class="language-plaintext highlighter-rouge">CRC_LOW</code>. If the length is valid and nonzero, we update the state to <code class="language-plaintext highlighter-rouge">PAYLOAD</code> and initialize the payload index.</p> <h4 id="payload">PAYLOAD</h4> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr>
 <td class="gutter gl"><pre class="lineno">1
 2
 3
