@@ -48,7 +48,7 @@ printf("Result: %d\n", result);
 
 Above is an example of a function pointer in use. Read the declaration inside-out: `func_ptr` is a pointer (`*`) to a function taking `(int, int)` and returning `int`. Once declared you can set it to a function with the same declaration and then use it as seen above.
 
-In mcu-co we have two different types of functions to base our function pointers on: action functions and read functions. Action functions take two inputs — the address of a buffer and the length of the buffer. Read functions take those same two inputs plus a pointer to a value, since a read has to place the result it finds somewhere. Below you can see the action function pointer and the read function pointer:
+In mcu-co we have two different types of functions to base our function pointers on: action functions and read functions. Action functions take two inputs: the address of a buffer and the length of the buffer. Read functions take those same two inputs plus a pointer to a value, since a read has to place the result it finds somewhere. Below you can see the action function pointer and the read function pointer:
 
 {% highlight c linenos %}
 typedef status_t (*command_action_fn)(const uint8_t *payload, uint8_t length);
@@ -57,10 +57,10 @@ typedef status_t (*command_read_fn)(const uint8_t *payload, uint8_t length, uint
 
 Both lines follow the same pattern, just wrapped in `typedef` so we can reuse the type by name instead of retyping the pointer syntax everywhere:
 
-- `typedef` — we're naming a type, not declaring a variable.
-- `status_t` — the return type the function must have.
-- `(*command_action_fn)` — the name of the new type, marked as a pointer with `*`.
-- `(const uint8_t *payload, uint8_t length)` — the parameter list the function must match.
+- `typedef`: we're naming a type, not declaring a variable.
+- `status_t`: the return type the function must have.
+- `(*command_action_fn)`: the name of the new type, marked as a pointer with `*`.
+- `(const uint8_t *payload, uint8_t length)`: the parameter list the function must match.
 
 So `command_action_fn` is now a type: "pointer to a function that takes `(const uint8_t *, uint8_t)` and returns `status_t`." `command_read_fn` is the same idea with one extra parameter, `uint32_t *value`, for the result. Any function matching one of these signatures can be assigned to a variable of that type and stored in the table below.
 
@@ -110,7 +110,7 @@ Three small habits make that table cheap and hard to break: `static const` keeps
 
 ## The adapters
 
-Two rows point at functions that are not controller functions: `read_gpio_pin` and `read_pwm_duty`. They exist because the controllers report values in their natural types — a `bool` for a pin, a `uint16_t` for a duty — while the table's read signature reports through a `uint32_t`:
+Two rows point at functions that are not controller functions: `read_gpio_pin` and `read_pwm_duty`. They exist because the controllers report values in their natural types (a `bool` for a pin, a `uint16_t` for a duty) while the table's read signature reports through a `uint32_t`:
 
 {% highlight c linenos %}
 /* gpio_controller_read() reports a bool, which the table's single read
@@ -135,7 +135,7 @@ This is the trade the table asks you to make. To have one call site handle every
 
 Three small static functions sit between the table and the dispatcher, and none of them is more than a few lines:
 
-- **`find_command`** walks the table and returns the row whose opcode matches, or `NULL`. A linear scan over thirteen rows, once per command, on a link that is strictly one command at a time — a direct-index array or a binary search would buy complexity where there is no problem.
+- **`find_command`** walks the table and returns the row whose opcode matches, or `NULL`. A linear scan over thirteen rows, once per command, on a link that is strictly one command at a time. A direct-index array or a binary search would buy complexity where there is no problem.
 
 {% highlight c linenos %}
 static const command_entry_t *find_command(uint8_t opcode)
@@ -165,7 +165,7 @@ static void store_le(uint8_t *data, uint32_t value, uint8_t width)
 }
 {% endhighlight %}
 
-- **`reply_nack`** builds the failure reply — `ack = false`, one data byte carrying the reason — and *returns* that reason:
+- **`reply_nack`** builds the failure reply (`ack = false`, one data byte carrying the reason) and *returns* that reason:
 
 {% highlight c linenos %}
 static status_t reply_nack(response_frame_t *resp, status_t reason)

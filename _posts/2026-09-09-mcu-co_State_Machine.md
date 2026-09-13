@@ -72,7 +72,7 @@ typedef struct
 {% endhighlight %}
 
 
-- **Inputs/Events**: a Mealy machine transitions based on its current state *and* an input or event. Here the input is the byte itself, and the event is what that byte turns out to be — `data_byte == SOF_BYTE`.
+- **Inputs/Events**: a Mealy machine transitions based on its current state *and* an input or event. Here the input is the byte itself, and the event is what that byte turns out to be, such as `data_byte == SOF_BYTE`.
 
 
 - **Transition Function**: one `switch` on the current state that consumes input and updates it:
@@ -113,7 +113,7 @@ All state machines follow this structure and you extend it for your specific app
 
 This is an overview of the data structures used for the frame-parser in mcu-co.
 
-**frame_state_t**: The states themselves. This enum *is* the state machine — each value is one field of the wire format.
+**frame_state_t**: The states themselves. This enum *is* the state machine, and each value is one field of the wire format.
 
 {% highlight c linenos %}
 /** @brief Which field of the wire format the next byte belongs to. */
@@ -330,7 +330,7 @@ This state is very simple: we save the incoming byte as the opcode, update to th
 
 In this state we expect the next incoming byte to be the length of the payload. We must also verify that this is a valid payload length. If it's invalid, we change the state back to `SOF`.
 
-0 is also a valid length — in that case we skip the payload state entirely and move straight into `CRC_LOW`. If the length is valid and nonzero, we update the state to `PAYLOAD` and initialize the payload index.
+0 is also a valid length. In that case we skip the payload state entirely and move straight into `CRC_LOW`. If the length is valid and nonzero, we update the state to `PAYLOAD` and initialize the payload index.
 
 
 #### PAYLOAD
