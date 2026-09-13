@@ -15,7 +15,7 @@ The full implementation can be found [here](https://github.com/Causality-Labs/mc
 
 ## High Level Overview
 
-{% include figure.liquid path="assets/img/mcu-co/mcu-co_controllers.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+{% include figure.liquid path="assets/img/mcu-co/mcu-co_controllers.png" class="img-fluid rounded z-depth-1" width="50%" zoomable=true %}
 
 The block diagram above illustrates the purpose of the GPIO and PWM controllers: it simply takes the raw payload bytes handed to it by the dispatcher, validates and decodes them into pin or channel arguments, and calls into the underlying GPIO or timer driver to carry out the operation.
 
