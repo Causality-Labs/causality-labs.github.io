@@ -1,7 +1,7 @@
 ---
 layout: post
 title: mcu-co How to write GPIO and PWM controllers (mcu-co P6)
-date: 2026-11-09 09:40:16
+date: 2026-09-13 09:40:16
 description: How to decode a validated command payload into pin and channel actions on real hardware, using the mcu-co GPIO and PWM controllers as the example
 tags: MCU
 categories: mcu-co
