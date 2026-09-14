@@ -20,7 +20,7 @@ category: MCU
 
         <p>Embedded Linux devices are excellent at application logic, networking stacks, servers, machine learning and more, but they are not well suited to low-latency, hard real-time work like PWM generation and interrupt handling (outside of kernel space).</p>
 
-        <p>That is what gave me the idea for mcu-co: a real-time I/O accelerator that pairs a Linux host with a dedicated microcontroller, one that handles the low-latency real-time work like interrupt handling and PWM generation. Offloading that work gives any Linux system hard real-time capability while the host stays focused on high-level application logic.</p>
+        <p>That is what gave me the idea for mcu-co: pairing a Linux host with a dedicated microcontroller that handles the timing-critical work, like interrupt handling and PWM generation. Offloading it that way gets you deterministic pin behavior without a real-time kernel, and leaves the host free to focus on high-level application logic.</p>
 
         <p>The mcu-co project spans the full stack. It contains firmware for an ARM Cortex-M4 microcontroller, a Linux shared library written in C that application programs can use to talk to it, and a CLI tool for driving it from the command line. The plan for the whole project is laid out in the <a href="{% post_url 2026-03-22-mcu-co_Proposal %}">mcu-co proposal</a>.</p>
 
@@ -140,26 +140,26 @@ SOF · LEN · ACK/NACK [ · DATA ] · CRC_L · CRC_H
         <p>Below are some example commands the CLI provides on the Linux host side.</p>
 
 {% highlight bash linenos %}
-mcu-co gpio cfg output A 5      configure PA5 as an output
-mcu-co gpio set high A 5        drive PA5 high
+mcu-co gpio cfg output A 5      # configure PA5 as an output
+mcu-co gpio set high A 5        # drive PA5 high
 
-mcu-co gpio cfg input A 0       configure PA0 as an input
-mcu-co gpio get A 0             read PA0 back
+mcu-co gpio cfg input A 0       # configure PA0 as an input
+mcu-co gpio get A 0             # read PA0 back
 {% endhighlight %}
 
         <p>Bringing up PWM group 0 (TIM2) at 1 kHz and running PA5 at 25% duty:</p>
 
 {% highlight bash linenos %}
-mcu-co pwm group cfg 1000 0     group 0 (TIM2) at 1000 Hz
-mcu-co pwm channel cfg high A 5 claim PA5, active high
-mcu-co pwm channel set 250 A 5  25.0% duty (tenths of a percent)
+mcu-co pwm group cfg 1000 0      # group 0 (TIM2) at 1000 Hz
+mcu-co pwm channel cfg high A 5  # claim PA5, active high
+mcu-co pwm channel set 250 A 5   # 25.0% duty (tenths of a percent)
 {% endhighlight %}
 
         <p>And the interesting one, binding a rising edge on an input pin to a toggle on an output pin. After these two commands the MCU handles the edge itself; the host never sees it and never has to respond to it:</p>
 
 {% highlight bash linenos %}
-mcu-co gpio irq cfg rising A 0               arm PA0 for rising edges
-mcu-co gpio irq bind rising A 0 toggle A 5   PA0 rising -> toggle PA5
+mcu-co gpio irq cfg rising A 0              # arm PA0 for rising edges
+mcu-co gpio irq bind rising A 0 toggle A 5  # PA0 rising -> toggle PA5
 {% endhighlight %}
 
     </div>
