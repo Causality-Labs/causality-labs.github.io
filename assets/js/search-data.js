@@ -100,7 +100,7 @@ ninja.data = [{
         
           title: "mcu-co Proposal (mcu-co P1)",
         
-        description: "Introducing mcu-co, a professional-grade real-time I/O accelerator that bridges a Linux host to a dedicated co-processor for deterministic hardware execution",
+        description: "Introducing mcu-co, which pairs a Linux host with a dedicated microcontroller to give it deterministic pin control without a real-time kernel",
         section: "Posts",
         handler: () => {
           
