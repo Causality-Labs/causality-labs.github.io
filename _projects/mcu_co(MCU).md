@@ -1,6 +1,6 @@
 ---
 layout: page
-title: mcu-co Firmware Part(February 2026 - September 2026)
+title: mcu-co Firmware Part (February 2026 - September 2026)
 description: Real-time co-processor that connects to a Linux host to receive commands, letting the MCU handle low latency deterministic pin work.
 img: assets/img/blogs/mcu-co_Visual.png 
 importance: 1
@@ -25,9 +25,9 @@ category: MCU
         <p>The mcu-co project spans the full stack. It contains firmware for an ARM Cortex-M4 microcontroller, a Linux shared library written in C that application programs can use to talk to it, and a CLI tool for driving it from the command line. The plan for the whole project is laid out in the <a href="{% post_url 2026-03-22-mcu-co_Proposal %}">mcu-co proposal</a>.</p>
 
 
-        <p>This post covers the firmware for the micro-controller portion of the project, The firmware turns an STM32G474RE into an I/O co-processor that listens on a serial link. It is written in C99 directly against the CMSIS device headers with no STM32 HAL. I decided to go bare-metal for this project because I wanted to own the whole stack and gain a better understanding of micro contoller architecture.</p>
+        <p>This page covers the firmware for the microcontroller portion of the project. The firmware turns an STM32G474RE into an I/O co-processor that listens on a serial link. It is written in C99 directly against the CMSIS device headers with no STM32 HAL. I decided to go bare-metal for this project because I wanted to own the whole stack and gain a better understanding of microcontroller architecture.</p>
 
-        <p>I also wrote a numebr of tutarials and documentaions for my design process, including <a href="{% post_url 2026-03-28-mcu-co_How_to_write_good_Driver %}">how to write a good driver</a>, <a href="{% post_url 2026-06-14-mcu-co_Type_Agnostic_Ring_Buffer %}">how to design a type agnostic ring-buffer</a>, <a href="{% post_url 2026-11-09-mcu-co_unit_tests %}">how to write unit-tests</a> and more. Here is a link to <a href="https://causality-labs.github.io/blog/category/mcu-co/">all of these posts</a>.</p>
+        <p>I also wrote a number of tutorials and documentation covering my design process, including <a href="{% post_url 2026-03-28-mcu-co_How_to_write_good_Driver %}">how to write a good driver</a>, <a href="{% post_url 2026-06-14-mcu-co_Type_Agnostic_Ring_Buffer %}">how to design a type agnostic ring-buffer</a>, <a href="{% post_url 2026-11-09-mcu-co_unit_tests %}">how to write unit-tests</a> and more. Here is a link to <a href="https://causality-labs.github.io/blog/category/mcu-co/">all of these posts</a>.</p>
 
         <p>Source code for the firmware can be found here: <a href="https://github.com/Causality-Labs/mcu-co_firmware" target="_blank" rel="noopener">mcu-co firmware</a>.</p>
 
@@ -46,7 +46,7 @@ category: MCU
     <div class="col-md-12">
         <p>The hardware side is two devices and one link between them:</p>
 
-        <p><strong>Linux Host:</strong> The Linux host that runs the application logic. Every operation starts here, as a command it sends over the link.</p>
+        <p><strong>Linux Host:</strong> The machine that runs the application logic. Every operation starts here, as a command it sends over the link.</p>
 
         <p><strong>Communication Link (UART):</strong> A single serial connection between the two, carrying commands one way and ACK/NACK replies the other. The firmware uses one UART channel for command traffic and keeps a second UART channel free for its own log output, so debug logging never interferes with the protocol.</p>
 
@@ -71,7 +71,7 @@ category: MCU
 
 <div class="row mt-3">
     <div class="col-md-12">
-        <p>mcu-co also hands the Linux host 43 extra GPIO pins. Each one is addressed by port and pin number over the serial link, and can be configured as an input or an output at runtime. Outputs are driven high or low on command, inputs are read back on command, and upto 16 inputs can be armed to interrupt on a rising edge, a falling edge, or both.</p>
+        <p>mcu-co also hands the Linux host 43 extra GPIO pins. Each one is addressed by port and pin number over the serial link, and can be configured as an input or an output at runtime. Outputs are driven high or low on command, inputs are read back on command, and up to 16 inputs can be armed to interrupt on a rising edge, a falling edge, or both.</p>
 
         <p>These sit on top of whatever the host board already exposes, so a host that has run out of usable pins simply gets another bank of them. The more useful part is that they behave deterministically. An interrupt-to-output binding is serviced by the MCU itself, so the reaction time is the MCU's interrupt latency rather than a trip up through the Linux scheduler and back.</p>
 
@@ -137,7 +137,7 @@ SOF · LEN · ACK/NACK [ · DATA ] · CRC_L · CRC_H
 
 <div class="row">
     <div class="col-md-12">
-        <p>Below would be some example commands that the CLI would provide on the Linux host side.</p>
+        <p>Below are some example commands the CLI provides on the Linux host side.</p>
 
 {% highlight bash linenos %}
 mcu-co gpio cfg output A 5      configure PA5 as an output
@@ -172,5 +172,7 @@ mcu-co gpio irq bind rising A 0 toggle A 5   PA0 rising -> toggle PA5
         <p>The co-processor now covers everything mcu-co asks of the MCU: GPIO, pin-change interrupts, autonomous interrupt-to-output bindings, and PWM, all behind a protocol that is checked end to end.</p>
 
         <p>Next up is the Linux side of the project: the shared library written in C that owns the serial link and speaks this protocol on the host's behalf, and the CLI tool built on top of it. Feel free to fork the firmware repo and build on it, and if you are following the series, the next post picks up on the host side.</p>
+
+        <p>Again, you can find documentation and tutorials related to this project <a href="https://causality-labs.github.io/blog/category/mcu-co/">here</a>.</p>
     </div>
 </div>
