@@ -2,7 +2,7 @@
 layout: post
 title: mcu-co Proposal (mcu-co P1)
 date: 2026-03-22 09:40:16
-description: Introducing mcu-co, a professional-grade real-time I/O accelerator that bridges a Linux host to a dedicated co-processor for deterministic hardware execution
+description: Introducing mcu-co, which pairs a Linux host with a dedicated microcontroller to give it deterministic pin control without a real-time kernel
 tags: Embedded-Linux MCU
 categories: mcu-co
 thumbnail: assets/img/blogs/mcu-co_Visual.png
@@ -10,7 +10,7 @@ thumbnail: assets/img/blogs/mcu-co_Visual.png
 
 ## What is mcu-co
 
-mcu-co is a professional-grade, real-time I/O accelerator that bridges a Linux host to a dedicated co-processor. It provides deterministic hardware execution by offloading time-critical tasks from the Linux kernel to dedicated hardware, all accessible from any Linux application through a C library and a command line interface.
+mcu-co pairs a Linux host with a dedicated microcontroller that handles the timing-critical work, like interrupt handling and PWM generation. Offloading it that way gets you deterministic pin behavior without a real-time kernel, and leaves the host free to focus on high-level application logic. Everything the co-processor can do is available to any Linux application through a C library and a command line interface.
 
 ## Core Features
 
