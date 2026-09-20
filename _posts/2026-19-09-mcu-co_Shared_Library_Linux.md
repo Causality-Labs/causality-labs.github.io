@@ -28,12 +28,12 @@ The source for the library is [here](https://github.com/Causality-Labs/mcu-co_sd
 
 ## The public header
 
-In order to use the mcuco library you must inlcude the public header in upit program like this :
+In order to use the mcuco library you must include the public header in your program like this:
 {% highlight c linenos %}
 #include "mcuco.h"
 {% endhighlight %}
 
-If you opened up that header you will be greeted with the data structures and API's that the library gives you access to interface with the microcontroller some of then are seen below:
+If you open up that header you will be greeted with the data structures and APIs the library gives you for interfacing with the microcontroller. Some of them are seen below:
 
 {% highlight c linenos %}
 /* Not thread-safe: the protocol allows one command in flight. */
@@ -56,7 +56,7 @@ mcu_status_t mcuco_probe(mcuco_t *mcu);
 mcu_status_t mcuco_reset(mcuco_t *mcu);
 {% endhighlight %}
 
-`mcuco_t` is declared but never defined in the header, which makes it an opaque pointer. An opaque pointer is a pointer to a type whose definition the caller can not see. This means the caller can hold and pass the pointer but can not derefrence it or know it's size. Here is what the actual mcuco struct looks like which is defined in mcuco.c:
+`mcuco_t` is declared but never defined in the header, which makes it an opaque pointer. An opaque pointer is a pointer to a type whose definition the caller cannot see. This means the caller can hold and pass the pointer but cannot dereference it or know its size. Here is what the actual `mcuco` struct looks like, defined in `mcuco.c`:
 {% highlight c linenos %}
 struct mcuco
 {
@@ -65,7 +65,7 @@ struct mcuco
 };
 {% endhighlight %}
 
-The rest of the functions above deal with the life time cycle of the mcuco_t data structure
+The rest of the functions above deal with the lifecycle of the `mcuco_t` data structure.
 
 - `mcuco_t *mcuco_open(const char *device_path, int timeout_ms)`: Opens the serial port, allocates the handle, and hands it back. It returns `NULL` with `errno` set rather than a status code, because there is no handle yet to report a status through. It also probes before returning, so if the device on the other end of that path is not mcu-co you get a failure here instead of a handle that only breaks on your first real command.
 - `void mcuco_close(mcuco_t *mcu)`: Closes the port and frees the handle. It ignores a `NULL`, the way `free()` does, so an error path can call it without guarding first.
@@ -102,7 +102,7 @@ mcu_status_t mcuco_pwm_channel_set(mcuco_t *mcu, uint16_t duty, port_t port, uin
 
 #### The implementation
 
-Lets a take a look at `mcuco_gpio_set` as the other functions follow a similar structure:
+Let's take a look at `mcuco_gpio_set`, as the other functions follow a similar structure:
 
 {% highlight c linenos %}
 mcu_status_t mcuco_gpio_set(mcuco_t *mcu, level_t level, port_t port, uint8_t pin)
@@ -163,9 +163,9 @@ mcuco_reset(mcu);
 mcuco_close(mcu);
 {% endhighlight %}
 
-By shipping the mcuco library the user does not have to worry about the low level deatils of interfacing with the microcontroller like setting up the uart bus, protocol parsing andd CRC checks. Instead they just have to include the header and call the API's they need. If there is an error it is returned with the `mcu_status_t` status which they can make human readable with the `mcuco_strerror` function.
+By shipping the mcuco library, the user does not have to worry about the low-level details of interfacing with the microcontroller, like setting up the UART bus, protocol parsing and CRC checks. Instead they just have to include the header and call the APIs they need. If there is an error it comes back as an `mcu_status_t`, which they can make human-readable with the `mcuco_strerror` function.
 
-One thiing worth noting is that when you are about to end the program one must call `mcuco_reset` and `mcuco_close`. The MCU keeps driving whatever it was last told to drive, so closing the handle does not turn the LED off. Resetting hands the pins back to a known state before the link goes down.
+One thing worth noting is that when you are about to end the program you must call `mcuco_reset` and `mcuco_close`. The MCU keeps driving whatever it was last told to drive, so closing the handle does not turn the LED off. Resetting hands the pins back to a known state before the link goes down.
 
 #### Linking against it
 
