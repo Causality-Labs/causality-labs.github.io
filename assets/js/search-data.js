@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-unit-test-embedded-c-mcu-co-p7",
+        },{id: "post-mcu-co-how-to-create-a-shared-library-in-linux-mcu-co-p8",
+        
+          title: "mcu-co How to create a shared library in Linux (mcu-co P8)",
+        
+        description: "What a shared library is on Linux and how to design a C API around one, using the mcu-co SDK as the example",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_Shared_Library_Linux/";
+          
+        },
+      },{id: "post-mcu-co-how-to-unit-test-embedded-c-mcu-co-p7",
         
           title: "mcu-co How to unit test embedded C (mcu-co P7)",
         
