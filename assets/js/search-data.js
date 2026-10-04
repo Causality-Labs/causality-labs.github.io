@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-create-a-shared-library-in-linux-mcu-co-p8",
+        },{id: "post-mcu-co-how-to-write-a-command-line-tool-in-c-mcu-co-p9",
+        
+          title: "mcu-co How to write a command-line tool in C (mcu-co P9)",
+        
+        description: "How the mcu-co SDK&#39;s command-line tool turns shell words into library calls with a table of commands, using mcu-co-cli as the example",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/mcu-co_CLI/";
+          
+        },
+      },{id: "post-mcu-co-how-to-create-a-shared-library-in-linux-mcu-co-p8",
         
           title: "mcu-co How to create a shared library in Linux (mcu-co P8)",
         
