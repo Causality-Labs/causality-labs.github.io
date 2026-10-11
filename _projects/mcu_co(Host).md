@@ -11,7 +11,7 @@ category: Embedded-Linux
 
 <div class="row">
     <div class="col-md-12">
-        {% include figure.liquid path="assets/img/mcu-co/SDK_Stack.png" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/mcu-co/SDK_Stack.png" class="img-fluid rounded z-depth-1 d-block mx-auto" width="50%" zoomable=true %}
     </div>
 </div>
 
@@ -27,21 +27,46 @@ category: Embedded-Linux
     </div>
 </div>
 
-<h1 style="text-align: center;">Software</h1>
+<h1 style="text-align: center;">Shared Library</h1>
 
-<div class="row mt-3">
+<div class="row">
     <div class="col-md-12">
-        <p>The SDK is written in C11 and built with CMake, so it can be cross-compiled for any Linux host. It is made up of the following parts:</p>
+        <p><code>libmcuco.so</code> gives applications a small C API for GPIO, interrupts and PWM. A program opens a handle to the serial port with <code>mcuco_open()</code>, calls functions like <code>mcuco_gpio_set()</code> or <code>mcuco_pwm_channel_set()</code>, and closes it when done.</p>
 
-        <p><strong>Shared Library (<code>libmcuco.so</code>):</strong> Gives applications a small C API for GPIO, interrupts and PWM. It owns the serial link and the command protocol, so a program just calls functions like <code>mcuco_gpio_set()</code> and gets a status code back. The full design is covered in <a href="{% post_url 2026-09-19-mcu-co_Shared_Library_Linux %}">how to create a shared library in Linux</a>.</p>
+        <p>The library owns everything below that API. It builds each command frame, adds the CRC, sends it over the serial link and waits for the MCU's reply with a timeout. Every call returns a status code, and <code>mcuco_strerror()</code> turns it into a readable message, so an application can tell "that pin is already in use" apart from "the MCU didn't answer".</p>
 
-        <p><strong>CLI (<code>mcu-co-cli</code>):</strong> Exposes every library operation from the shell, which makes it useful for bring-up, testing and scripting. The full design is covered in <a href="{% post_url 2026-10-03-mcu-co_CLI %}">building the CLI</a>.</p>
-
-        <p><strong>Example Programs:</strong> Small programs that show the library in use: <code>blink</code>, <code>pwm_frequency</code>, <code>pwm_breathe</code> and <code>irq_bind</code>.</p>
+        <p>The full design is covered in <a href="{% post_url 2026-09-19-mcu-co_Shared_Library_Linux %}">how to create a shared library in Linux</a>.</p>
     </div>
 </div>
 
-<h4>Yocto Recipe</h4>
+<h1 style="text-align: center;">CLI</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <p><code>mcu-co-cli</code> exposes every library operation from the shell, which makes it useful for bring-up, testing and scripting. Each call runs one command, written as a subsystem, a verb and then values, for example <code>mcu-co-cli gpio set high A 5</code>.</p>
+
+        <p>Values are printed on stdout and status messages on stderr, and the exit code is 0 on success and 1 on failure, so it works well in shell scripts. The serial port defaults to <code>/dev/ttyACM0</code> and can be changed with <code>-d</code>, and <code>--help</code> lists every command.</p>
+
+        <p>The full design is covered in <a href="{% post_url 2026-10-03-mcu-co_CLI %}">building the CLI</a>.</p>
+    </div>
+</div>
+
+<h1 style="text-align: center;">Example Programs</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <p>The SDK comes with four small programs that show the library in use and make a good starting point for your own:</p>
+
+        <ul>
+            <li><strong><code>blink</code>:</strong> configures a pin as an output and drives it high and low.</li>
+            <li><strong><code>pwm_frequency</code>:</strong> requests PWM group frequencies and reads back what the MCU actually achieved.</li>
+            <li><strong><code>pwm_breathe</code>:</strong> fades an LED by ramping a PWM channel's duty cycle.</li>
+            <li><strong><code>irq_bind</code>:</strong> binds an input pin's interrupt to toggle an output, handled entirely on the MCU.</li>
+        </ul>
+    </div>
+</div>
+
+<h1 style="text-align: center;">Yocto Recipe</h1>
 
 <div class="row">
     <div class="col-md-12">
