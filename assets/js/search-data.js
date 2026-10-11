@@ -253,8 +253,13 @@ ninja.data = [{
           description: "Environmental sensor daemon that exposes BME280 temperature, pressure, and humidity data over TCP/IP with C++ and Python client implementations for remote monitoring.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/Env_Sensor_Daemon/";
-            },},{id: "projects-mcu-co-firmware-part-february-2026-september-2026",
-          title: 'mcu-co Firmware Part (February 2026 - September 2026)',
+            },},{id: "projects-mcu-co-sdk-september-2026-october-2026",
+          title: 'mcu-co SDK (September 2026- October 2026)',
+          description: "Linux SDK for mcu-co, a C shared library, CLI tool and example programs that let a Linux host drive the MCU co-processor over a serial link.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/mcu_co(Host)/";
+            },},{id: "projects-mcu-co-firmware-february-2026-september-2026",
+          title: 'mcu-co Firmware (February 2026 - September 2026)',
           description: "Real-time co-processor that connects to a Linux host to receive commands, letting the MCU handle low latency deterministic pin work.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/mcu_co(MCU)/";
