@@ -27,7 +27,7 @@ category: Embedded-Linux
     </div>
 </div>
 
-<h1 style="text-align: center;">Shared Library</h1>
+<h1 style="text-align: center;">Shared Library</h2>
 
 <div class="row">
     <div class="col-md-12">
@@ -77,7 +77,7 @@ int main(void)
     </div>
 </div>
 
-<h1 style="text-align: center;">CLI</h1>
+<h1 style="text-align: center;">CLI</h2>
 
 <div class="row">
     <div class="col-md-12">
@@ -114,7 +114,7 @@ mcu-co-cli irq bind falling C 13 toggle A 5   # each falling edge on C13 toggles
     </div>
 </div>
 
-<h1 style="text-align: center;">Example Programs</h1>
+<h1 style="text-align: center;">Example Programs</h2>
 
 <div class="row">
     <div class="col-md-12">
@@ -182,7 +182,7 @@ IMAGE_INSTALL:append = " mcu-co mcu-co-examples"
     </div>
 </div>
 
-<h1 style="text-align: center;">Conclusion</h1>
+<h1 style="text-align: center;">Conclusion</h2>
 
 <div class="row">
     <div class="col-md-12">
