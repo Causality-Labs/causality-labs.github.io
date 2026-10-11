@@ -1,6 +1,6 @@
 ---
 layout: page
-title: mcu-co Firmware Part (February 2026 - September 2026)
+title: mcu-co Firmware (February 2026 - September 2026)
 description: Real-time co-processor that connects to a Linux host to receive commands, letting the MCU handle low latency deterministic pin work.
 img: assets/img/blogs/mcu-co_Visual.png 
 importance: 1
@@ -27,7 +27,7 @@ category: MCU
 
         <p>This page covers the firmware for the microcontroller portion of the project. The firmware turns an STM32G474RE into an I/O co-processor that listens on a serial link. It is written in C99 directly against the CMSIS device headers with no STM32 HAL. I decided to go bare-metal for this project because I wanted to own the whole stack and gain a better understanding of microcontroller architecture.</p>
 
-        <p>I also wrote a number of tutorials and documentation covering my design process, including <a href="{% post_url 2026-03-28-mcu-co_How_to_write_good_Driver %}">how to write a good driver</a>, <a href="{% post_url 2026-06-14-mcu-co_Type_Agnostic_Ring_Buffer %}">how to design a type agnostic ring-buffer</a>, <a href="{% post_url 2026-11-09-mcu-co_unit_tests %}">how to write unit-tests</a> and more. Here is a link to <a href="https://causality-labs.github.io/blog/category/mcu-co/">all of these posts</a>.</p>
+        <p>I also wrote a number of tutorials and documentation covering my design process, including <a href="{% post_url 2026-03-28-mcu-co_How_to_write_good_Driver %}">how to write a good driver</a>, <a href="{% post_url 2026-06-14-mcu-co_Type_Agnostic_Ring_Buffer %}">how to design a type agnostic ring-buffer</a>, <a href="{% post_url 2026-09-13-mcu-co_unit_tests %}">how to write unit-tests</a> and more. Here is a link to <a href="https://causality-labs.github.io/blog/category/mcu-co/">all of these posts</a>.</p>
 
         <p>Source code for the firmware can be found here: <a href="https://github.com/Causality-Labs/mcu-co_firmware" target="_blank" rel="noopener">mcu-co firmware</a>.</p>
 
@@ -94,9 +94,9 @@ category: MCU
 
         <p><strong><a href="{% post_url 2026-09-09-mcu-co_Command_Dispatcher %}">Command Dispatcher</a>:</strong> Reads a frame's opcode, hands it to the controller that owns it, and packages the result as an ACK or a NACK.</p>
 
-        <p><strong><a href="{% post_url 2026-11-09-mcu-co_gpio_and_pwm_controllers %}">GPIO Controller</a>:</strong> Translates the GPIO and interrupt commands into driver calls, and keeps track of which pins are bound to which interrupt actions.</p>
+        <p><strong><a href="{% post_url 2026-09-13-mcu-co_gpio_and_pwm_controllers %}">GPIO Controller</a>:</strong> Translates the GPIO and interrupt commands into driver calls, and keeps track of which pins are bound to which interrupt actions.</p>
 
-        <p><strong><a href="{% post_url 2026-11-09-mcu-co_gpio_and_pwm_controllers %}">PWM Controller</a>:</strong> Translates the PWM commands into timer calls, and tracks which groups and pins have been claimed.</p>
+        <p><strong><a href="{% post_url 2026-09-13-mcu-co_gpio_and_pwm_controllers %}">PWM Controller</a>:</strong> Translates the PWM commands into timer calls, and tracks which groups and pins have been claimed.</p>
 
         <p><strong>GPIO Driver:</strong> The register-level driver for the GPIO ports: pin direction, levels, alternate functions, and interrupt setup.</p>
 

@@ -28,7 +28,7 @@ I believe unit tests are vital for any well-designed codebase. A good suite catc
 There are two types of unit tests we need to worry about: tests that are pure logic, and tests that depend on hardware.
 Logic-bound tests like writing a test for ring buffer or a math library are easier to write because the code under test has no external dependencies. You construct it, feed it known inputs, and assert on the output, and it runs the same way every time on the host. Hardware-dependent tests, like writing tests for a sensor driver, are more complex because the code under test calls real registers and peripherals that don't exist on the host, so that boundary has to be faked before the test can run at all.
 
-In mcu-co we have two modules that demonstrate this perfectly: the ring buffer is our logic-bound test, which we covered in [P3]({% post_url 2026-06-14-mcu-co_Type_Agnostic_Ring_Buffer %}), and the GPIO and PWM controllers are our hardware-bound tests, which we covered in [P6]({% post_url 2026-11-09-mcu-co_gpio_and_pwm_controllers %}).
+In mcu-co we have two modules that demonstrate this perfectly: the ring buffer is our logic-bound test, which we covered in [P3]({% post_url 2026-06-14-mcu-co_Type_Agnostic_Ring_Buffer %}), and the GPIO and PWM controllers are our hardware-bound tests, which we covered in [P6]({% post_url 2026-09-13-mcu-co_gpio_and_pwm_controllers %}).
 
 The tests below use [CppUTest](https://cpputest.github.io/), the framework the Grenning book teaches with. Here is a link to some background on how to use the CppUTest framework as I want to keep this post focused on my specifc use case.
 
