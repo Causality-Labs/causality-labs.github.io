@@ -9,12 +9,6 @@ category: Embedded-Linux
 
 <h1 style="text-align: center;">Overview</h1>
 
-<div class="row">
-    <div class="col-md-12">
-        {% include figure.liquid path="assets/img/mcu-co/SDK_Stack.png" class="img-fluid rounded z-depth-1 d-block mx-auto" width="50%" zoomable=true %}
-    </div>
-</div>
-
 <div class="row mt-3">
     <div class="col-md-12">
         <p>mcu-co pairs a Linux host with a microcontroller that handles the timing-critical work, like PWM generation, interrupt handling and I/O expansion. The host stays free for high-level application logic, and the MCU gives it deterministic pin behavior without needing a real-time kernel. The microcontroller side is covered on the <a href="{% link _projects/mcu_co(MCU).md %}">mcu-co firmware page</a>.</p>
@@ -27,6 +21,12 @@ category: Embedded-Linux
     </div>
 </div>
 
+<div class="row">
+    <div class="col-md-12">
+        {% include figure.liquid path="assets/img/mcu-co/SDK_Stack.png" class="img-fluid rounded z-depth-1 d-block mx-auto" width="50%" zoomable=true %}
+    </div>
+</div>
+
 <h1 style="text-align: center;">Shared Library</h1>
 
 <div class="row">
@@ -34,6 +34,44 @@ category: Embedded-Linux
         <p><code>libmcuco.so</code> gives applications a small C API for GPIO, interrupts and PWM. A program opens a handle to the serial port with <code>mcuco_open()</code>, calls functions like <code>mcuco_gpio_set()</code> or <code>mcuco_pwm_channel_set()</code>, and closes it when done.</p>
 
         <p>The library owns everything below that API. It builds each command frame, adds the CRC, sends it over the serial link and waits for the MCU's reply with a timeout. Every call returns a status code, and <code>mcuco_strerror()</code> turns it into a readable message, so an application can tell "that pin is already in use" apart from "the MCU didn't answer".</p>
+
+        <p>Here is a program that blinks the LED on PA5 ten times, checking the status of every call:</p>
+
+{% highlight c linenos %}
+#include <stdio.h>
+#include <unistd.h>
+#include <mcuco.h>
+
+int main(void)
+{
+    mcuco_t *mcu = mcuco_open("/dev/ttyACM0", MCUCO_TIMEOUT_DEFAULT_MS);
+    if (mcu == NULL)
+    {
+        perror("mcuco_open");
+        return 1;
+    }
+
+    mcu_status_t status = mcuco_gpio_cfg(mcu, DIR_OUTPUT, PORT_A, 5);
+
+    for (int i = 0; (i < 20) && (status == MCUCO_STATUS_OK); i++)
+    {
+        level_t level;
+
+        status = mcuco_gpio_toggle(mcu, PORT_A, 5, &level);
+        usleep(500000);
+    }
+
+    if (status != MCUCO_STATUS_OK)
+    {
+        fprintf(stderr, "%s\n", mcuco_strerror(status));
+    }
+
+    mcuco_close(mcu);
+    return (status == MCUCO_STATUS_OK) ? 0 : 1;
+}
+{% endhighlight %}
+
+        <p>Build it against the library with <code>gcc blinky.c -o blinky -lmcuco</code>. More complete programs are in the SDK's <a href="https://github.com/Causality-Labs/mcu-co_sdk/tree/main/examples" target="_blank" rel="noopener">examples folder</a>.</p>
 
         <p>The full design is covered in <a href="{% post_url 2026-09-19-mcu-co_Shared_Library_Linux %}">how to create a shared library in Linux</a>.</p>
     </div>
@@ -46,6 +84,31 @@ category: Embedded-Linux
         <p><code>mcu-co-cli</code> exposes every library operation from the shell, which makes it useful for bring-up, testing and scripting. Each call runs one command, written as a subsystem, a verb and then values, for example <code>mcu-co-cli gpio set high A 5</code>.</p>
 
         <p>Values are printed on stdout and status messages on stderr, and the exit code is 0 on success and 1 on failure, so it works well in shell scripts. The serial port defaults to <code>/dev/ttyACM0</code> and can be changed with <code>-d</code>, and <code>--help</code> lists every command.</p>
+
+        <p>A few examples:</p>
+
+        <p>Driving a GPIO pin:</p>
+
+{% highlight bash linenos %}
+mcu-co-cli gpio cfg output A 5                # make A5 an output
+mcu-co-cli gpio set high A 5                  # drive it high
+{% endhighlight %}
+
+        <p>Running PA1 at 1 kHz and 25% duty:</p>
+
+{% highlight bash linenos %}
+mcu-co-cli timer cfg 1000 0                   # timer 0 at 1 kHz
+mcu-co-cli pwm cfg active-high A 1            # claim A1 for PWM
+mcu-co-cli pwm set 25 A 1                     # 25% duty
+{% endhighlight %}
+
+        <p>Binding a falling edge on one pin to a toggle on another. Once the binding is set, the MCU handles every edge itself and the host never has to respond:</p>
+
+{% highlight bash linenos %}
+mcu-co-cli gpio cfg input C 13                # make C13 an input
+mcu-co-cli irq cfg falling C 13               # arm a falling-edge trigger on C13
+mcu-co-cli irq bind falling C 13 toggle A 5   # each falling edge on C13 toggles A5
+{% endhighlight %}
 
         <p>The full design is covered in <a href="{% post_url 2026-10-03-mcu-co_CLI %}">building the CLI</a>.</p>
     </div>
@@ -116,37 +179,6 @@ IMAGE_INSTALL:append = " mcu-co mcu-co-examples"
 {% endhighlight %}
 
         <p>The examples then show up on the target as <code>mcu-co-blink</code>, <code>mcu-co-pwm_breathe</code> and so on.</p>
-    </div>
-</div>
-
-<h1 style="text-align: center;">Demo</h1>
-
-<div class="row">
-    <div class="col-md-12">
-        <p>Below are a few of the things the SDK can do from the shell. See <a href="{% post_url 2026-10-03-mcu-co_CLI %}">the CLI post</a> for the full command set.</p>
-
-        <p>Driving a GPIO pin:</p>
-
-{% highlight bash linenos %}
-mcu-co-cli gpio cfg output A 5                # make A5 an output
-mcu-co-cli gpio set high A 5                  # drive it high
-{% endhighlight %}
-
-        <p>Running PA1 at 1 kHz and 25% duty:</p>
-
-{% highlight bash linenos %}
-mcu-co-cli timer cfg 1000 0                   # timer 0 at 1 kHz
-mcu-co-cli pwm cfg active-high A 1            # claim A1 for PWM
-mcu-co-cli pwm set 25 A 1                     # 25% duty
-{% endhighlight %}
-
-        <p>Binding a falling edge on one pin to a toggle on another. Once the binding is set, the MCU handles every edge itself and the host never has to respond:</p>
-
-{% highlight bash linenos %}
-mcu-co-cli gpio cfg input C 13                # make C13 an input
-mcu-co-cli irq cfg falling C 13               # arm a falling-edge trigger on C13
-mcu-co-cli irq bind falling C 13 toggle A 5   # each falling edge on C13 toggles A5
-{% endhighlight %}
     </div>
 </div>
 
