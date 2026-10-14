@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-mcu-co-how-to-write-a-command-line-tool-in-c-mcu-co-p9",
+        },{id: "post-the-smartsight-project",
+        
+          title: "The smartsight project",
+        
+        description: "Introducing smartsight, real-time object tracking on a heterogeneous i.MX8MP (A53 + NPU + M7).",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/smartsight_Project/";
+          
+        },
+      },{id: "post-mcu-co-how-to-write-a-command-line-tool-in-c-mcu-co-p9",
         
           title: "mcu-co How to write a command-line tool in C (mcu-co P9)",
         
