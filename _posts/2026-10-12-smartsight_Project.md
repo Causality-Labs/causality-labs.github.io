@@ -4,7 +4,7 @@ title: The smartsight project
 date: 2026-10-12 09:40:16
 description: Introducing smartsight, real-time object tracking on a heterogeneous i.MX8MP (A53 + NPU + M7).
 tags: Embedded-Linux MCU
-categories: mcu-co
+categories: smartsight
 thumbnail: assets/img/blogs/smartsight.png
 ---
 
@@ -42,3 +42,5 @@ Alongside this, the A53 cores also send video to a network client, so the camera
 smartsight brings together the three parts of the i.MX 8M Plus: Linux on the Cortex-A53 cores for vision, the NPU for object detection, and FreeRTOS on the Cortex-M7 for real-time motor control. Each part of the system runs where it fits best, which is exactly the kind of heterogeneous design I wanted to explore with this project.
 
 This post covered what smartsight is, its core features, and its high-level design. In the upcoming posts, I will document the build step by step, starting with getting the Cortex-M7 up and running. As I mentioned earlier, some of these plans may change along the way, and I will share what I learn as the project develops.
+
+{% include figure.liquid path="assets/img/blogs/smartsight.png" class="img-fluid mx-auto d-block" width="30%" %}
