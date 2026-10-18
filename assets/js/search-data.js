@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-the-smartsight-project",
+        },{id: "post-adding-cortex-m7-support-to-the-frdm-i-mx8mp-bsp-smartsight-p1",
+        
+          title: "Adding Cortex-M7 support to the FRDM-i.MX8MP BSP (smartsight P1)",
+        
+        description: "How to add Cortex-M7 support to the FRDM-i.MX8MP Yocto BSP so Linux can boot and talk to the M7 core.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/smartsight_Booting_the_M7/";
+          
+        },
+      },{id: "post-the-smartsight-project",
         
           title: "The smartsight project",
         

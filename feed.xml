@@ -1,4 +1,212 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-10-14T15:43:23+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">The smartsight project</title><link href="https://causality-lab.github.io/blog/2026/smartsight_Project/" rel="alternate" type="text/html" title="The smartsight project"/><published>2026-10-12T09:40:16+00:00</published><updated>2026-10-12T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/smartsight_Project</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/smartsight_Project/"><![CDATA[<h2 id="what-is-smartsight">What is smartsight?</h2> <p>smartsight is a pan/tilt smart camera built on the NXP FRDM-i.MX8MP. It detects objects with an on-device neural network and physically turns to keep them in frame, all on the edge. I have been very interested in heterogeneous systems for a long time, so I thought up the idea of smartsight because it gives me the opportunity to design a system and optimize it on a heterogeneous platform. This project will also give me experience working with edge ML, which I will be using for the object detection, and because I will be working with a camera, it will give me the chance to work with the V4L2 subsystem.</p> <p>The hardware I will be using for this project is NXP’s i.MX 8M Plus SoC on the FRDM development board, which I chose because it offers great heterogeneous compute. It comes with a cluster of four Arm Cortex-A53 cores running at 1.8 GHz, one Arm Cortex-M7 running at 800 MHz, and an NPU rated at 2.3 TOPS. This board is built for handling application-level logic on its Cortex-A53 cores, real-time tasks on its M7 core, and ML on the NPU, making it a fantastic platform for smartsight.</p> <h2 id="core-features">Core Features</h2> <p>Below are the features I currently have planned for this project. These are subject to change, as once I actually start building, I may find that the way I planned to implement some features is not optimal and needs rethinking.</p> <h4 id="object-detection">Object Detection</h4> <p>Real-time object detection is one of the main features of smartsight. Detection will run on a neural network accelerated by the i.MX 8M Plus NPU. I will start with something simple, like detecting people, and may expand to other objects in the future.</p> <h4 id="object-tracking">Object Tracking</h4> <p>In addition to object detection, smartsight will also track objects. Since it is a pan/tilt camera, it will be able to pan and tilt to keep the tracked object in frame. I plan to do this by using the M7 core on the i.MX 8M Plus SoC to control the servos via PWM signals.</p> <h4 id="sending-video-over-the-network">Sending Video over the network</h4> <p>I want smartsight to be able to send video data over a network. Whether the video is streamed live or recorded, saved on the device, and sent later is yet to be decided, but one way or another, it should be able to share its video over the network.</p> <h2 id="design">Design</h2> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/blogs/smartsight-block-diagram.svg" sizes="95vw"/> <img src="/assets/img/blogs/smartsight-block-diagram.svg" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>The diagram above shows the high-level design of smartsight and how the work is split across the FRDM-i.MX8MP.</p> <p>A USB camera feeds frames into the Cortex-A53 cluster, which runs Linux and handles the vision side of the system. The A53 cores capture each frame and pass it to the NPU, which runs the object detection model and returns the results. Using those detections, the A53 cores work out where the camera needs to point to keep the object in frame.</p> <p>That target position is then sent to the Cortex-M7 over RPMsg. The M7 runs FreeRTOS and is dedicated to motor control, generating the PWM signals that drive the pan/tilt servos. Keeping this on the M7 means the servos get deterministic timing, regardless of how busy Linux is. As the servos move, they move the camera with them, which closes the loop: the next frame reflects the new position, and the cycle repeats.</p> <p>Alongside this, the A53 cores also send video to a network client, so the camera’s view can be watched from another device.</p> <h2 id="conclusion">Conclusion</h2> <p>smartsight brings together the three parts of the i.MX 8M Plus: Linux on the Cortex-A53 cores for vision, the NPU for object detection, and FreeRTOS on the Cortex-M7 for real-time motor control. Each part of the system runs where it fits best, which is exactly the kind of heterogeneous design I wanted to explore with this project.</p> <p>This post covered what smartsight is, its core features, and its high-level design. In the upcoming posts, I will document the build step by step, starting with getting the Cortex-M7 up and running. As I mentioned earlier, some of these plans may change along the way, and I will share what I learn as the project develops.</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/blogs/smartsight-480.webp 480w,/assets/img/blogs/smartsight-800.webp 800w,/assets/img/blogs/smartsight-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/blogs/smartsight.png" class="img-fluid mx-auto d-block" width="30%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure>]]></content><author><name></name></author><category term="smartsight"/><category term="Embedded-Linux"/><category term="MCU"/><summary type="html"><![CDATA[Introducing smartsight, real-time object tracking on a heterogeneous i.MX8MP (A53 + NPU + M7).]]></summary></entry><entry><title type="html">mcu-co How to write a command-line tool in C (mcu-co P9)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_CLI/" rel="alternate" type="text/html" title="mcu-co How to write a command-line tool in C (mcu-co P9)"/><published>2026-10-03T00:00:00+00:00</published><updated>2026-10-03T00:00:00+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_CLI</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_CLI/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>In this post we will go over <code class="language-plaintext highlighter-rouge">mcu-co-cli</code>, the command-line tool that ships with the mcu-co SDK. It is built on top of the mcuco library we covered in <a href="/blog/2026/mcu-co_Shared_Library_Linux/">P8</a>.</p> <p>So why have a CLI at all? Because sometimes you just want to flip a pin. During bring-up you want to check the link, drive an output or read an input without writing, compiling and running a C program each time. The CLI lets you do that straight from the shell, and since it reports success through its exit code, you can drop it into scripts too.</p> <p>The source for the CLI is <a href="https://github.com/Causality-Labs/mcu-co_sdk/tree/main/cli">here</a>.</p> <h4 id="what-the-tool-looks-like">What the tool looks like</h4> <p>Every command has the same shape: a subsystem, a verb, then the values.</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://causality-lab.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://causality-lab.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-10-18T01:09:39+00:00</updated><id>https://causality-lab.github.io/feed.xml</id><title type="html">Causality-Labs</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">Adding Cortex-M7 support to the FRDM-i.MX8MP BSP (smartsight P1)</title><link href="https://causality-lab.github.io/blog/2026/smartsight_Booting_the_M7/" rel="alternate" type="text/html" title="Adding Cortex-M7 support to the FRDM-i.MX8MP BSP (smartsight P1)"/><published>2026-10-12T10:40:16+00:00</published><updated>2026-10-12T10:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/smartsight_Booting_the_M7</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/smartsight_Booting_the_M7/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>In this post, I will go over how I got the M7 core to boot using my own custom Yocto layer. Bringing up the core involves enabling its kernel driver, adding it to the device tree, tweaking some settings in U-Boot, and using the remoteproc framework to get it up and running.</p> <h2 id="why-the-m7">Why the M7?</h2> <p>I am planning to use the M7 core to control the pan/tilt servos for smartsight. There are simpler, less rigorous ways to control the servos. For example, you could drive the PWM peripherals from userspace in Linux or use a dedicated PWM controller chip. However, I have always been fascinated by heterogeneous systems and asymmetric multiprocessing, and I really wanted to learn how to design systems like this, so I decided to take this route. You can see glimpses of this interest in my last project, mcu-co, but for this project, I decided to keep everything on a single chip.</p> <h2 id="how-cortex-a53-cores-and-the-m7-share-the-soc">How Cortex-A53 cores and the M7 Share the SoC</h2> <p>Because the Cortex-A53 core cluster and the M7 share the same Silicoln it means they also share a number of resources like memory and different hardware peripherals.</p> <h4 id="memory">Memory</h4> <p>Going through the imx8mp reference maual here is the memory subsystem for the core cluster and the m7 core:</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/smartsight/imx8mp-cores-memory-480.webp 480w,/assets/img/smartsight/imx8mp-cores-memory-800.webp 800w,/assets/img/smartsight/imx8mp-cores-memory-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/smartsight/imx8mp-cores-memory.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>Each system has its own cache and it can be broken down to this: Cortex-A53 Cluster: • Level 1 Cache (4x per Cortex-A53 Core) • Instruction (32 KB) • Data (32 KB) • Level 2 Cache, shared by the four Cortex-A53 cores: • Unified instruction and data (512 KB)</p> <p>Cortex-M7: • Cache • Instruction (32 KB) • Data (32 KB) • Tightly-Coupled-Memory • Data Tightly Coupled Memory (DTCM) (128KB) • Instruction Tightly Coupled Memory (ITCM) (128KB)</p> <p>You might be curious as to what Tightly Coupled Memory is, I will explain it now. Tightly Coupled Memory (TCM) is a small block of SRAM wired directly to the m7 processor core, sitting right next to it instead of out on the shared system bus. The core can read and write it at full clock speed, usually in a single cycle, every time. Making for faster access to instructions and data stored in this memory structure. The rest of the on chip SRAM is accesed by the bus and is shared by the A53 cores and the M7 core.</p> <p>The Cortex-A53 cluster is the only one with access to the SoC’s boot ROM, but both core systems can access the different types of RAM, including DRAM and on-chip RAM. However, because the Cortex-M7 is a 32-bit processor and the Cortex-A53s are 64-bit processors, some parts of DRAM are not accessible to the Cortex-M7.</p> <h4 id="peripherals">Peripherals</h4> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/smartsight/imx8mp-cores-peripherals-480.webp 480w,/assets/img/smartsight/imx8mp-cores-peripherals-800.webp 800w,/assets/img/smartsight/imx8mp-cores-peripherals-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/smartsight/imx8mp-cores-peripherals.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>The M7 core and A-53 core cluster are able to talk to most of the peripherals on the SoC, as they share mostly the same register map. The easiest way to garuntee access to the m7 core is to disable the peripheral in the device tree source file as then Linux would not be able to probe the peripheral.</p> <p>Here’s a fun fact: the Cortex-M7 can actually talk to the NPU. Its registers and interrupt are right there in the M7’s memory map. The catch is that NXP’s NPU software only exists for Linux, so getting the M7 to use it means writing the driver yourself. Maybe a future project for me, if I’m ever that curious (or hate myself enough, haha).</p> <h2 id="prerequisites">Prerequisites</h2> <p>To keep my life simple I am using the NXP SDK for my Yocto work, and the default frdm imx8mp build does not come with the m7 core working out of the box. So I have to enable it in the device tree first before I can do any more work. Remote proc is set upo by default to work in the NXP SDK, it just was not set up in the device tree.</p> <h2 id="adding-m7-support-to-the-bsp">Adding M7 Support to the BSP</h2> <h4 id="device-tree">Device Tree</h4> <p>There is a device tree set up for the m7 core that we can use for reference which can be found here []. I copied it into my own bsp layer in meta-causality-labs called meta-causality-imx. Here is what the device tree looks like :</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+</pre></td><td class="code"><pre><span class="c1">// SPDX-License-Identifier: (GPL-2.0 OR MIT)</span>
+<span class="cm">/*
+ * i.MX8MP FRDM with the Cortex-M7 enabled for remoteproc/RPMsg.
+ *
+ * Based on imx8mp-frdm.dts; only the generic RPMsg pieces of NXP's
+ * imx8mp-frdm-rpmsg.dts are carried over (not its audio offload setup).
+ */</span>
+
+<span class="o">/</span><span class="n">dts</span><span class="o">-</span><span class="n">v1</span><span class="o">/</span><span class="p">;</span>
+
+<span class="cp">#include</span> <span class="cpf">"imx8mp-frdm.dts"</span><span class="cp">
+</span>
+<span class="o">/</span> <span class="p">{</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="s">"Causality Labs i.MX8MP FRDM"</span><span class="p">;</span>
+
+    <span class="n">reserved</span><span class="o">-</span><span class="n">memory</span> <span class="p">{</span>
+        <span class="cp">#address-cells = &lt;2&gt;;
+</span>        <span class="cp">#size-cells = &lt;2&gt;;
+</span>        <span class="n">ranges</span><span class="p">;</span>
+
+        <span class="cm">/* M7 code/data when the firmware is linked to run from DDR */</span>
+        <span class="nl">m7_reserved:</span> <span class="n">m7</span><span class="err">@</span><span class="mi">80000000</span> <span class="p">{</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="o">&lt;</span><span class="mi">0</span> <span class="mh">0x80000000</span> <span class="mi">0</span> <span class="mh">0x1000000</span><span class="o">&gt;</span><span class="p">;</span>
+            <span class="n">no</span><span class="o">-</span><span class="n">map</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="cm">/* Must match the M7 firmware's rsc_table.c / linker script */</span>
+        <span class="nl">vdev0vring0:</span> <span class="n">vdev0vring0</span><span class="err">@</span><span class="mi">55000000</span> <span class="p">{</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="o">&lt;</span><span class="mi">0</span> <span class="mh">0x55000000</span> <span class="mi">0</span> <span class="mh">0x8000</span><span class="o">&gt;</span><span class="p">;</span>
+            <span class="n">no</span><span class="o">-</span><span class="n">map</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="nl">vdev0vring1:</span> <span class="n">vdev0vring1</span><span class="err">@</span><span class="mi">55008000</span> <span class="p">{</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="o">&lt;</span><span class="mi">0</span> <span class="mh">0x55008000</span> <span class="mi">0</span> <span class="mh">0x8000</span><span class="o">&gt;</span><span class="p">;</span>
+            <span class="n">no</span><span class="o">-</span><span class="n">map</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="nl">rsc_table:</span> <span class="n">rsc</span><span class="o">-</span><span class="n">table</span><span class="err">@</span><span class="mi">550</span><span class="n">ff000</span> <span class="p">{</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="o">&lt;</span><span class="mi">0</span> <span class="mh">0x550ff000</span> <span class="mi">0</span> <span class="mh">0x1000</span><span class="o">&gt;</span><span class="p">;</span>
+            <span class="n">no</span><span class="o">-</span><span class="n">map</span><span class="p">;</span>
+        <span class="p">};</span>
+
+        <span class="nl">vdevbuffer:</span> <span class="n">vdevbuffer</span><span class="err">@</span><span class="mi">55400000</span> <span class="p">{</span>
+            <span class="n">compatible</span> <span class="o">=</span> <span class="s">"shared-dma-pool"</span><span class="p">;</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="o">&lt;</span><span class="mi">0</span> <span class="mh">0x55400000</span> <span class="mi">0</span> <span class="mh">0x100000</span><span class="o">&gt;</span><span class="p">;</span>
+            <span class="n">no</span><span class="o">-</span><span class="n">map</span><span class="p">;</span>
+        <span class="p">};</span>
+    <span class="p">};</span>
+
+    <span class="n">imx8mp</span><span class="o">-</span><span class="n">cm7</span> <span class="p">{</span>
+        <span class="n">compatible</span> <span class="o">=</span> <span class="s">"fsl,imx8mp-cm7"</span><span class="p">;</span>
+        <span class="n">rsc</span><span class="o">-</span><span class="n">da</span> <span class="o">=</span> <span class="o">&lt;</span><span class="mh">0x55000000</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="n">clocks</span> <span class="o">=</span> <span class="o">&lt;&amp;</span><span class="n">clk</span> <span class="n">IMX8MP_CLK_M7_DIV</span><span class="o">&gt;</span><span class="p">,</span>
+                 <span class="o">&lt;&amp;</span><span class="n">audio_blk_ctrl</span> <span class="n">IMX8MP_CLK_AUDIOMIX_AUDPLL_ROOT</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="n">clock</span><span class="o">-</span><span class="n">names</span> <span class="o">=</span> <span class="s">"core"</span><span class="p">,</span> <span class="s">"audio"</span><span class="p">;</span>
+        <span class="n">mbox</span><span class="o">-</span><span class="n">names</span> <span class="o">=</span> <span class="s">"tx"</span><span class="p">,</span> <span class="s">"rx"</span><span class="p">,</span> <span class="s">"rxdb"</span><span class="p">;</span>
+        <span class="n">mboxes</span> <span class="o">=</span> <span class="o">&lt;&amp;</span><span class="n">mu</span> <span class="mi">0</span> <span class="mi">1</span>
+                  <span class="o">&amp;</span><span class="n">mu</span> <span class="mi">1</span> <span class="mi">1</span>
+                  <span class="o">&amp;</span><span class="n">mu</span> <span class="mi">3</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="n">memory</span><span class="o">-</span><span class="n">region</span> <span class="o">=</span> <span class="o">&lt;&amp;</span><span class="n">vdevbuffer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;&amp;</span><span class="n">vdev0vring0</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;&amp;</span><span class="n">vdev0vring1</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;&amp;</span><span class="n">rsc_table</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="n">fsl</span><span class="p">,</span><span class="n">startup</span><span class="o">-</span><span class="n">delay</span><span class="o">-</span><span class="n">ms</span> <span class="o">=</span> <span class="o">&lt;</span><span class="mi">500</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="s">"okay"</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">};</span>
+
+<span class="cm">/*
+ * Peripherals owned by the M7 must be disabled on the Linux side.
+ * UART4 is the usual M7 debug console; add others (i2c3, ecspi2,
+ * flexcan1, pwm4, ...) here as the M7 firmware starts using them.
+ */</span>
+<span class="o">&amp;</span><span class="n">uart4</span> <span class="p">{</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s">"disabled"</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>As you can see above, we include the base <code class="language-plaintext highlighter-rouge">imx8mp-frdm.dts</code> and then describe only the parts we are interested in. Let’s start with the <code class="language-plaintext highlighter-rouge">reserved-memory</code> node.</p> <p>In this node, we’re telling Linux that there are portions of DDR RAM it isn’t allowed to use, because they’re set aside for the M7 and the RPMsg buffers the two cores share.</p> <p>Now let’s see how this device tree lines up with the memory map given to us in the i.MX 8M Plus reference manual. According to the manual, DDR RAM spans from address <code class="language-plaintext highlighter-rouge">0x4000_0000</code> to <code class="language-plaintext highlighter-rouge">0xFFFF_FFFF</code> (3 GB), and the regions in the reserved memory all fall within that range, confirming that they are all located in DRAM.</p> <ul> <li><strong>m7_reserved</strong> (<code class="language-plaintext highlighter-rouge">0x8000_0000 – 0x80FF_FFFF</code>, 16 MB): holds the M7’s code and data when its firmware is linked to run from DDR instead of TCM.</li> <li><strong>vdev0vring0</strong> (<code class="language-plaintext highlighter-rouge">0x5500_0000 – 0x5500_7FFF</code>, 32 KB): the first RPMsg vring, a ring buffer that carries messages from the M7 to Linux.</li> <li><strong>vdev0vring1</strong> (<code class="language-plaintext highlighter-rouge">0x5500_8000 – 0x5500_FFFF</code>, 32 KB): the second RPMsg vring, which carries messages from Linux to the M7.</li> <li><strong>rsc_table</strong> (<code class="language-plaintext highlighter-rouge">0x550F_F000 – 0x550F_FFFF</code>, 4 KB): the resource table, which the M7 firmware uses to tell Linux what it needs, such as where the vrings are.</li> <li><strong>vdevbuffer</strong> (<code class="language-plaintext highlighter-rouge">0x5540_0000 – 0x554F_FFFF</code>, 1 MB): a shared DMA pool that holds the actual RPMsg message buffers that the vrings point to.</li> </ul> <p>Now let’s talk about the <code class="language-plaintext highlighter-rouge">imx8mp-cm7</code> node, which tells Linux how to find the M7 core. On its own, Linux doesn’t know the M7 core exists or how to talk to it, which is why this node is needed. Once Linux knows the core exists, it binds the remoteproc driver to it, which can then load firmware onto the core and start it.</p> <ul> <li><strong>compatible</strong> (<code class="language-plaintext highlighter-rouge">"fsl,imx8mn-cm7"</code>): tells Linux which driver to bind to the node, in this case the i.MX remoteproc driver (<code class="language-plaintext highlighter-rouge">imx_rproc</code>). The i.MX 8M Plus reuses the i.MX 8M Nano compatible string because the M7 is controlled the same way on both chips.</li> <li><strong>rsc-da</strong> (<code class="language-plaintext highlighter-rouge">0x55000000</code>): the address of the resource table region in the M7’s address space, which the driver uses to find the resource table.</li> <li><strong>clocks</strong> and <strong>clock-names</strong>: the clocks the M7 needs. <code class="language-plaintext highlighter-rouge">core</code> is the M7’s own clock, and <code class="language-plaintext highlighter-rouge">audio</code> is the audio PLL clock, which Linux keeps enabled for the M7.</li> <li><strong>mboxes</strong> and <strong>mbox-names</strong>: the Messaging Unit (MU) channels used to notify the other core when there is a new message. <code class="language-plaintext highlighter-rouge">tx</code> is for sending, <code class="language-plaintext highlighter-rouge">rx</code> is for receiving, and <code class="language-plaintext highlighter-rouge">rxdb</code> is a doorbell channel for receiving simple notifications.</li> <li><strong>memory-region</strong>: links the node to the reserved memory regions above (<code class="language-plaintext highlighter-rouge">vdevbuffer</code>, <code class="language-plaintext highlighter-rouge">vdev0vring0</code>, <code class="language-plaintext highlighter-rouge">vdev0vring1</code>, and <code class="language-plaintext highlighter-rouge">rsc_table</code>), so the driver knows which memory to use for RPMsg.</li> <li><strong>fsl,startup-delay-ms</strong> (<code class="language-plaintext highlighter-rouge">500</code>): how long Linux waits after starting the M7 before trying to talk to it, giving the firmware time to initialise.</li> <li><strong>status</strong> (<code class="language-plaintext highlighter-rouge">"okay"</code>): enables the node. Without this, Linux would ignore it.</li> </ul> <p>After setting up we most tell uBoot that we want our new device tree to get loaded with the Kernel we the fdtfile argument in uboot is what tells uboot what flattened device tree or device tree blob to use. We can ad</p> <h4 id="adding-it-to-the-yocto-layer">Adding it to the Yocto Layer</h4> <p>Now that we have our device tree, we need to add it to our Yocto layer so it gets built with the kernel. Since <code class="language-plaintext highlighter-rouge">imx8mp-causality.dts</code> is a new file rather than a change to an existing one, we don’t need a patch. Instead, we can place the file in our layer and have the <code class="language-plaintext highlighter-rouge">linux-imx</code> recipe copy it into the kernel source before it builds. The layout in <code class="language-plaintext highlighter-rouge">meta-causality-imx</code> looks like this:</p> <figure class="highlight"><pre><code class="language-text" data-lang="text">recipes-kernel/
+└── linux/
+    ├── files/
+    │   └── imx8mp-causality.dts
+    └── linux-imx_%.bbappend</code></pre></figure> <p>Create a recipes-kernel/linux/linux-imx_%.bbappend</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="code"><pre>FILESEXTRAPATHS:prepend :<span class="o">=</span> <span class="s2">"</span><span class="k">${</span><span class="nv">THISDIR</span><span class="k">}</span><span class="s2">/files:"</span>
+
+SRC_URI:append:imx8mpfrdm <span class="o">=</span> <span class="s2">" file://imx8mp-causality.dts"</span>
+
+<span class="c"># Copy our device tree into the kernel source next to the other i.MX device trees</span>
+do_configure:append:imx8mpfrdm<span class="o">()</span> <span class="o">{</span>
+    <span class="nb">cp</span> <span class="k">${</span><span class="nv">WORKDIR</span><span class="k">}</span>/imx8mp-causality.dts <span class="k">${</span><span class="nv">S</span><span class="k">}</span>/arch/arm64/boot/dts/freescale/
+<span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></figure> <ul> <li><strong><code class="language-plaintext highlighter-rouge">FILESEXTRAPATHS:prepend</code></strong>: lets BitBake find files in the <code class="language-plaintext highlighter-rouge">files/</code> directory next to the <code class="language-plaintext highlighter-rouge">.bbappend</code>.</li> <li><strong><code class="language-plaintext highlighter-rouge">SRC_URI:append:imx8mpfrdm</code></strong>: adds our <code class="language-plaintext highlighter-rouge">.dts</code> to the recipe’s sources, but only when building for the FRDM-i.MX8MP machine.</li> <li><strong><code class="language-plaintext highlighter-rouge">do_configure:append</code></strong>: copies the <code class="language-plaintext highlighter-rouge">.dts</code> into <code class="language-plaintext highlighter-rouge">arch/arm64/boot/dts/freescale/</code>, the same directory as <code class="language-plaintext highlighter-rouge">imx8mp-frdm.dts</code>, so our <code class="language-plaintext highlighter-rouge">#include "imx8mp-frdm.dts"</code> resolves.</li> </ul> <p>Copying the file in isn’t enough on its own, because the kernel recipe only builds the device trees listed in <code class="language-plaintext highlighter-rouge">KERNEL_DEVICETREE</code>. We add ours to that list in <code class="language-plaintext highlighter-rouge">conf/local.conf</code>:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td><td class="code"><pre>KERNEL_DEVICETREE:append:imx8mpfrdm <span class="o">=</span> <span class="s2">" freescale/imx8mp-causality.dtb"</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>This needs to go in a configuration file rather than the kernel <code class="language-plaintext highlighter-rouge">.bbappend</code>, because the image recipe also reads <code class="language-plaintext highlighter-rouge">KERNEL_DEVICETREE</code> to decide which device trees to copy into the boot partition. If it were only set in the kernel recipe, the <code class="language-plaintext highlighter-rouge">.dtb</code> would be built but never end up on the SD card, and U-Boot would not be able to find it.</p> <p>After setting up we most tell uBoot that we want our new device tree to get loaded with the Kernel we the fdtfile argument in uboot is what tells uboot what flattened device tree or device tree blob to use. We can append the uboot recipe and override the fdtfile argument with our own device tree blob like this:</p> <p>Create a recipes-bsp/uboot/files/fdtfile.cfg file with the following content.</p> <figure class="highlight"><pre><code class="language-ini" data-lang="ini"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td><td class="code"><pre><span class="py">CONFIG_DEFAULT_FDT_FILE</span><span class="p">=</span><span class="s">"imx8mp-causality.dtb"</span>
+</pre></td></tr></tbody></table></code></pre></figure> <p>Create a recipes-bsp/uboot/uboot-imx_%.bbappend</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="code"><pre>FILESEXTRAPATHS:prepend :<span class="o">=</span> <span class="s2">"</span><span class="k">${</span><span class="nv">THISDIR</span><span class="k">}</span><span class="s2">/files:"</span>
+
+<span class="c"># Boot our DTB by default</span>
+SRC_URI:append:imx8mpfrdm <span class="o">=</span> <span class="s2">" file://fdtfile.cfg"</span>
+</pre></td></tr></tbody></table></code></pre></figure> <h2 id="testing-with-a-hello-world-m7-image">Testing with a Hello World M7 Image</h2> <p>To test that everything works, I built a simple hello world program for the M7 using NXP’s MCUXpresso SDK. The SDK comes with a <code class="language-plaintext highlighter-rouge">hello_world</code> demo for the i.MX 8M Plus that prints a message over the M7’s debug UART, which is exactly what we need to prove the core boots. I won’t go through setting up the SDK here, since NXP already has a good <a href="https://mcuxpresso.nxp.com/mcuxsdk/latest/html/gsd/repo.html">getting started guide</a> that walks you through it. I built the demo to run from TCM, which gave me <code class="language-plaintext highlighter-rouge">imx8mp_m7_TCM_hello_world.elf</code>. I then copied the <code class="language-plaintext highlighter-rouge">.elf</code> over to the board’s <code class="language-plaintext highlighter-rouge">/lib/firmware</code> directory using <code class="language-plaintext highlighter-rouge">scp</code>:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td><td class="code"><pre><span class="nv">$ </span>scp imx8mp_m7_TCM_hello_world.elf root@&lt;board-ip&gt;:/lib/firmware/
+</pre></td></tr></tbody></table></code></pre></figure> <p>The steps below follow NXP’s application note <a href="https://www.nxp.com/docs/en/application-note/AN5317.pdf">AN5317</a>, which covers loading code onto the Cortex-M from U-Boot and Linux.</p> <p><strong>1. Prepare the M7 in U-Boot</strong></p> <p>Power up the board, stop in U-Boot, and run the following commands:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="code"><pre>u-boot<span class="o">=&gt;</span> run prepare_mcore
+u-boot<span class="o">=&gt;</span> boot
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>2. Check that remoteproc is enabled</strong></p> <p>Once Linux has booted, remoteproc exposes the M7 to userspace through sysfs:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">ls</span> /sys/class/remoteproc/remoteproc0/
+consumers  device    name   recovery  subsystem  uevent
+coredump   firmware  power  state     suppliers
+</pre></td></tr></tbody></table></code></pre></figure> <p>If <code class="language-plaintext highlighter-rouge">/sys/class/remoteproc/</code> is empty, the remoteproc framework isn’t enabled, which usually means the <code class="language-plaintext highlighter-rouge">imx8mp-cm7</code> node isn’t in the device tree that was booted. This is a good way to confirm our new device tree is actually being used.</p> <p><strong>3. Point remoteproc to the firmware</strong></p> <p>By default, remoteproc looks for firmware in <code class="language-plaintext highlighter-rouge">/lib/firmware</code>, which is why I copied the <code class="language-plaintext highlighter-rouge">.elf</code> there. All that’s left is to tell remoteproc the name of the firmware file:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+</pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">echo</span> <span class="nt">-n</span> imx8mp_m7_TCM_hello_world.elf <span class="o">&gt;</span> /sys/class/remoteproc/remoteproc0/firmware
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>4. Check the state of the M7</strong></p> <p>Before starting the M7 with new firmware, make sure it isn’t already running. If it is, it needs to be stopped first.</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">cat</span> /sys/class/remoteproc/remoteproc0/state
+offline
+</pre></td></tr></tbody></table></code></pre></figure> <p><strong>5. Start the M7</strong></p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">echo </span>start <span class="o">&gt;</span> /sys/class/remoteproc/remoteproc0/state
+<span class="nv">$ </span><span class="nb">cat</span> /sys/class/remoteproc/remoteproc0/state
+running
+</pre></td></tr></tbody></table></code></pre></figure> <p>The hello world message should now appear on the M7’s debug UART. This is UART4, which is why we disabled it on the Linux side in our device tree.</p> <p><strong>6. Stop the M7</strong></p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="code"><pre><span class="nv">$ </span><span class="nb">echo </span>stop <span class="o">&gt;</span> /sys/class/remoteproc/remoteproc0/state
+<span class="nv">$ </span><span class="nb">cat</span> /sys/class/remoteproc/remoteproc0/state
+offline
+</pre></td></tr></tbody></table></code></pre></figure> <h2 id="conclusion">Conclusion</h2> <p>In this post, we added Cortex-M7 support to the FRDM-i.MX8MP BSP in our own Yocto layer. We created a device tree that reserves memory for the M7 and RPMsg and describes the M7 to Linux, added it to the kernel build, and told U-Boot to load it. With a simple hello world <code class="language-plaintext highlighter-rouge">.elf</code> from the MCUXpresso SDK, we then used remoteproc to start and stop the M7 from Linux, confirming that the BSP changes work.</p> <p>With the M7 up and running, the foundation for smartsight’s heterogeneous design is in place. Next, I will start building the FreeRTOS firmware that will control the pan/tilt servos and get the Cortex-A53 cores and the M7 talking to each other over RPMsg.</p>]]></content><author><name></name></author><category term="smartsight"/><category term="Embedded-Linux"/><category term="MCU"/><summary type="html"><![CDATA[How to add Cortex-M7 support to the FRDM-i.MX8MP Yocto BSP so Linux can boot and talk to the M7 core.]]></summary></entry><entry><title type="html">The smartsight project</title><link href="https://causality-lab.github.io/blog/2026/smartsight_Project/" rel="alternate" type="text/html" title="The smartsight project"/><published>2026-10-12T09:40:16+00:00</published><updated>2026-10-12T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/smartsight_Project</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/smartsight_Project/"><![CDATA[<h2 id="what-is-smartsight">What is smartsight?</h2> <p>smartsight is a pan/tilt smart camera built on the NXP FRDM-i.MX8MP. It detects objects with an on-device neural network and physically turns to keep them in frame, all on the edge. I have been very interested in heterogeneous systems for a long time, so I thought up the idea of smartsight because it gives me the opportunity to design a system and optimize it on a heterogeneous platform. This project will also give me experience working with edge ML, which I will be using for the object detection, and because I will be working with a camera, it will give me the chance to work with the V4L2 subsystem.</p> <p>The hardware I will be using for this project is NXP’s i.MX 8M Plus SoC on the FRDM development board, which I chose because it offers great heterogeneous compute. It comes with a cluster of four Arm Cortex-A53 cores running at 1.8 GHz, one Arm Cortex-M7 running at 800 MHz, and an NPU rated at 2.3 TOPS. This board is built for handling application-level logic on its Cortex-A53 cores, real-time tasks on its M7 core, and ML on the NPU, making it a fantastic platform for smartsight.</p> <h2 id="core-features">Core Features</h2> <p>Below are the features I currently have planned for this project. These are subject to change, as once I actually start building, I may find that the way I planned to implement some features is not optimal and needs rethinking.</p> <h4 id="object-detection">Object Detection</h4> <p>Real-time object detection is one of the main features of smartsight. Detection will run on a neural network accelerated by the i.MX 8M Plus NPU. I will start with something simple, like detecting people, and may expand to other objects in the future.</p> <h4 id="object-tracking">Object Tracking</h4> <p>In addition to object detection, smartsight will also track objects. Since it is a pan/tilt camera, it will be able to pan and tilt to keep the tracked object in frame. I plan to do this by using the M7 core on the i.MX 8M Plus SoC to control the servos via PWM signals.</p> <h4 id="sending-video-over-the-network">Sending Video over the network</h4> <p>I want smartsight to be able to send video data over a network. Whether the video is streamed live or recorded, saved on the device, and sent later is yet to be decided, but one way or another, it should be able to share its video over the network.</p> <h2 id="design">Design</h2> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/blogs/smartsight-block-diagram.svg" sizes="95vw"/> <img src="/assets/img/blogs/smartsight-block-diagram.svg" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p>The diagram above shows the high-level design of smartsight and how the work is split across the FRDM-i.MX8MP.</p> <p>A USB camera feeds frames into the Cortex-A53 cluster, which runs Linux and handles the vision side of the system. The A53 cores capture each frame and pass it to the NPU, which runs the object detection model and returns the results. Using those detections, the A53 cores work out where the camera needs to point to keep the object in frame.</p> <p>That target position is then sent to the Cortex-M7 over RPMsg. The M7 runs FreeRTOS and is dedicated to motor control, generating the PWM signals that drive the pan/tilt servos. Keeping this on the M7 means the servos get deterministic timing, regardless of how busy Linux is. As the servos move, they move the camera with them, which closes the loop: the next frame reflects the new position, and the cycle repeats.</p> <p>Alongside this, the A53 cores also send video to a network client, so the camera’s view can be watched from another device.</p> <h2 id="conclusion">Conclusion</h2> <p>smartsight brings together the three parts of the i.MX 8M Plus: Linux on the Cortex-A53 cores for vision, the NPU for object detection, and FreeRTOS on the Cortex-M7 for real-time motor control. Each part of the system runs where it fits best, which is exactly the kind of heterogeneous design I wanted to explore with this project.</p> <p>This post covered what smartsight is, its core features, and its high-level design. In the upcoming posts, I will document the build step by step, starting with getting the Cortex-M7 up and running. As I mentioned earlier, some of these plans may change along the way, and I will share what I learn as the project develops.</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/blogs/smartsight-480.webp 480w,/assets/img/blogs/smartsight-800.webp 800w,/assets/img/blogs/smartsight-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/blogs/smartsight.png" class="img-fluid mx-auto d-block" width="30%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure>]]></content><author><name></name></author><category term="smartsight"/><category term="Embedded-Linux"/><category term="MCU"/><summary type="html"><![CDATA[Introducing smartsight, real-time object tracking on a heterogeneous i.MX8MP (A53 + NPU + M7).]]></summary></entry><entry><title type="html">mcu-co How to write a command-line tool in C (mcu-co P9)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_CLI/" rel="alternate" type="text/html" title="mcu-co How to write a command-line tool in C (mcu-co P9)"/><published>2026-10-03T00:00:00+00:00</published><updated>2026-10-03T00:00:00+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_CLI</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_CLI/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>In this post we will go over <code class="language-plaintext highlighter-rouge">mcu-co-cli</code>, the command-line tool that ships with the mcu-co SDK. It is built on top of the mcuco library we covered in <a href="/blog/2026/mcu-co_Shared_Library_Linux/">P8</a>.</p> <p>So why have a CLI at all? Because sometimes you just want to flip a pin. During bring-up you want to check the link, drive an output or read an input without writing, compiling and running a C program each time. The CLI lets you do that straight from the shell, and since it reports success through its exit code, you can drop it into scripts too.</p> <p>The source for the CLI is <a href="https://github.com/Causality-Labs/mcu-co_sdk/tree/main/cli">here</a>.</p> <h4 id="what-the-tool-looks-like">What the tool looks like</h4> <p>Every command has the same shape: a subsystem, a verb, then the values.</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 </pre></td><td class="code"><pre>mcu-co-cli &lt;subsystem&gt; &lt;verb&gt; &lt;values...&gt;
 </pre></td></tr></tbody></table></code></pre></figure> <p>A pin is written as its port and number, so pin 5 on port A is <code class="language-plaintext highlighter-rouge">A 5</code>. Here is a short session:</p> <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2
@@ -2461,674 +2669,4 @@ mcu-co-cli gpio get C 13 <span class="nt">-d</span> /dev/ttyUSB0
 
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure>]]></content><author><name></name></author><category term="mcu-co"/><category term="MCU"/><summary type="html"><![CDATA[How to write a type agnostic ring buffer in C, the ring buffer can be used for any data struct.]]></summary></entry><entry><title type="html">mcu-co Proposal (mcu-co P1)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/" rel="alternate" type="text/html" title="mcu-co Proposal (mcu-co P1)"/><published>2026-03-22T09:40:16+00:00</published><updated>2026-03-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_Proposal</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/"><![CDATA[<h2 id="what-is-mcu-co">What is mcu-co</h2> <p>mcu-co pairs a Linux host with a dedicated microcontroller that handles the timing-critical work, like interrupt handling and PWM generation. Offloading it that way gets you deterministic pin behavior without a real-time kernel, and leaves the host free to focus on high-level application logic. Everything the co-processor can do is available to any Linux application through a C library and a command line interface.</p> <h2 id="core-features">Core Features</h2> <h4 id="io">I/O</h4> <ul> <li><strong>Standard GPIO</strong> — pin direction configuration, high-speed pin state manipulation (High/Low), and input sensing</li> <li><strong>Pin-change interrupts</strong> — arm any input pin to trigger on a rising edge, a falling edge, or both</li> <li><strong>Interrupt-to-output bindings</strong> — logic-locked pins that react to an edge on another pin without any software intervention, serviced entirely by the MCU</li> <li><strong>Advanced PWM</strong> — jitter-free pulse-width modulation for motor control and power electronics, with frequency set per timer group and duty cycle set per pin</li> </ul> <h4 id="reliability">Reliability</h4> <ul> <li><strong>A checked command protocol</strong> — strict master-slave with one command in flight at a time, CRC-checked frames, and an ACK or a NACK with a reason code for every command sent</li> </ul> <h2 id="software-for-mcu-co">Software for mcu-co</h2> <p>The mcu-co stack is a complete “Vertical” solution, ranging from low-level firmware to high-level application code:</p> <table> <thead> <tr> <th>Layer</th> <th>Component</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>Hardware</td> <td>MCU Firmware</td> <td>Optimized real-time firmware for an STM32G474RE MCU</td> </tr> <tr> <td>OS Layer</td> <td>Yocto Layer</td> <td>meta-mcu-co recipes for seamless integration into custom Linux builds</td> </tr> <tr> <td>Tools</td> <td>mcu-co CLI</td> <td>A powerful Command Line Interface for testing and field diagnostics</td> </tr> <tr> <td>Dev Kit</td> <td>C SDK</td> <td>Native C shared library for fast application development</td> </tr> </tbody> </table> <h2 id="why-use-mcu-co">Why use mcu-co?</h2> <p>Unlike standard Linux GPIO, which suffers from “jitter” (unpredictable delays), mcu-co ensures that your hardware reacts at the exact same time, every time. It is the bridge between the intelligence of Linux and the speed of silicon.</p> <h2 id="design">Design</h2> <p>The following block diagram shows the high-level architecture of the mcu-co system:</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_block-diagram_v2-480.webp 480w,/assets/img/mcu-co/mcu-co_block-diagram_v2-800.webp 800w,/assets/img/mcu-co/mcu-co_block-diagram_v2-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_block-diagram_v2.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <h4 id="mcu">MCU</h4> <p>The micro-controller (MCU) I decided to go with is the STM32G474RE. I chose this MCU because it is a high-performance Cortex-M4F with advanced timer peripherals capable of driving twelve PWM outputs, plenty of GPIO with per-pin edge interrupts, and enough headroom at 170 MHz to service those interrupts with very little latency, covering the entire mcu-co feature set on a single chip.</p> <p>The firmware will be a bare metal application that parses commands received from the Linux host. The physical link between the SoC and the MCU is a UART. I chose a UART because every Linux-capable SoC exposes one, and on the MCU side it needs nothing beyond a driver I write myself, which keeps the firmware bare metal and makes the traffic easy to observe with any serial monitor.</p> <h4 id="linux">Linux</h4> <p>On the Linux side, the software will consist of an SDK: a dynamic C library and a command line interface built on top of it. These tools are SoC agnostic and will work on any Linux-capable SoC, keeping with mcu-co’s core theme of being plug and play.</p> <h4 id="sdk">SDK</h4> <p>The SDK is comprised of a dynamic C library and a command line interface. It allows developers to easily integrate mcu-co into their applications without needing to understand the underlying communication protocol. The library owns the serial link and speaks the protocol on the application’s behalf, and the CLI, built on that same library, is designed for testing and field diagnostics.</p> <h4 id="yocto-meta-mcu-co">Yocto (meta-mcu-co)</h4> <p>The Yocto layer (meta-mcu-co) will package the library and the CLI, allowing developers working with Yocto to include mcu-co in their own custom Embedded Linux images with minimal effort.</p> <h2 id="conclusion">Conclusion</h2> <p>I believe mcu-co is actually a super useful tool and will give Linux developers real-time control, which is something Linux is known to struggle with. With mcu-co one can offload time-critical tasks to dedicated hardware, unlocking deterministic control over GPIO and PWM from any Linux application without leaving the comfort of a high-level API.</p> <p>mcu-co also serves as a great learning opportunity for me and for you, the reader. I plan on making this a series, so those who are interested and follow along will have the opportunity to learn a thing or two about multiple fields in embedded software, from bare-metal firmware to Linux software to Yocto development. This project will cover a lot of ground, so there is something in it for everyone. For me, this is the first time I have taken on a project of such depth and so many moving parts, it will give me the opportunity to elevate my skills as an engineer by quite a bit. I am very excited to work on this project and to share my progress with you all. In the next post I will go over the MCU firmware for the project, see you then!</p>]]></content><author><name></name></author><category term="mcu-co"/><category term="Embedded-Linux"/><category term="MCU"/><summary type="html"><![CDATA[Introducing mcu-co, which pairs a Linux host with a dedicated microcontroller to give it deterministic pin control without a real-time kernel]]></summary></entry><entry><title type="html">mcu-co How to write a UART driver (mcu-co P2)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_How_to_write_good_Driver/" rel="alternate" type="text/html" title="mcu-co How to write a UART driver (mcu-co P2)"/><published>2026-03-22T09:40:16+00:00</published><updated>2026-03-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_How_to_write_good_Driver</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_How_to_write_good_Driver/"><![CDATA[<h2 id="introduction">Introduction</h2> <p>For mcu-co, I decided to go bare-metal rather than the CubeMX route, simply because I wanted to extract as much knowledge as possible from doing this project, and by using the drivers and the HAL that CubeMX gives me, I felt I would be missing out on this experience. Going the bare-metal route definitely adds a lot more complexity and increases the amount of time it takes to finish the project; however, I feel it is well worth it because of the experience that it will grant me. Because we are going bare-metal, I will have to write my own drivers for the peripherals I will be using on the MCU. One of the most common peripherals that one might have to write their own driver for is a UART peripheral. In this post, I will go over how to write a good driver and the practices I like to follow when writing a driver.</p> <p>I will not be going over what UART is at a high level, as that is not the focus of this post, but if you would like to learn more about UART in detail, here is a <a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter">website</a> you can use to do that. For this post, all I will say is UART is a common serial communication protocol that is often used for debug/logging consoles, bootloaders/firmware flashing, and GPS modules. For mcu-co, we will be using UART for two things: debugging/logging and as the communication link from the MCU to the SoC running Linux.</p> <h2 id="data-structures">Data Structures</h2> <p>First thing to go over are the data structures used for this driver.</p> <p><strong>uart_config_t</strong>: A struct that allows the user to configure the UART peripheral. Here is what it looks like:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-</pre></td><td class="code"><pre><span class="cm">/** @brief UART peripheral configuration parameters. */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">uart_baudrate_t</span> <span class="n">baudrate</span><span class="p">;</span>
-    <span class="n">uart_parity_t</span> <span class="n">parity</span><span class="p">;</span>
-    <span class="n">uart_data_width_t</span> <span class="n">data_width</span><span class="p">;</span>
-    <span class="n">uart_stop_bits_t</span> <span class="n">stop_bits</span><span class="p">;</span>
-    <span class="n">uart_mode_t</span> <span class="n">mode</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">uart_config_t</span><span class="p">;</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p>And here are the enumerations the user can use to set these fields:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-</pre></td><td class="code"><pre><span class="cm">/** @brief Supported baud rates. */</span>
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UART_BAUD_9600</span>   <span class="o">=</span> <span class="mi">9600U</span><span class="p">,</span>
-    <span class="n">UART_BAUD_19200</span>  <span class="o">=</span> <span class="mi">19200U</span><span class="p">,</span>
-    <span class="n">UART_BAUD_38400</span>  <span class="o">=</span> <span class="mi">38400U</span><span class="p">,</span>
-    <span class="n">UART_BAUD_57600</span>  <span class="o">=</span> <span class="mi">57600U</span><span class="p">,</span>
-    <span class="n">UART_BAUD_115200</span> <span class="o">=</span> <span class="mi">115200U</span><span class="p">,</span>
-<span class="p">}</span> <span class="n">uart_baudrate_t</span><span class="p">;</span>
-
-<span class="cm">/** @brief Parity mode selection. */</span>
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UART_PARITY_NONE</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
-    <span class="n">UART_PARITY_EVEN</span> <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
-    <span class="n">UART_PARITY_ODD</span>  <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
-<span class="p">}</span> <span class="n">uart_parity_t</span><span class="p">;</span>
-
-<span class="cm">/** @brief Data frame width selection. */</span>
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UART_DATA_8BIT</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
-    <span class="n">UART_DATA_9BIT</span> <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
-    <span class="n">UART_DATA_7BIT</span> <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
-<span class="p">}</span> <span class="n">uart_data_width_t</span><span class="p">;</span>
-
-<span class="cm">/** @brief Number of stop bits. */</span>
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UART_STOP_1BIT</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
-    <span class="n">UART_STOP_2BIT</span> <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
-<span class="p">}</span> <span class="n">uart_stop_bits_t</span><span class="p">;</span>
-
-<span class="cm">/** @brief TX, RX, or bidirectional mode. */</span>
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UART_MODE_TX</span>    <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
-    <span class="n">UART_MODE_RX</span>    <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
-    <span class="n">UART_MODE_TX_RX</span> <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
-<span class="p">}</span> <span class="n">uart_mode_t</span><span class="p">;</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p>By using C <strong>enums</strong> we force the user to only configure UART with known values, as if they try to set other values their program would not compile.</p> <p><strong>uart_instance_t</strong>: This is an enum that allows the user to select whichever UART channel/bus they would like to use. The MCU we are using, the STM32G474RE, has 6 UART channels; for mcu-co, we will be using two of them.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-</pre></td><td class="code"><pre><span class="cm">/** @brief UART peripheral instance identifiers. */</span>
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UART_INSTANCE_USART1</span>  <span class="o">=</span> <span class="mi">0U</span><span class="p">,</span>
-    <span class="n">UART_INSTANCE_USART2</span>  <span class="o">=</span> <span class="mi">1U</span><span class="p">,</span>
-    <span class="n">UART_INSTANCE_USART3</span>  <span class="o">=</span> <span class="mi">2U</span><span class="p">,</span>
-    <span class="n">UART_INSTANCE_UART4</span>   <span class="o">=</span> <span class="mi">3U</span><span class="p">,</span>
-    <span class="n">UART_INSTANCE_UART5</span>   <span class="o">=</span> <span class="mi">4U</span><span class="p">,</span>
-    <span class="n">UART_INSTANCE_LPUART1</span> <span class="o">=</span> <span class="mi">5U</span><span class="p">,</span>
-<span class="p">}</span> <span class="n">uart_instance_t</span><span class="p">;</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_rx_buffer_t</strong>: This is the data structure for the receive buffer. It’s a struct comprising a <strong>uint8_t</strong> pointer and a size variable. The buffer is then set up as a ring buffer that the UART peripheral will pass received characters into.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-</pre></td><td class="code"><pre><span class="cm">/**
- * @brief Caller-supplied RX ring buffer storage.
- *
- * @p buffer must remain valid for the lifetime of the UART instance.
- * @p size must be a power of 2.
- */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">buffer</span><span class="p">;</span>
-    <span class="kt">uint16_t</span> <span class="n">size</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">uart_rx_buffer_t</span><span class="p">;</span>
-</pre></td></tr></tbody></table></code></pre></figure> <h2 id="apis">API’s</h2> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-</pre></td><td class="code"><pre><span class="cm">/**
- * @brief Initialise a UART peripheral.
- *
- * Enables the peripheral clock, configures GPIO pins, baud rate, frame
- * format, and mode. For RX-capable modes, initialises the ring buffer
- * and enables the RXNE interrupt.
- *
- * @param instance  UART peripheral to initialise
- * @param config    Pointer to frame and mode configuration
- * @param rx_buffer Caller-supplied RX buffer; required for RX/TX_RX modes, NULL for TX-only
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on bad arguments,
- *         STATUS_ERR_BUSY if already initialised or its pins are in use,
- *         STATUS_ERR_NOT_INIT if the clock/GPIO could not be brought up,
- *         STATUS_ERR_TIMEOUT if the peripheral did not become ready.
- */</span>
-<span class="n">status_t</span> <span class="nf">uart_init</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="k">const</span> <span class="n">uart_config_t</span> <span class="o">*</span><span class="n">config</span><span class="p">,</span>
-                   <span class="k">const</span> <span class="n">uart_rx_buffer_t</span> <span class="o">*</span><span class="n">rx_buffer</span><span class="p">);</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_init</strong>: This is the function used to initialize the UART channel of choice with your specific configuration and receive buffer. Here are some ways this function can be used to initialize a TX-only UART instance and a RX/TX UART instance:</p> <p>Say you wanted to make a logger that only transmits characters. There would be no need to create a receive buffer in this use case, so here is an example of how one could set up the UART channel:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-</pre></td><td class="code"><pre><span class="k">static</span> <span class="k">const</span> <span class="n">uart_instance_t</span> <span class="n">uart_logger</span> <span class="o">=</span> <span class="n">UART_INSTANCE_USART1</span><span class="p">;</span>
-
-<span class="k">static</span> <span class="kt">int</span> <span class="nf">init_uart_logger_hw</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">const</span> <span class="n">uart_config_t</span> <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="p">.</span><span class="n">baudrate</span>   <span class="o">=</span> <span class="n">UART_BAUD_115200</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">data_width</span> <span class="o">=</span> <span class="n">UART_DATA_8BIT</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">parity</span>     <span class="o">=</span> <span class="n">UART_PARITY_NONE</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">stop_bits</span>  <span class="o">=</span> <span class="n">UART_STOP_1BIT</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">mode</span>       <span class="o">=</span> <span class="n">UART_MODE_TX</span><span class="p">,</span>
-    <span class="p">};</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_init</span><span class="p">(</span><span class="n">uart_logger</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p>Now say you want to set up a terminal instance, meaning you want to be able to write characters into your UART peripheral. This means you would want to have initialized a receive buffer; here’s how that could look:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-</pre></td><td class="code"><pre><span class="cp">#define TERMINAL_BUFFER_SIZE 64U
-</span>
-<span class="k">static</span> <span class="k">const</span> <span class="n">uart_instance_t</span> <span class="n">uart_terminal</span> <span class="o">=</span> <span class="n">UART_INSTANCE_USART2</span><span class="p">;</span>
-
-<span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">uart_terminal_rx_buffer</span><span class="p">[</span><span class="n">TERMINAL_BUFFER_SIZE</span><span class="p">];</span>
-
-<span class="k">static</span> <span class="kt">int</span> <span class="nf">init_uart_terminal_hw</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">const</span> <span class="n">uart_config_t</span> <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="p">.</span><span class="n">baudrate</span>   <span class="o">=</span> <span class="n">UART_BAUD_115200</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">data_width</span> <span class="o">=</span> <span class="n">UART_DATA_8BIT</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">parity</span>     <span class="o">=</span> <span class="n">UART_PARITY_NONE</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">stop_bits</span>  <span class="o">=</span> <span class="n">UART_STOP_1BIT</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">mode</span>       <span class="o">=</span> <span class="n">UART_MODE_TX_RX</span><span class="p">,</span>
-    <span class="p">};</span>
-
-    <span class="k">const</span> <span class="n">uart_rx_buffer_t</span> <span class="n">rx_buffer</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="p">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">uart_terminal_rx_buffer</span><span class="p">,</span>
-        <span class="p">.</span><span class="n">size</span>   <span class="o">=</span> <span class="n">TERMINAL_BUFFER_SIZE</span><span class="p">,</span>
-    <span class="p">};</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_init</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rx_buffer</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p>Something worth noting when using <strong>uart_init</strong>: the <code class="language-plaintext highlighter-rouge">config</code> struct and the <code class="language-plaintext highlighter-rouge">rx_buffer</code> wrapper can both be declared on the stack, since <code class="language-plaintext highlighter-rouge">uart_init</code> only reads them during the call. The RX storage array itself, however, cannot be a stack local. The driver keeps using that memory on every incoming byte for as long as the UART instance is initialized, so it needs to be declared where it can have a lifetime that outlives the init function (like a global variable or a static variable).</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-</pre></td><td class="code"><pre><span class="cm">/**
- * @brief Transmit a buffer of bytes.
- *
- * Calls the internal TX helper for each byte. Fails early if any byte
- * times out waiting for the transmit register to empty.
- *
- * @param instance UART peripheral to write to
- * @param data     Pointer to transmit buffer
- * @param length   Number of bytes to transmit
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on bad arguments,
- *         STATUS_ERR_NOT_INIT if not initialised, STATUS_ERR_INVALID_STATE if
- *         the instance is not in a TX-capable mode, STATUS_ERR_TIMEOUT if a
- *         byte timed out waiting for the transmit register to empty.
- */</span>
-<span class="n">status_t</span> <span class="nf">uart_write_buffer</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">length</span><span class="p">);</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_write_buffer</strong>: This is the function that is used to transmit characters on the UART TX line. It is used as follows:</p> <p>Again, say you want to transmit data onto a terminal using your terminal module, you would use the <strong>uart_write_buffer</strong> function like this:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-</pre></td><td class="code"><pre><span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_send_greeting</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">message</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"Hello from mcu-co</span><span class="se">\r\n</span><span class="s">"</span><span class="p">;</span>
-
-    <span class="cm">/* sizeof - 1 to drop the trailing NUL terminator */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_buffer</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1U</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p>The driver also provides a function with more granularity if one wants to transmit single bytes on the TX line: <strong>uart_write_byte</strong>.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-</pre></td><td class="code"><pre><span class="cm">/**
- * @brief Transmit a single byte.
- *
- * Blocks until the transmit data register is empty, then writes the byte.
- *
- * @param instance UART peripheral to write to
- * @param data     Byte to transmit
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on an invalid instance,
- *         STATUS_ERR_NOT_INIT if not initialised, STATUS_ERR_INVALID_STATE if
- *         the instance is not in a TX-capable mode, STATUS_ERR_TIMEOUT if the
- *         transmit register did not empty in time.
- */</span>
-<span class="n">status_t</span> <span class="nf">uart_write_byte</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">data</span><span class="p">);</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_write_byte</strong>: This function is used to transmit single bytes over the UART TX line. It can be used as follows:</p> <p>Say you want your UART terminal to print out a payload that follows a specific structure. You can use <strong>uart_write_byte</strong> for finer control of the characters in the message:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-</pre></td><td class="code"><pre><span class="cp">#define FRAME_START 0x7EU
-#define FRAME_END   0x7FU
-</span>
-<span class="cm">/*
- * Send a structured log frame:
- *
- *   [START][LENGTH][ ...payload... ][CHECKSUM][END]
- *
- * The START, LENGTH, CHECKSUM and END bytes are computed here rather than
- * stored anywhere, so uart_write_byte lets us emit them around the payload
- * one at a time instead of building a separate contiguous buffer.
- */</span>
-<span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_send_log_frame</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">payload</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">length</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="kt">uint8_t</span> <span class="n">checksum</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">FRAME_START</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">for</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">payload</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="n">checksum</span> <span class="o">^=</span> <span class="n">payload</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">checksum</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_write_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">FRAME_END</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-</pre></td><td class="code"><pre><span class="cm">/**
- * @brief Read available bytes from the RX ring buffer.
- *
- * Drains the ring buffer up to @p length bytes. Stops early if the buffer
- * empties before @p length is reached; draining an empty buffer is not an
- * error and yields @p bytes_read == 0 with STATUS_OK.
- *
- * @param instance   UART peripheral to read from
- * @param data       Output buffer to write received bytes into
- * @param length     Maximum number of bytes to read
- * @param bytes_read Output parameter set to the number of bytes read (0 to length)
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on bad arguments,
- *         STATUS_ERR_NOT_INIT if not initialised, STATUS_ERR_INVALID_STATE if
- *         the instance is not in an RX-capable mode.
- */</span>
-<span class="n">status_t</span> <span class="nf">uart_read_buffer</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">length</span><span class="p">,</span>
-                          <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">bytes_read</span><span class="p">);</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_read_buffer</strong>: This function reads multiple bytes stored in the RX ring buffer and places them in an output buffer the user provides. The ring buffer serves as temporary storage for the bytes held in the UART peripheral’s shift register. The driver has an interrupt service routine that fires every time our enabled UART peripheral has data in its shift register. That data is then stored in the ring buffer, where it is ready to be consumed by the <strong>uart_read_buffer</strong> function.</p> <p>An example use case using this function is as follows:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-</pre></td><td class="code"><pre><span class="cm">/* Pull whatever the terminal has sent us into a local buffer. */</span>
-<span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_read_command</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">max_len</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">received</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_read_buffer</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">max_len</span><span class="p">,</span> <span class="n">received</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p>This function also serves as a burst read: it drains as many bytes from the ring buffer as are available, up to the maximum length of the output buffer.</p> <p>If you need finer control, for an application like a state machine where you want to transition states based on the byte you receive, you’re better off using <strong>uart_read_byte</strong>, as detailed below.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-</pre></td><td class="code"><pre><span class="cm">/**
- * @brief Read a single byte from the RX ring buffer.
- *
- * Returns immediately if no byte is available.
- *
- * @param instance UART peripheral to read from
- * @param data     Output parameter for the received byte
- * @return STATUS_OK on success, STATUS_ERR_EMPTY if no byte is available,
- *         STATUS_ERR_INVALID_ARG on bad arguments, STATUS_ERR_NOT_INIT if not
- *         initialised, STATUS_ERR_INVALID_STATE if not in an RX-capable mode.
- */</span>
-<span class="n">status_t</span> <span class="nf">uart_read_byte</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_read_byte</strong>: This function is used to pop a single byte from the RX ring buffer, and it provides the user with more precise control, as seen in the example below:</p> <p>Below we have a state machine that is used to parse an incoming payload. We want to read one byte at a time, since each byte determines what state we transition to while parsing the payload.</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-</pre></td><td class="code"><pre><span class="cm">/*
- * Receive-side counterpart to the framed log sender. We pull one byte at a
- * time and feed it into a small state machine, which lets us parse the frame
- * as it streams in without buffering the whole thing first.
- *
- *   [START][LENGTH][ ...payload... ][CHECKSUM][END]
- */</span>
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">FRAME_WAIT_START</span><span class="p">,</span>
-    <span class="n">FRAME_WAIT_LENGTH</span><span class="p">,</span>
-    <span class="n">FRAME_READ_PAYLOAD</span><span class="p">,</span>
-    <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">,</span>
-<span class="p">}</span> <span class="n">frame_state_t</span><span class="p">;</span>
-
-<span class="cm">/* Returns 1 when a full, valid frame has been assembled into dst. */</span>
-<span class="k">static</span> <span class="kt">int</span> <span class="nf">terminal_poll_frame</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">out_len</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">static</span> <span class="n">frame_state_t</span> <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_START</span><span class="p">;</span>
-    <span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">expected_len</span><span class="p">;</span>
-    <span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">index</span><span class="p">;</span>
-    <span class="k">static</span> <span class="kt">uint8_t</span> <span class="n">checksum</span><span class="p">;</span>
-
-    <span class="kt">uint8_t</span> <span class="n">byte</span><span class="p">;</span>
-
-    <span class="cm">/* Nothing in the ring buffer yet - come back and try again later. */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_read_byte</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">byte</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">switch</span> <span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="n">FRAME_WAIT_START</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">byte</span> <span class="o">==</span> <span class="n">FRAME_START</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_LENGTH</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">break</span><span class="p">;</span>
-
-    <span class="k">case</span> <span class="n">FRAME_WAIT_LENGTH</span><span class="p">:</span>
-        <span class="n">expected_len</span> <span class="o">=</span> <span class="n">byte</span><span class="p">;</span>
-        <span class="n">index</span>    <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span>
-        <span class="n">checksum</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span>
-        <span class="n">state</span>    <span class="o">=</span> <span class="p">(</span><span class="n">expected_len</span> <span class="o">&gt;</span> <span class="mi">0U</span><span class="p">)</span> <span class="o">?</span> <span class="n">FRAME_READ_PAYLOAD</span> <span class="o">:</span> <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">;</span>
-        <span class="k">break</span><span class="p">;</span>
-
-    <span class="k">case</span> <span class="n">FRAME_READ_PAYLOAD</span><span class="p">:</span>
-        <span class="n">dst</span><span class="p">[</span><span class="n">index</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span><span class="p">;</span>
-        <span class="n">checksum</span>    <span class="o">^=</span> <span class="n">byte</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="n">expected_len</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">break</span><span class="p">;</span>
-
-    <span class="k">case</span> <span class="n">FRAME_WAIT_CHECKSUM</span><span class="p">:</span>
-        <span class="n">state</span> <span class="o">=</span> <span class="n">FRAME_WAIT_START</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">byte</span> <span class="o">==</span> <span class="n">checksum</span><span class="p">)</span> <span class="p">{</span>
-            <span class="o">*</span><span class="n">out_len</span> <span class="o">=</span> <span class="n">expected_len</span><span class="p">;</span>
-            <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">break</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-</pre></td><td class="code"><pre><span class="cm">/**
- * @brief Deinitialise a UART peripheral.
- *
- * Waits for any in-progress transmission to complete, disables the
- * peripheral and its clock, deconfigures GPIO pins, and disables the
- * NVIC interrupt if RX was active.
- *
- * @param instance UART peripheral to deinitialise
- * @return STATUS_OK on success, STATUS_ERR_INVALID_ARG on an invalid instance,
- *         STATUS_ERR_NOT_INIT if the peripheral was not initialised.
- */</span>
-<span class="n">status_t</span> <span class="nf">uart_deinit</span><span class="p">(</span><span class="n">uart_instance_t</span> <span class="n">instance</span><span class="p">);</span>
-</pre></td></tr></tbody></table></code></pre></figure> <p><strong>uart_deinit</strong>: This function is used to deinitialize the UART channel in use. It disables the clock for the specific UART bus and marks its state as uninitialized in the driver. It can be used as follows:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-</pre></td><td class="code"><pre><span class="k">static</span> <span class="kt">int</span> <span class="nf">shutdown_uart_terminal</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">uart_deinit</span><span class="p">(</span><span class="n">uart_terminal</span><span class="p">)</span> <span class="o">!=</span> <span class="n">STATUS_OK</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></figure> <h2 id="general-trends">General Trends</h2> <p>Each function above returns a status to let the user know whether the operation was successful or not. Also, when a function fails, it returns a different status code, giving the user a better idea of what caused the failure, which is great for debugging purposes. Below is the status enumeration and the different status values the functions can return:</p> <figure class="highlight"><pre><code class="language-c" data-lang="c"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-</pre></td><td class="code"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">STATUS_OK</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>            <span class="cm">/**&lt; Operation completed successfully.            */</span>
-    <span class="n">STATUS_ERR_INVALID_ARG</span><span class="p">,</span>   <span class="cm">/**&lt; NULL pointer or out-of-range enum argument.  */</span>
-    <span class="n">STATUS_ERR_INVALID_PIN</span><span class="p">,</span>   <span class="cm">/**&lt; Pin number out of range or a reserved pin.   */</span>
-    <span class="n">STATUS_ERR_INVALID_STATE</span><span class="p">,</span> <span class="cm">/**&lt; Resource not configured for this operation.  */</span>
-    <span class="n">STATUS_ERR_NOT_INIT</span><span class="p">,</span>      <span class="cm">/**&lt; Peripheral or clock not initialised yet.     */</span>
-    <span class="n">STATUS_ERR_BUSY</span><span class="p">,</span>          <span class="cm">/**&lt; Resource already initialised or in use.      */</span>
-    <span class="n">STATUS_ERR_TIMEOUT</span><span class="p">,</span>       <span class="cm">/**&lt; Hardware did not respond within the timeout. */</span>
-    <span class="n">STATUS_ERR_UNSUPPORTED</span><span class="p">,</span>   <span class="cm">/**&lt; Valid request the driver cannot satisfy.     */</span>
-    <span class="n">STATUS_ERR_EMPTY</span><span class="p">,</span>         <span class="cm">/**&lt; No data available (e.g. RX buffer empty).    */</span>
-<span class="p">}</span> <span class="n">status_t</span><span class="p">;</span>
-</pre></td></tr></tbody></table></code></pre></figure>]]></content><author><name></name></author><category term="mcu-co"/><category term="MCU"/><summary type="html"><![CDATA[Learn the fundamentals of writing a good driver by writing one for a UART peripheral]]></summary></entry></feed>
+</pre></td></tr></tbody></table></code></pre></figure>]]></content><author><name></name></author><category term="mcu-co"/><category term="MCU"/><summary type="html"><![CDATA[How to write a type agnostic ring buffer in C, the ring buffer can be used for any data struct.]]></summary></entry><entry><title type="html">mcu-co Proposal (mcu-co P1)</title><link href="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/" rel="alternate" type="text/html" title="mcu-co Proposal (mcu-co P1)"/><published>2026-03-22T09:40:16+00:00</published><updated>2026-03-22T09:40:16+00:00</updated><id>https://causality-lab.github.io/blog/2026/mcu-co_Proposal</id><content type="html" xml:base="https://causality-lab.github.io/blog/2026/mcu-co_Proposal/"><![CDATA[<h2 id="what-is-mcu-co">What is mcu-co</h2> <p>mcu-co pairs a Linux host with a dedicated microcontroller that handles the timing-critical work, like interrupt handling and PWM generation. Offloading it that way gets you deterministic pin behavior without a real-time kernel, and leaves the host free to focus on high-level application logic. Everything the co-processor can do is available to any Linux application through a C library and a command line interface.</p> <h2 id="core-features">Core Features</h2> <h4 id="io">I/O</h4> <ul> <li><strong>Standard GPIO</strong> — pin direction configuration, high-speed pin state manipulation (High/Low), and input sensing</li> <li><strong>Pin-change interrupts</strong> — arm any input pin to trigger on a rising edge, a falling edge, or both</li> <li><strong>Interrupt-to-output bindings</strong> — logic-locked pins that react to an edge on another pin without any software intervention, serviced entirely by the MCU</li> <li><strong>Advanced PWM</strong> — jitter-free pulse-width modulation for motor control and power electronics, with frequency set per timer group and duty cycle set per pin</li> </ul> <h4 id="reliability">Reliability</h4> <ul> <li><strong>A checked command protocol</strong> — strict master-slave with one command in flight at a time, CRC-checked frames, and an ACK or a NACK with a reason code for every command sent</li> </ul> <h2 id="software-for-mcu-co">Software for mcu-co</h2> <p>The mcu-co stack is a complete “Vertical” solution, ranging from low-level firmware to high-level application code:</p> <table> <thead> <tr> <th>Layer</th> <th>Component</th> <th>Description</th> </tr> </thead> <tbody> <tr> <td>Hardware</td> <td>MCU Firmware</td> <td>Optimized real-time firmware for an STM32G474RE MCU</td> </tr> <tr> <td>OS Layer</td> <td>Yocto Layer</td> <td>meta-mcu-co recipes for seamless integration into custom Linux builds</td> </tr> <tr> <td>Tools</td> <td>mcu-co CLI</td> <td>A powerful Command Line Interface for testing and field diagnostics</td> </tr> <tr> <td>Dev Kit</td> <td>C SDK</td> <td>Native C shared library for fast application development</td> </tr> </tbody> </table> <h2 id="why-use-mcu-co">Why use mcu-co?</h2> <p>Unlike standard Linux GPIO, which suffers from “jitter” (unpredictable delays), mcu-co ensures that your hardware reacts at the exact same time, every time. It is the bridge between the intelligence of Linux and the speed of silicon.</p> <h2 id="design">Design</h2> <p>The following block diagram shows the high-level architecture of the mcu-co system:</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/mcu-co/mcu-co_block-diagram_v2-480.webp 480w,/assets/img/mcu-co/mcu-co_block-diagram_v2-800.webp 800w,/assets/img/mcu-co/mcu-co_block-diagram_v2-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/mcu-co/mcu-co_block-diagram_v2.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <h4 id="mcu">MCU</h4> <p>The micro-controller (MCU) I decided to go with is the STM32G474RE. I chose this MCU because it is a high-performance Cortex-M4F with advanced timer peripherals capable of driving twelve PWM outputs, plenty of GPIO with per-pin edge interrupts, and enough headroom at 170 MHz to service those interrupts with very little latency, covering the entire mcu-co feature set on a single chip.</p> <p>The firmware will be a bare metal application that parses commands received from the Linux host. The physical link between the SoC and the MCU is a UART. I chose a UART because every Linux-capable SoC exposes one, and on the MCU side it needs nothing beyond a driver I write myself, which keeps the firmware bare metal and makes the traffic easy to observe with any serial monitor.</p> <h4 id="linux">Linux</h4> <p>On the Linux side, the software will consist of an SDK: a dynamic C library and a command line interface built on top of it. These tools are SoC agnostic and will work on any Linux-capable SoC, keeping with mcu-co’s core theme of being plug and play.</p> <h4 id="sdk">SDK</h4> <p>The SDK is comprised of a dynamic C library and a command line interface. It allows developers to easily integrate mcu-co into their applications without needing to understand the underlying communication protocol. The library owns the serial link and speaks the protocol on the application’s behalf, and the CLI, built on that same library, is designed for testing and field diagnostics.</p> <h4 id="yocto-meta-mcu-co">Yocto (meta-mcu-co)</h4> <p>The Yocto layer (meta-mcu-co) will package the library and the CLI, allowing developers working with Yocto to include mcu-co in their own custom Embedded Linux images with minimal effort.</p> <h2 id="conclusion">Conclusion</h2> <p>I believe mcu-co is actually a super useful tool and will give Linux developers real-time control, which is something Linux is known to struggle with. With mcu-co one can offload time-critical tasks to dedicated hardware, unlocking deterministic control over GPIO and PWM from any Linux application without leaving the comfort of a high-level API.</p> <p>mcu-co also serves as a great learning opportunity for me and for you, the reader. I plan on making this a series, so those who are interested and follow along will have the opportunity to learn a thing or two about multiple fields in embedded software, from bare-metal firmware to Linux software to Yocto development. This project will cover a lot of ground, so there is something in it for everyone. For me, this is the first time I have taken on a project of such depth and so many moving parts, it will give me the opportunity to elevate my skills as an engineer by quite a bit. I am very excited to work on this project and to share my progress with you all. In the next post I will go over the MCU firmware for the project, see you then!</p>]]></content><author><name></name></author><category term="mcu-co"/><category term="Embedded-Linux"/><category term="MCU"/><summary type="html"><![CDATA[Introducing mcu-co, which pairs a Linux host with a dedicated microcontroller to give it deterministic pin control without a real-time kernel]]></summary></entry></feed>
