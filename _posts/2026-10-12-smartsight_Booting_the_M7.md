@@ -161,7 +161,7 @@ After setting up we most tell uBoot that we want our new device tree to get load
 #### Adding it to the Yocto Layer
 Now that we have our device tree, we need to add it to our Yocto layer so it gets built with the kernel. Since `imx8mp-causality.dts` is a new file rather than a change to an existing one, we don't need a patch. Instead, we can place the file in our layer and have the `linux-imx` recipe copy it into the kernel source before it builds. The layout in `meta-causality-imx` looks like this:
 
-{% highlight text %}
+{% highlight text linenos%}
 recipes-kernel/
 └── linux/
     ├── files/
