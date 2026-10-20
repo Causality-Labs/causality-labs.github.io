@@ -117,7 +117,7 @@ There is a device tree set up for the m7 core that we can use for reference whic
         mboxes = <&mu 0 1
                   &mu 1 1
                   &mu 3 1>;
-        memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>;
+        memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>, <&m7_reserved>;
         fsl,startup-delay-ms = <500>;
         status = "okay";
     };
@@ -224,6 +224,12 @@ Power up the board, stop in U-Boot, and run the following commands:
 {% highlight bash linenos %}
 u-boot=> run prepare_mcore
 u-boot=> boot
+{% endhighlight %}
+
+Or permenantly add it to the boot command:
+{% highlight bash linenos %}
+u-boot=> setenv bootcmd 'run prepare_mcore; run sr_ir_v2_cmd; run distro_bootcmd; run bsp_bootcmd'
+u-boot=> saveenv
 {% endhighlight %}
 
 **2. Check that remoteproc is enabled**
