@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-adding-cortex-m7-support-to-the-frdm-i-mx8mp-bsp-smartsight-p1",
+        },{id: "post-understanding-the-rpmsg-architecture-smartsight-p2",
+        
+          title: "Understanding the RPMsg architecture (smartsight P2)",
+        
+        description: "A look at how RPMsg lets the Cortex-A53 cores and the Cortex-M7 on the i.MX 8M Plus talk to each other.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/smartsight_rpmsg/";
+          
+        },
+      },{id: "post-adding-cortex-m7-support-to-the-frdm-i-mx8mp-bsp-smartsight-p1",
         
           title: "Adding Cortex-M7 support to the FRDM-i.MX8MP BSP (smartsight P1)",
         
