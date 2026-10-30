@@ -9,7 +9,7 @@ thumbnail: assets/img/blogs/smartsight.png
 ---
 
 ## Introduction
-In this post I will go over the fundamentals of the RPsg framework and how utilize it in the smartsight project. RPMsg (Remote Processor Messaging) is a standard, shared-memory-based messaging bus that enables low-latency Inter-Processor Communication (IPC) between heterogeneous cores in an asymmetric multiprocessing (AMP) architecture. It is how we will be getting our cortex-A53 core cluster to communicate with our cortex-M7 core.
+In this post, I will go over the fundamentals of the RPMsg framework and how I use it in the smartsight project. RPMsg (Remote Processor Messaging) is a standard, shared-memory-based messaging bus that enables low-latency Inter-Processor Communication (IPC) between heterogeneous cores in an asymmetric multiprocessing (AMP) architecture. It is how we will get our Cortex-A53 core cluster to communicate with our Cortex-M7 core.
 
 ## How RPMsg works
 RPMsg is built as a three-layer stack. At the bottom is the physical layer: a region of shared memory plus an inter-core interrupt that lets one core notify the other (on i.MX parts this is the Messaging Unit, or MU). Above that is the media access layer, VirtIO, which manages vrings, the ring buffers in shared memory that pass message buffers between the cores. At the top is RPMsg itself, the transport layer, which adds addressing through endpoints and named channels so drivers on each side can send and receive messages.
@@ -17,22 +17,30 @@ RPMsg is built as a three-layer stack. At the bottom is the physical layer: a re
 {% include figure.liquid path="assets/img/smartsight/rpmsg-layers.png" class="img-fluid rounded z-depth-1" zoomable=true %}
 
 #### Physical Layer
-The Physical Layer is comprised of two things shared memory and inter core interrupts(A Mailbox Unit (MU)).
+The physical layer is made up of two things: shared memory and inter-core interrupts, which are provided by the Messaging Unit (MU).
 
-- shared memory: A location DDR RAM that is accessible by both cores, its where each core writes data to and reads data from.
+- Shared memory: a region of DDR RAM that is accessible by both cores. It's where each core writes data to and reads data from.
 
-- inter core interrupts: A hardware signal one core sends to interrupt another. It's how one side of RPMsg tells the other "I've put something in shared memory for you".
+- Inter-core interrupts: a hardware signal one core sends to interrupt another. It's how one side of RPMsg tells the other "I've put something in shared memory for you".
 
 {% include figure.liquid path="assets/img/smartsight/rpmsg-physical-layer.png" class="img-fluid rounded z-depth-1" zoomable=true %}
 
 #### Media Access Control Layer (MAC)
 The Media Access Control layer is implemented by VirtIO and manages access to the shared memory using vrings, ring buffers that pass message buffers back and forth between the two cores, one for each direction.
 
-The MAC layer is implemented by VirtIO, whiich is a standard for passing data between two sides that share memory. It was originally created for virtual machines: instead of emulating real hardware, a VM and its host exchange data through shared memory using an agreed set of rules. RPMsg reuses that standard. To Linux, the M7 looks like a VirtIO device, so the same well-tested code handles the communication. Vring uses a data structure called vring to do this, vring is a ring buffer that lives in shared memory. It doesn't hold the messages themselves. It holds small entries that point to message buffers, and it has three parts:
+The MAC layer is implemented by VirtIO, which is a standard for passing data between two sides that share memory. It was originally created for virtual machines: instead of emulating real hardware, a VM and its host exchange data through shared memory using an agreed set of rules. RPMsg reuses that standard. To Linux, the M7 looks like a VirtIO device, so the same well-tested code handles the communication. VirtIO uses a data structure called a vring to do this. A vring is a ring buffer that lives in shared memory. It doesn't hold the messages themselves. It holds small entries that point to message buffers, and it has three parts:
 
 {% include figure.liquid path="assets/img/smartsight/virtio-vring.png" class="img-fluid rounded z-depth-1" zoomable=true %}
 
+- Buffer descriptor table: a list of entries describing each message buffer, including where it is in memory and how big it is.
+- Available ring: where one side hands buffers over to the other.
+- Used ring: where the other side hands buffers back once it is done with them.
+
+Let's look at each part in more detail, starting with the buffer descriptor table:
+
 {% include figure.liquid path="assets/img/smartsight/virtio-descriptor.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+
+Each entry in the buffer descriptor table has the following fields:
 
 - Address: the physical address of the buffer in RAM.
 - Length: the length of the buffer in bytes.
@@ -77,21 +85,21 @@ It consists of the following:
 - Flags (16-bit): Currently unused by RPMsg and is reserved.
 - Payload: the actual data being sent
 
-The transport layer is also comprised of an RPMsg channel and RPMsg endpoint:
+The transport layer is also made up of RPMsg channels and RPMsg endpoints:
 
-An RPMsg channel is a named connection between a remote core and the host core, such as "rpmsg-tty" or "sensor-service". Its comprised of three things:
-- A name for the channel (sensor service)
-- Local Address (Source Address)
-- Remote Address (Destination Address)
+An RPMsg channel is a named connection between a remote core and the host core, such as "rpmsg-tty" or "sensor-service". It's made up of three things:
+- A name for the channel (e.g. "sensor-service")
+- Local address (source address)
+- Remote address (destination address)
 
 Each core can have multiple channels.
 
-An RPMsg endpoint is a logical address that a core uses to send and receive messages, similar to a port number in networking. It's comprised of two things:
+An RPMsg endpoint is a logical address that a core uses to send and receive messages, similar to a port number in networking. It's made up of two things:
 
 - Address: a 32-bit number that uniquely identifies the endpoint on its core. Every RPMsg message carries a source address and a destination address, which is how RPMsg knows which endpoint a message came from and which endpoint should receive it.
 - Callback: a function that gets called whenever a message arrives at the endpoint's address. This is where the application handles the incoming data.
 
-You can have multiple endpoints in a channel
+You can have multiple endpoints in a channel.
 
 An example configuration of a channel and endpoint can look like this:
 
@@ -105,7 +113,7 @@ When Linux wants the current temperature, it sends a message from its endpoint 1
 
 {% include figure.liquid path="assets/img/smartsight/rpmsg-system.png" class="img-fluid rounded z-depth-1" zoomable=true %}
 
-Now we are going to connect all the dots, in the diagram above we can see al the pieces connected, also one thing to not is that we have two vrings one for linux to talk to the M7 core and the other is for the m7 core to talk to linux
+Now we are going to connect all the dots. In the diagram above, we can see all the pieces connected. One thing to note is that we have two vrings: one for Linux to talk to the M7 core, and the other for the M7 core to talk to Linux.
 
 {% include figure.liquid path="assets/img/smartsight/rpmsg-endpoints-buffers.png" class="img-fluid rounded z-depth-1" zoomable=true %}
 
@@ -113,7 +121,7 @@ The diagram shows how endpoints use message buffers in shared memory to talk to 
 
 For example, Linux's endpoint 1024 calls `rpmsg_send()` to send `"GET_TEMP"` to the M7's endpoint 30, which runs `temp_req_cb()` to handle the request. In the other direction, the M7's endpoint 31 calls `rpmsg_lite_send()` to send `"OVERHEAT"` to Linux's endpoint 1025, which runs `on_alarm()`. Channel B works the same way: endpoint 1026 sends `"SPEED 120"` to endpoint 40, which runs `motor_cmd_cb()`.
 
-Now we will connect the the MAC layers vring to the transport layer. As seen in the diagrams below:
+Now we will connect the MAC layer's vrings to the transport layer, as seen in the diagrams below:
 
 vring0 (M7 to Linux)
 {% include figure.liquid path="assets/img/smartsight/rpmsg-vring0.png" class="img-fluid rounded z-depth-1" zoomable=true %}
@@ -139,7 +147,7 @@ Below is the flow of communication in this ring.
 - The M7 reads the header, finds the endpoint matching dst, and runs its callback with the payload.
 - The M7 writes the descriptor number into the used ring, meaning “done, you can have it back.”
 
-Now we will go over actually messages as an example:
+Now let's go through some actual messages as examples:
 
 #### Example: Sending "GET_TEMP" from Linux to the M7
 
@@ -150,6 +158,7 @@ Linux's endpoint 1024 sends `"GET_TEMP"` to the M7's endpoint 30. Messages in th
 1. **Linux gets a buffer:** it takes the buffer at `0x55420000` from its free pool and describes it with `desc[0]`.
 2. **Linux writes the message:** `src 1024` · `dst 30` · `len 8` · `"GET_TEMP"`.
 3. **Linux hands it over:** it writes `0` into the available ring (`avail[0] = 0`, `avail.idx = 1`).
+   - In the diagram, Linux has also sent `"SPEED 120"` right after, using `desc[1]` and `avail[1] = 1`, which is why `avail.idx` shows 2.
 4. **Linux notifies the M7:** it rings the MU, which interrupts the M7.
 5. **M7 finds the message:** `avail[0] = 0` points to `desc[0]` and the buffer at `0x55420000`.
 6. **M7 delivers it:** `dst 30` selects the endpoint, and its callback runs with `"GET_TEMP"`.
@@ -173,7 +182,7 @@ The M7's endpoint 31 sends `"OVERHEAT"` to Linux's endpoint 1025. Messages in th
 
 ## Connecting it back to the Device Tree
 
-NOw that we have gone over how the stack and how messages flow throught both vrings, we can take a second look at the how rpmsg is setup in the dts file:
+Now that we have gone over the stack and how messages flow through both vrings, we can take a second look at how RPMsg is set up in the DTS file:
 
 {% highlight c linenos %}
 // SPDX-License-Identifier: (GPL-2.0 OR MIT)
@@ -261,6 +270,7 @@ We'll focus only on the parts of the device tree that relate to RPMsg. Here are 
 | `vdev0vring1` | `0x55008000` · 32 KB | vring 1 (Linux → M7) |
 | `vdevbuffer` | `0x55400000` · 1 MB | The message buffers the descriptors point to |
 | `rsc_table` | `0x550ff000` · 4 KB | The resource table, where the M7 firmware tells Linux where its vrings are |
+
 
 `no-map` stops Linux from using these regions as ordinary memory, since the M7 reads and writes them too. The vring addresses must match the M7 firmware's resource table, or no RPMsg channel will appear.
 
