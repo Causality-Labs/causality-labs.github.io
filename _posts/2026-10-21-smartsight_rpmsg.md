@@ -100,3 +100,171 @@ An example configuration of a channel and endpoint can look like this:
 In the diagram, our remote core, the M7, has two channels: temp-sensor and motor-ctrl. Each channel has two endpoints. The temp-sensor channel has endpoint 30 for handling temperature requests and endpoint 31 for sending alarms, while the motor-ctrl channel has endpoint 40 for receiving motor commands and endpoint 41 for reporting faults. Linux, our host, has a matching set of channels, and each of its endpoints is paired with one on the M7. For example, Linux's endpoint 1024 talks to the M7's endpoint 30.
 
 When Linux wants the current temperature, it sends a message from its endpoint 1024 to the M7's endpoint 30 (Buffer 1). The M7's temp_req_cb() callback runs, and the M7 replies from endpoint 30 back to endpoint 1024 with the reading (Buffer 2). Notice that the buffers only carry the source and destination addresses, not the channel name. The channel name is only used when the channel is first set up. After that, the addresses are all RPMsg needs to deliver each message to the right callback.
+
+## Linking it all up
+
+{% include figure.liquid path="assets/img/smartsight/rpmsg-system.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+
+Now we are going to connect all the dots, in the diagram above we can see al the pieces connected, also one thing to not is that we have two vrings one for linux to talk to the M7 core and the other is for the m7 core to talk to linux
+
+{% include figure.liquid path="assets/img/smartsight/rpmsg-endpoints-buffers.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+
+The diagram shows how endpoints use message buffers in shared memory to talk to each other. To send a message, an endpoint calls a send function: `rpmsg_send()` on the Linux side, or `rpmsg_lite_send()` on the M7 side. The message is written into a buffer along with a small header containing the source address (`src`), the destination address (`dst`), and the length of the message. RPMsg then uses the destination address to deliver the buffer to the right endpoint on the other core, which runs that endpoint's callback to handle the message.
+
+For example, Linux's endpoint 1024 calls `rpmsg_send()` to send `"GET_TEMP"` to the M7's endpoint 30, which runs `temp_req_cb()` to handle the request. In the other direction, the M7's endpoint 31 calls `rpmsg_lite_send()` to send `"OVERHEAT"` to Linux's endpoint 1025, which runs `on_alarm()`. Channel B works the same way: endpoint 1026 sends `"SPEED 120"` to endpoint 40, which runs `motor_cmd_cb()`.
+
+Now we will connect the the MAC layers vring to the transport layer. As seen in the diagrams below:
+
+vring0 (M7 to Linux)
+{% include figure.liquid path="assets/img/smartsight/rpmsg-vring0.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+
+Below is the flow of communication in this ring.
+- Linux posts empty buffers by writing their descriptor numbers into the available ring
+- The M7 reads the available ring to get one of those buffers: slot → descriptor number
+- The M7 writes the message into that buffer: header (src, dst, len) and payload.
+- The M7 writes that descriptor number into the used ring
+- The M7 rings the MU
+- Linux wakes up and reads the used ring to find the buffer, then reads the message and runs the endpoint’s callback.
+- Linux acknowledges by re-posting the buffer into the available ring as an empty buffer.
+
+vring1 (Linux to M7)
+{% include figure.liquid path="assets/img/smartsight/rpmsg-vring1.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+
+Below is the flow of communication in this ring.
+- Linux takes a free buffer from its own memory pool.
+- Linux writes the message into it: header (src, dst, len) and payload.
+- Linux writes the descriptor number into the available ring, meaning “here’s a message for you.”
+- Linux rings the MU.
+- The M7 wakes up and reads the available ring to find the buffer.
+- The M7 reads the header, finds the endpoint matching dst, and runs its callback with the payload.
+- The M7 writes the descriptor number into the used ring, meaning “done, you can have it back.”
+
+Now we will go over actually messages as an example:
+
+#### Example: Sending "GET_TEMP" from Linux to the M7
+
+Linux's endpoint 1024 sends `"GET_TEMP"` to the M7's endpoint 30. Messages in this direction travel on vring 1, where Linux fills the buffers itself and the M7 only reads them.
+
+**Before:** nothing to set up. Linux keeps its own pool of free buffers, so it doesn't need to post empty ones in advance.
+
+1. **Linux gets a buffer:** it takes the buffer at `0x55420000` from its free pool and describes it with `desc[0]`.
+2. **Linux writes the message:** `src 1024` · `dst 30` · `len 8` · `"GET_TEMP"`.
+3. **Linux hands it over:** it writes `0` into the available ring (`avail[0] = 0`, `avail.idx = 1`).
+4. **Linux notifies the M7:** it rings the MU, which interrupts the M7.
+5. **M7 finds the message:** `avail[0] = 0` points to `desc[0]` and the buffer at `0x55420000`.
+6. **M7 delivers it:** `dst 30` selects the endpoint, and its callback runs with `"GET_TEMP"`.
+7. **M7 gives the buffer back:** it writes `{id 0}` into the used ring (`used.idx = 1`).
+
+
+#### Example: Sending "OVERHEAT" from the M7 to Linux
+
+The M7's endpoint 31 sends `"OVERHEAT"` to Linux's endpoint 1025. Messages in this direction travel on vring 0, where Linux supplies the empty buffers and the M7 fills them.
+
+**Before:** Linux has already posted empty buffers `desc[0]`–`desc[3]` into the available ring (`avail.idx = 4`).
+
+1. **M7 gets a buffer:** it reads `avail[0] = 0`, which points to `desc[0]` and the buffer at `0x55400000`.
+2. **M7 writes the message:** `src 31` · `dst 1025` · `len 8` · `"OVERHEAT"`.
+3. **M7 hands it over:** it writes `{id 0, len 24}` into the used ring (`used.idx = 1`).
+4. **M7 notifies Linux:** it rings the MU, which interrupts Linux.
+5. **Linux finds the message:** `used[0]` points to `desc[0]` and the buffer.
+6. **Linux delivers it:** `dst 1025` selects the endpoint, and its callback runs with `"OVERHEAT"`.
+7. **Linux gives the buffer back:** it re-posts the empty buffer into the available ring (`avail[4] = 0`).
+8. **Linux notifies the M7:** it rings the MU to tell the M7 another empty buffer is ready.
+
+## Connecting it back to the Device Tree
+
+NOw that we have gone over how the stack and how messages flow throught both vrings, we can take a second look at the how rpmsg is setup in the dts file:
+
+{% highlight c linenos %}
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * i.MX8MP FRDM with the Cortex-M7 enabled for remoteproc/RPMsg.
+ *
+ * Based on imx8mp-frdm.dts; only the generic RPMsg pieces of NXP's
+ * imx8mp-frdm-rpmsg.dts are carried over (not its audio offload setup).
+ */
+
+/dts-v1/;
+
+#include "imx8mp-frdm.dts"
+
+/ {
+    model = "Causality Labs i.MX8MP FRDM";
+
+    reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        /* M7 code/data when the firmware is linked to run from DDR */
+        m7_reserved: m7@80000000 {
+            reg = <0 0x80000000 0 0x1000000>;
+            no-map;
+        };
+
+        /* Must match the M7 firmware's rsc_table.c / linker script */
+        vdev0vring0: vdev0vring0@55000000 {
+            reg = <0 0x55000000 0 0x8000>;
+            no-map;
+        };
+
+        vdev0vring1: vdev0vring1@55008000 {
+            reg = <0 0x55008000 0 0x8000>;
+            no-map;
+        };
+
+        rsc_table: rsc-table@550ff000 {
+            reg = <0 0x550ff000 0 0x1000>;
+            no-map;
+        };
+
+        vdevbuffer: vdevbuffer@55400000 {
+            compatible = "shared-dma-pool";
+            reg = <0 0x55400000 0 0x100000>;
+            no-map;
+        };
+    };
+
+    imx8mp-cm7 {
+        compatible = "fsl,imx8mp-cm7";
+        rsc-da = <0x55000000>;
+        clocks = <&clk IMX8MP_CLK_M7_DIV>,
+                 <&audio_blk_ctrl IMX8MP_CLK_AUDIOMIX_AUDPLL_ROOT>;
+        clock-names = "core", "audio";
+        mbox-names = "tx", "rx", "rxdb";
+        mboxes = <&mu 0 1
+                  &mu 1 1
+                  &mu 3 1>;
+        memory-region = <&vdevbuffer>, <&vdev0vring0>, <&vdev0vring1>, <&rsc_table>, <&m7_reserved>;
+        fsl,startup-delay-ms = <500>;
+        status = "okay";
+    };
+};
+
+/*
+ * Peripherals owned by the M7 must be disabled on the Linux side.
+ * UART4 is the usual M7 debug console; add others (i2c3, ecspi2,
+ * flexcan1, pwm4, ...) here as the M7 firmware starts using them.
+ */
+&uart4 {
+    status = "disabled";
+};
+{% endhighlight %}
+
+We'll focus only on the parts of the device tree that relate to RPMsg. Here are the points to focus on:
+
+**Shared memory: `reserved-memory`**
+
+| Node | Address · Size | Where it fits |
+|------|----------------|---------------|
+| `vdev0vring0` | `0x55000000` · 32 KB | vring 0 (M7 → Linux) |
+| `vdev0vring1` | `0x55008000` · 32 KB | vring 1 (Linux → M7) |
+| `vdevbuffer` | `0x55400000` · 1 MB | The message buffers the descriptors point to |
+| `rsc_table` | `0x550ff000` · 4 KB | The resource table, where the M7 firmware tells Linux where its vrings are |
+
+`no-map` stops Linux from using these regions as ordinary memory, since the M7 reads and writes them too. The vring addresses must match the M7 firmware's resource table, or no RPMsg channel will appear.
+
+**The M7 and the MU: `imx8mp-cm7`**
+
+- `memory-region` hands the regions above to the driver that starts the M7.
+- `mboxes` connects the MU channels (`tx`, `rx`, `rxdb`), which are the doorbells each side rings after updating a ring.
